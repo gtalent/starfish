@@ -12,10 +12,11 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- */
+*/
 package graphics
 
 import (
+	"fmt"
 	"dog/base/util"
 	"sdl"
 )
@@ -88,7 +89,12 @@ func (me *Canvas) FillRect(x, y, width, height int) {
 
 //Draws the image at the given coordinates with the given dimensions.
 func (me *Canvas) DrawImage(img *Image, x, y, width, height int) {
-	dest := sdl_Rect(x + me.origin.X, y + me.origin.Y, 0, 0)
-	src := sdl_Rect(0, 0, width, height)
-	me.pane.Blit(&dest, img.img, &src)
+	var dest sdl.Rect
+	dest.X = int16(x + me.origin.X)
+	dest.Y = int16(y + me.origin.Y)
+	fmt.Println(x, ", ", y)
+	fmt.Println(dest.X, ", ", dest.Y)
+	/*src := sdl_Rect(0, 0, width, height)
+	 */
+	me.pane.Blit(&dest, img.img, nil)
 }

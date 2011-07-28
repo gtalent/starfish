@@ -2,15 +2,7 @@ include $(GOROOT)/src/Make.inc
 
 TARG=dog/base/graphics
 GOFILES=\
-	canvas.go\
-	color.go\
-	display.go\
-	image.go\
-	util.go\
-	viewport.go\
-
-GOTESTFILES=\
-	tests/*.go\
+	../*.go\
 
 include $(GOROOT)/src/Make.pkg
 
