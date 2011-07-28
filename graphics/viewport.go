@@ -35,14 +35,6 @@ func newViewport() (v viewport) {
 	return
 }
 
-func (me *viewport) GetBounds() (r util.Bounds) {
-	r.X = (me.X)
-	r.Y = (me.Y)
-	r.Width = (me.Width)
-	r.Height = (me.Height)
-	return
-}
-
 func (me *viewport) push(rect util.Bounds) {
 	me.list[me.pt] = rect
 	me.pt++

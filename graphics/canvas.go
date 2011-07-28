@@ -42,7 +42,7 @@ func newCanvas(surface *sdl.Surface) (p Canvas) {
 //Loads the settings for this Pane onto the SDL Surface.
 func (me *Canvas) load() {
 	me.viewport.calcBounds()
-	b := me.viewport.GetBounds()
+	b := me.viewport.Bounds
 	r := toSDL_Rect(b)
 	me.pane.SetClipRect(&r)
 }
@@ -59,7 +59,7 @@ func (me *Canvas) SetBounds(x, y, width, height int) {
 func (me *Canvas) PushViewport(x, y, width, height int) {
 	me.viewport.push(util.Bounds{util.Point{x, y}, util.Size{width, height}})
 	me.viewport.calcBounds()
-	b := me.viewport.GetBounds()
+	b := me.viewport.Bounds
 	r := toSDL_Rect(b)
 	me.pane.SetClipRect(&r)
 	me.origin = me.translation.AddOf(me.viewport.Point)
@@ -70,7 +70,7 @@ func (me *Canvas) PopViewport() {
 	if me.viewport.pt != 0 {
 		me.viewport.pop()
 		me.viewport.calcBounds()
-		b := me.viewport.GetBounds()
+		b := me.viewport.Bounds
 		r := toSDL_Rect(b)
 		me.pane.SetClipRect(&r)
 		me.origin = me.translation.AddOf(me.viewport.Point)
