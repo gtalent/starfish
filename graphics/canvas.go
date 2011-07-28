@@ -16,7 +16,6 @@
 package graphics
 
 import (
-	"fmt"
 	"dog/base/util"
 	"sdl"
 )
@@ -80,7 +79,6 @@ func (me *Canvas) PopViewport() {
 //Sets the color that the Canvas will draw with.
 func (me *Canvas) SetColor(color Color) {
 	me.color = color.toUint32()
-	fmt.Println(me.color)
 }
 
 //Fills a rectangle at the given coordinates and size on this Canvas.
