@@ -86,9 +86,5 @@ func (me *Canvas) DrawImage(img *Image, x, y, width, height int) {
 	var dest sdl.Rect
 	dest.X = int16(x + me.origin.X)
 	dest.Y = int16(y + me.origin.Y)
-	//fmt.Println(x, ", ", y)
-	fmt.Println(dest.X, ", ", dest.Y)
-	/*src := sdl_Rect(0, 0, width, height)
-	 */
 	me.pane.Blit(&dest, img.img, nil)
 }
