@@ -16,7 +16,6 @@
 package graphics
 
 import (
-	"fmt"
 	"dog/base/util"
 	"sdl"
 )
@@ -86,5 +85,8 @@ func (me *Canvas) DrawImage(img *Image, x, y, width, height int) {
 	var dest sdl.Rect
 	dest.X = int16(x + me.origin.X)
 	dest.Y = int16(y + me.origin.Y)
-	me.pane.Blit(&dest, img.img, nil)
+	dest.W = uint16(width)
+	dest.H = uint16(height)
+	src := sdl_Rect(0, 0, width, height)
+	me.pane.Blit(&dest, img.img, &src)
 }

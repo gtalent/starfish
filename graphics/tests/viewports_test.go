@@ -17,7 +17,6 @@ package graphics
 
 import (
 	"testing"
-	//"fmt"
 	"dog/base/util"
 )
 

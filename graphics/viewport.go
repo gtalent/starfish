@@ -22,7 +22,7 @@ import (
 type viewport struct {
 	util.Bounds
 	list [500]util.Bounds
-	pt   int
+	pt   uint
 }
 
 func newViewport() (v viewport) {
@@ -66,7 +66,7 @@ func (me *viewport) calcBounds() {
 	me.Y = 0
 	me.Width = 65000
 	me.Height = 65000
-	for i := 0; i < me.pt; i++ {
+	for i := uint(0); i < me.pt; i++ {
 		r := &me.list[i]
 		nx1 := me.X + (r.X)
 		ny1 := me.Y + (r.Y)
