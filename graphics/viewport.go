@@ -26,13 +26,25 @@ type viewport struct {
 }
 
 func newViewport() (v viewport) {
-	v.pt = 1
+	v.pt = 0
 	r := &v.list[0]
 	r.X = 0
 	r.Y = 0
 	r.Width = 65000
 	r.Height = 65000
+	v.list[0].X = 0
+	v.list[0].Y = 0
+	v.list[0].Width = 65000
+	v.list[0].Height = 65000
 	return
+}
+
+//Sets the root drawing bounds of this viewport.
+func (me *viewport) setBounds(x, y, width, height int) {
+	me.list[0].X = 0
+	me.list[0].Y = 0
+	me.list[0].Width = 65000
+	me.list[0].Height = 65000
 }
 
 func (me *viewport) push(rect util.Bounds) {
@@ -42,7 +54,7 @@ func (me *viewport) push(rect util.Bounds) {
 }
 
 func (me *viewport) pop() {
-	if me.pt < 2 {
+	if me.pt < 1 {
 		return
 	}
 	me.pt--

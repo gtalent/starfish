@@ -24,7 +24,7 @@ import (
 func TestViewportPushPop(t *testing.T) {
 	viewport := newViewport()
 	viewport.calcBounds()
-	initial := viewport.GetBounds()
+	initial := viewport.Bounds
 	tests := make([]util.Bounds, 0)
 	tests = append(tests, util.Bounds{util.Point{42, 42}, util.Size{100, 100}})
 

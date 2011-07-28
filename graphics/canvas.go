@@ -47,18 +47,14 @@ func (me *Canvas) load() {
 	me.pane.SetClipRect(&r)
 }
 
-//Sets the drawing bounds of this Canvas on screen.
-func (me *Canvas) SetBounds(x, y, width, height int) {
-	me.viewport.X = 0
-	me.viewport.Y = 0
-	me.viewport.Width = 65000
-	me.viewport.Height = 65000
+//Returns the bounds of this Canvas
+func (me *Canvas) GetViewport() util.Bounds {
+	return me.viewport.Bounds
 }
 
 //Pushs a viewport to limit the drawing space to the given bounds within the current drawing space.
 func (me *Canvas) PushViewport(x, y, width, height int) {
 	me.viewport.push(util.Bounds{util.Point{x, y}, util.Size{width, height}})
-	me.viewport.calcBounds()
 	b := me.viewport.Bounds
 	r := toSDL_Rect(b)
 	me.pane.SetClipRect(&r)
@@ -69,9 +65,7 @@ func (me *Canvas) PushViewport(x, y, width, height int) {
 func (me *Canvas) PopViewport() {
 	if me.viewport.pt != 0 {
 		me.viewport.pop()
-		me.viewport.calcBounds()
-		b := me.viewport.Bounds
-		r := toSDL_Rect(b)
+		r := toSDL_Rect(me.viewport.Bounds)
 		me.pane.SetClipRect(&r)
 		me.origin = me.translation.AddOf(me.viewport.Point)
 	}
@@ -92,7 +86,7 @@ func (me *Canvas) DrawImage(img *Image, x, y, width, height int) {
 	var dest sdl.Rect
 	dest.X = int16(x + me.origin.X)
 	dest.Y = int16(y + me.origin.Y)
-	fmt.Println(x, ", ", y)
+	//fmt.Println(x, ", ", y)
 	fmt.Println(dest.X, ", ", dest.Y)
 	/*src := sdl_Rect(0, 0, width, height)
 	 */
