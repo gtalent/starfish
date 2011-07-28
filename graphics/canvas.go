@@ -16,6 +16,7 @@
 package graphics
 
 import (
+	"fmt"
 	"dog/base/util"
 	"sdl"
 )
@@ -78,7 +79,8 @@ func (me *Canvas) PopViewport() {
 
 //Sets the color that the Canvas will draw with.
 func (me *Canvas) SetColor(color Color) {
-	me.color = color.toInt()
+	me.color = color.toUint32()
+	fmt.Println(me.color)
 }
 
 //Fills a rectangle at the given coordinates and size on this Canvas.
@@ -88,7 +90,7 @@ func (me *Canvas) FillRect(x, y, width, height int) {
 
 //Draws the image at the given coordinates with the given dimensions.
 func (me *Canvas) DrawImage(img *Image, x, y, width, height int) {
-	dest := sdl_Rect(x + me.origin.X, y + me.origin.Y, width, height)
-	//src := sdl_Rect(0, 0, int(img.img.W), int(img.img.H))
-	me.pane.Blit(&dest, img.img, nil)
+	dest := sdl_Rect(x + me.origin.X, y + me.origin.Y, 0, 0)
+	src := sdl_Rect(0, 0, width, height)
+	me.pane.Blit(&dest, img.img, &src)
 }

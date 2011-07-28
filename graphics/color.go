@@ -20,6 +20,6 @@ type Color struct {
 	Red, Green, Blue byte
 }
 
-func (me *Color) toInt() uint32 {
-	return uint32(me.Red) & (uint32(me.Green) << 8) & (uint32(me.Blue) << 16)
+func (me *Color) toUint32() uint32 {
+	return uint32(me.Red) | (uint32(me.Green) << 8) | (uint32(me.Blue) << 16)
 }
