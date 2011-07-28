@@ -7,4 +7,4 @@ GOFILES=\
 include $(GOROOT)/src/Make.pkg
 
 fmt:
-	gofmt -w *.go
+	gofmt -w $(GOTESTFILES) $(GOFILES) 

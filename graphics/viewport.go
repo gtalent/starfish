@@ -20,8 +20,7 @@ import (
 )
 
 type viewport struct {
-	util.Point
-	util.Size
+	util.Bounds
 	list [500]util.Bounds
 	pt   int
 }
