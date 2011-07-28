@@ -29,6 +29,11 @@ type Point struct {
 	Y int
 }
 
+//Compares the value of this Point to the value of the given Point.
+func (me *Point) Equals(p Point) bool {
+	return me.X == p.X && me.Y == p.Y
+}
+
 /*
  Gets the x coordinate of this Point.
  Returns:

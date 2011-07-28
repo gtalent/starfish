@@ -23,6 +23,11 @@ type Size struct {
 	Height int
 }
 
+//Compares the value of this Size to the value of the given Size.
+func (me *Size) Equals(p Size) bool {
+	return me.Width == p.Width && me.Height == p.Height
+}
+
 /*
   Sets the width attribute for this Size.
   Takes:

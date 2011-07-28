@@ -23,6 +23,11 @@ type Bounds struct {
 	Size
 }
 
+//Compares the value of this Bounds to the value of the given Bounds.
+func (me *Bounds) Equals(p Bounds) bool {
+	return me.Point.Equals(p.Point) && me.Size.Equals(p.Size)
+}
+
 /*
   Sets this Bounds to the given coordinates and dimensions.
 */
