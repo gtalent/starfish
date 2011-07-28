@@ -1,0 +1,118 @@
+/*
+   Copyright 2011 gtalent2@gmail.com
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
+package util
+
+/*
+  Used to track a point on a 2 dimensional Cartesian plane.
+*/
+type Point struct {
+	/*
+	 * The x coordinate.
+	 */
+	X int
+	/*
+	 * The y coordinate.
+	 */
+	Y int
+}
+
+/*
+ Gets the x coordinate of this Point.
+ Returns:
+	the x coordinate of this Point
+*/
+func (me *Point) GetX() int {
+	return me.X
+}
+
+/*
+ Gets the y coordinate of this Point.
+ Returns:
+	the y coordinate of this Point
+*/
+func (me *Point) GetY() int {
+	return me.Y
+}
+
+/*
+ Gets the x and y coordinates of this Point.
+ Returns:
+	the x coordinate of this Point
+	the y coordinate of this Point
+*/
+func (me *Point) Get() (int, int) {
+	return me.X, me.Y
+}
+
+/*
+  Sets the x coordinate of this Point.
+  x - the new x coordinate for this point
+*/
+func (me *Point) SetX(x int) {
+	me.Y = x
+}
+
+/*
+  Sets the y coordinate of this Point.
+  y - the new y coordinate for this point
+*/
+func (me *Point) SetY(y int) {
+	me.Y = y
+}
+
+/*
+  Sets the x coordinate of this Point.
+  x - the new x coordinate for this point
+  y - the new y coordinate for this point
+*/
+func (me *Point) SetPoint(x int, y int) {
+	me.X = x
+	me.Y = y
+}
+
+/*
+  Sets this Point's values to that of the given Point.
+  point - the Point who's value that this Point is to take
+*/
+func (me *Point) Set(point *Point) {
+	me.SetPoint(point.X, point.Y)
+}
+
+// Returns the value of this Point with the coordinates of the given added to its coordinates.
+func (me *Point) AddOf(point Point) (p Point) {
+	p.X = me.X + point.X
+	p.Y = me.Y + point.Y
+	return
+}
+
+// Adds the coordinates of the given Point to the coordinates of this Point.
+func (me *Point) AddTo(point Point) {
+	me.X += point.X
+	me.Y += point.Y
+}
+
+// Returns the value of this Point with the coordinates of the given subracted from its coordinates.
+func (me *Point) SubractOf(point Point) (p Point) {
+	p.X = me.X - point.X
+	p.Y = me.Y - point.Y
+	return
+}
+
+// Subracts the coordinates of the given Point from the coordinates of this Point.
+func (me *Point) SubractFrom(point Point) {
+	me.X -= point.X
+	me.Y -= point.Y
+}
