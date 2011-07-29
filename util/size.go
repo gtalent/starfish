@@ -40,7 +40,7 @@ func (me *Size) SetWidth(width int) {
 /*
   Sets the width attribute for this Size.
   Takes:
-  	height - the new height of this Size
+	height - the new height of this Size
 */
 func (me *Size) SetHeight(height int) {
 	me.Height = height
@@ -49,8 +49,8 @@ func (me *Size) SetHeight(height int) {
 /*
   Sets the dimensions of this Size.
   Takes:
-  	width - the new width of this Size
-  	height - the new height of this Size
+	width - the new width of this Size
+	height - the new height of this Size
 */
 func (me *Size) SetSize(width int, height int) {
 	me.Width = width
@@ -60,7 +60,7 @@ func (me *Size) SetSize(width int, height int) {
 /*
   Sets the dimensions of this Size according to the given Size.
   Takes:
-  	size - the Size object representing the values this Size should take on
+	size - the Size object representing the values this Size should take on
 */
 func (me *Size) Set(size *Size) {
 	me.SetSize(size.Width, size.Height)
@@ -69,7 +69,7 @@ func (me *Size) Set(size *Size) {
 /*
   Gets the width attribute of this Size.
   Returns:
-  	the width attribute of this Size
+	the width attribute of this Size
 */
 func (me *Size) GetWidth() int {
 	return me.Width
@@ -78,7 +78,7 @@ func (me *Size) GetWidth() int {
 /*
   Gets the height attribute of this Size.
   Returns:
-  	the height attribute of this Size
+	the height attribute of this Size
 */
 func (me *Size) GetHeight() int {
 	return me.Height
@@ -87,9 +87,35 @@ func (me *Size) GetHeight() int {
 /*
   Gets the width and height of this Size.
   Returns:
- 	width - the width attribute of this Size
- 	height - the height attribute of this Size
+	width - the width attribute of this Size
+	height - the height attribute of this Size
 */
 func (me *Size) Get() (int, int) {
 	return me.Width, me.Height
+}
+
+// Returns the value of this Point with the dimensions of the given added to its dimensions.
+func (me *Size) AddOf(size Size) (s Size) {
+	s.Width = me.Width + size.Width
+	s.Height = me.Height + size.Height
+	return
+}
+
+// Adds the dimensions of the given Size to the dimensions of this Size.
+func (me *Size) AddTo(size Size) {
+	me.Width += size.Width
+	me.Height += size.Height
+}
+
+// Returns the value of this Size with the dimensions of the given subracted from its dimensions.
+func (me *Size) SubractOf(size Size) (s Size) {
+	s.Width = me.Width - size.Width
+	s.Height = me.Height - size.Height
+	return
+}
+
+// Subracts the coordinates of the given Size from the coordinates of this Size.
+func (me *Size) SubractFrom(size Size) {
+	me.Width -= size.Width
+	me.Height -= size.Height
 }
