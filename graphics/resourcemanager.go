@@ -12,13 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- */
+*/
 package graphics
-
-//Passed into a resourceCatalog to load the resource.
-type loader interface {
-	load(key string) (interface{}, bool)
-}
 
 type resourceNode struct {
 	uses int
@@ -27,16 +22,17 @@ type resourceNode struct {
 
 type resourceCatalog struct {
 	images   map[string]*resourceNode
-	checkout, checkin chan interface{}
-	loader loader
+	checkout chan interface{}
+	checkin  chan interface{}
+	load     func(string) (interface{}, bool)
 }
 
-func newResourceCatalog(loader loader) (r resourceCatalog) {
+func newResourceCatalog(load func(string) (interface{}, bool)) (r resourceCatalog) {
 	r.images = make(map[string]*resourceNode)
 	r.checkout = make(chan interface{})
 	r.checkin = make(chan interface{})
-	r.loader = loader
-	r.run()
+	r.load = load
+	go r.run()
 	return r
 }
 
@@ -50,7 +46,7 @@ func (me *resourceCatalog) run() {
 				i.uses++
 				me.checkout <- i.rsrc
 			} else {
-				tmp, ok := me.loader.load(key)
+				tmp, ok := me.load(key)
 				if ok {
 					i = new(resourceNode)
 					i.rsrc = tmp
@@ -76,5 +72,3 @@ func (me *resourceCatalog) run() {
 		}
 	}
 }
-
-

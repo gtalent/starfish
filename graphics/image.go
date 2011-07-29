@@ -12,21 +12,19 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- */
+*/
 package graphics
 
 import (
 	"sdl"
 )
 
-type imageLoader struct {}
+type imageLoader struct{}
 
-func (me *imageLoader) load(path string) (interface{}, bool) {
+var images = newResourceCatalog(func(path string) (interface{}, bool) {
 	i := sdl.Load(path)
 	return i, i != nil
-}
-
-var images = newResourceCatalog(new(imageLoader))
+})
 
 type Image struct {
 	img  *sdl.Surface
