@@ -17,7 +17,7 @@ package graphics
 
 //Passed into a resourceCatalog to load the resource.
 type loader interface {
-	load(key string) interface{}
+	load(key string) (interface{}, bool)
 }
 
 type resourceNode struct {
@@ -50,8 +50,8 @@ func (me *resourceCatalog) run() {
 				i.uses++
 				me.checkout <- i.rsrc
 			} else {
-				tmp := me.loader.load(key)
-				if tmp != nil {
+				tmp, ok := me.loader.load(key)
+				if ok {
 					i = new(resourceNode)
 					i.rsrc = tmp
 					i.uses++

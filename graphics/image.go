@@ -21,8 +21,9 @@ import (
 
 type imageLoader struct {}
 
-func (me *imageLoader) load(path string) interface{} {
-	return sdl.Load(path)
+func (me *imageLoader) load(path string) (interface{}, bool) {
+	i := sdl.Load(path)
+	return i, i != nil
 }
 
 var images = newResourceCatalog(new(imageLoader))
