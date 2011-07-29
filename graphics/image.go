@@ -12,57 +12,20 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
 package graphics
 
 import (
 	"sdl"
 )
 
-type imageNode struct {
-	uses int
-	img  *sdl.Surface
+type imageLoader struct {}
+
+func (me *imageLoader) load(path string) interface{} {
+	return sdl.Load(path)
 }
 
-type imageCatalog struct {
-	images   map[string]*imageNode
-	checkout, checkin chan interface{}
-}
-
-var images imageCatalog
-
-func (me *imageCatalog) run() {
-	for {
-		select {
-		case input := <-me.checkout:
-			path := input.(string)
-			i, ok := me.images[path]
-			if ok {
-				i.uses++
-				me.checkout <- i.img
-			} else {
-				tmp := sdl.Load(path)
-				if tmp != nil {
-					i = new(imageNode)
-					i.img = tmp
-					i.uses++
-					me.images[path] = i
-					me.checkout <- i.img
-				}
-			}
-		case input := <-me.checkin:
-			path := input.(string)
-			i, ok := me.images[path]
-			if ok {
-				i.uses--
-				me.checkin <- true
-			} else {
-				me.checkin <- false
-			}
-		}
-		me.checkout <- nil
-	}
-}
+var images = newResourceCatalog(new(imageLoader))
 
 type Image struct {
 	img  *sdl.Surface
@@ -89,4 +52,11 @@ func (me *Image) Width() int {
 //Returns the height of the image.
 func (me *Image) Height() int {
 	return int(me.img.H)
+}
+
+//Nils this image and lets the resource manager know this object is no longer using the image data.
+func (me *Image) Free() {
+	images.checkin <- me.img
+	me.img = nil
+	me.path = ""
 }
