@@ -68,8 +68,8 @@ func (me *resourceCatalog) run() {
 			} else {
 				me.checkin <- false
 			}
+			me.checkout <- nil
 		}
-		me.checkout <- nil
 	}
 }
 
