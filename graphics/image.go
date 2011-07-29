@@ -19,6 +19,39 @@ import (
 	"sdl"
 )
 
+type imageNode struct {
+	uses int
+	img  *sdl.Surface
+}
+
+type imageCatalog struct {
+	images map[string]*imageNode
+	checkout chan interface{}
+}
+
+var images imageCatalog
+
+func (me *imageCatalog) run() {
+	for {
+		var path string = (<-me.checkout).(string)
+		i, ok := me.images[path]
+		if ok {
+			i.uses++
+			me.checkout <- i.img
+		} else {
+			tmp := sdl.Load(path)
+			if tmp != nil {
+				i = new(imageNode)
+				i.img = tmp
+				i.uses++
+				me.images[path] = i
+				me.checkout <- i.img
+			}
+		}
+		me.checkout <- nil
+	}
+}
+
 type Image struct {
 	img  *sdl.Surface
 	path string
@@ -26,7 +59,8 @@ type Image struct {
 
 //Loads the image at the given path, or nil if the image was not found.
 func LoadImage(path string) (img *Image) {
-	i := sdl.Load(path)
+	images.checkout <- path
+	i := (<-images.checkout).(*sdl.Surface)
 	if i != nil {
 		img = new(Image)
 		img.img = i

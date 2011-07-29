@@ -87,6 +87,6 @@ func (me *Canvas) DrawImage(img *Image, x, y, width, height int) {
 	dest.Y = int16(y + me.origin.Y)
 	dest.W = uint16(width)
 	dest.H = uint16(height)
-	src := sdl_Rect(0, 0, width, height)
-	me.pane.Blit(&dest, img.img, &src)
+	//src := sdl_Rect(0, 0, width, height)
+	me.pane.Blit(&dest, img.img, nil)
 }
