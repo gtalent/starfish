@@ -44,31 +44,35 @@ func (me *resourceCatalog) run() {
 	for {
 		select {
 		case input := <-me.checkout:
-			path := input.(string)
-			i, ok := me.images[path]
+			key := input.(string)
+			i, ok := me.images[key]
 			if ok {
 				i.uses++
 				me.checkout <- i.rsrc
 			} else {
-				tmp := me.loader.load(path)
+				tmp := me.loader.load(key)
 				if tmp != nil {
 					i = new(resourceNode)
 					i.rsrc = tmp
 					i.uses++
-					me.images[path] = i
+					me.images[key] = i
 					me.checkout <- i.rsrc
+				} else {
+					me.checkout <- nil
 				}
 			}
 		case input := <-me.checkin:
-			path := input.(string)
-			i, ok := me.images[path]
+			key := input.(string)
+			i, ok := me.images[key]
 			if ok {
 				i.uses--
+				if i.uses == 0 {
+					me.images[key] = nil, false
+				}
 				me.checkin <- true
 			} else {
 				me.checkin <- false
 			}
-			me.checkout <- nil
 		}
 	}
 }
