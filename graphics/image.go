@@ -25,27 +25,39 @@ type imageNode struct {
 }
 
 type imageCatalog struct {
-	images map[string]*imageNode
-	checkout chan interface{}
+	images   map[string]*imageNode
+	checkout, checkin chan interface{}
 }
 
 var images imageCatalog
 
 func (me *imageCatalog) run() {
 	for {
-		var path string = (<-me.checkout).(string)
-		i, ok := me.images[path]
-		if ok {
-			i.uses++
-			me.checkout <- i.img
-		} else {
-			tmp := sdl.Load(path)
-			if tmp != nil {
-				i = new(imageNode)
-				i.img = tmp
+		select {
+		case input := <-me.checkout:
+			path := input.(string)
+			i, ok := me.images[path]
+			if ok {
 				i.uses++
-				me.images[path] = i
 				me.checkout <- i.img
+			} else {
+				tmp := sdl.Load(path)
+				if tmp != nil {
+					i = new(imageNode)
+					i.img = tmp
+					i.uses++
+					me.images[path] = i
+					me.checkout <- i.img
+				}
+			}
+		case input := <-me.checkin:
+			path := input.(string)
+			i, ok := me.images[path]
+			if ok {
+				i.uses--
+				me.checkin <- true
+			} else {
+				me.checkin <- false
 			}
 		}
 		me.checkout <- nil
