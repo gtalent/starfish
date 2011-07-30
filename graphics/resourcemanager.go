@@ -20,54 +20,67 @@ type resourceNode struct {
 	rsrc interface{}
 }
 
-type resourceCatalog struct {
-	images   map[string]*resourceNode
-	checkout chan interface{}
-	checkin  chan interface{}
-	load     func(string) (interface{}, bool)
+type resourceKey interface {
+	String() string
 }
 
-func newResourceCatalog(load func(string) (interface{}, bool)) (r resourceCatalog) {
+type resourceCatalog struct {
+	images map[string]*resourceNode
+	out    chan interface{}
+	in     chan interface{}
+	load   func(resourceKey) (interface{}, bool)
+}
+
+func newResourceCatalog(load func(resourceKey) (interface{}, bool)) (r resourceCatalog) {
 	r.images = make(map[string]*resourceNode)
-	r.checkout = make(chan interface{})
-	r.checkin = make(chan interface{})
+	r.out = make(chan interface{})
+	r.in = make(chan interface{})
 	r.load = load
 	go r.run()
 	return r
 }
 
+func (me *resourceCatalog) checkout(key resourceKey) interface{} {
+	me.out <- key
+	return <-me.out
+}
+
+func (me *resourceCatalog) checkin(key resourceKey) {
+	me.in <- key
+}
+
 func (me *resourceCatalog) run() {
 	for {
 		select {
-		case input := <-me.checkout:
-			key := input.(string)
-			i, ok := me.images[key]
+		case input := <-me.out:
+			key := input.(resourceKey)
+			i, ok := me.images[key.String()]
 			if ok {
 				i.uses++
-				me.checkout <- i.rsrc
+				me.out <- i.rsrc
 			} else {
 				tmp, ok := me.load(key)
 				if ok {
 					i = new(resourceNode)
 					i.rsrc = tmp
 					i.uses++
-					me.images[key] = i
-					me.checkout <- i.rsrc
+					me.images[key.String()] = i
+					me.out <- i.rsrc
 				} else {
-					me.checkout <- nil
+					me.out <- nil
 				}
 			}
-		case input := <-me.checkin:
-			key := input.(string)
-			i, ok := me.images[key]
+		case input := <-me.in:
+			key := input.(resourceKey)
+			i, ok := me.images[key.String()]
 			if ok {
 				i.uses--
 				if i.uses == 0 {
-					me.images[key] = nil, false
+					me.images[key.String()] = nil, false
 				}
-				me.checkin <- true
+				me.in <- true
 			} else {
-				me.checkin <- false
+				me.in <- false
 			}
 		}
 	}
