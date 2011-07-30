@@ -15,9 +15,15 @@
 */
 package graphics
 
+import "sdl"
+
 //An RGB color representation.
 type Color struct {
 	Red, Green, Blue byte
+}
+
+func (me *Color) toSDL_Color() sdl.Color {
+	return sdl.Color{me.Red, me.Green, me.Blue, 0}
 }
 
 func (me *Color) toUint32() uint32 {

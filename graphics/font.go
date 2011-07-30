@@ -17,6 +17,7 @@ package graphics
 
 import (
 	"strconv"
+	"sdl"
 	"sdl/ttf"
 )
 
@@ -37,10 +38,33 @@ var fonts = newResourceCatalog(func(key resourceKey) (interface{}, bool) {
 	val.(*ttf.Font).Close()
 })
 
+//A drawable representation of a string.
+type Text struct {
+	color Color
+	text *sdl.Surface
+}
+
+//Returns a Color object representing the color of the text.
+func (me *Text) Color() Color {
+	return me.color
+}
+
+//Returns the width of this text.
+func (me *Text) Width() int {
+	return me.text.W
+}
+
+//Returns the height of this text.
+func (me *Text) Height() int {
+	return me.text.H
+}
+
+//A font type that represents a TTF file loaded from storage, used to create Text objects for drawing.
 type Font struct {
 	path string
 	size int
 	font *ttf.Font
+	color Color
 }
 
 //Loads the TrueType Font at the given path, or nil if the font was not found.
@@ -52,6 +76,25 @@ func LoadFont(path string, size int) (font *Font) {
 	font = new(Font)
 	font.font = i
 	font.path = path
+	return
+}
+
+//Sets the color that this Font will draw with.
+func (me *Font) SetColor(color Color) {
+	me.color = color
+}
+
+//Sets the color that this Font will draw with.
+func (me *Font) SetRGB(red, green, blue byte) {
+	me.color.Red = red
+	me.color.Green = green
+	me.color.Blue = blue
+}
+
+//Returns a drawable representation of the given string.
+func (me *Font) Write(text string) (t Text) {
+	t.color = me.color
+	t.text = ttf.RenderText_Blended(me.font, text, me.color.toSDL_Color())
 	return
 }
 
