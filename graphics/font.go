@@ -51,12 +51,12 @@ func (me *Text) Color() Color {
 
 //Returns the width of this text.
 func (me *Text) Width() int {
-	return me.text.W
+	return int(me.text.W)
 }
 
 //Returns the height of this text.
 func (me *Text) Height() int {
-	return me.text.H
+	return int(me.text.H)
 }
 
 //A font type that represents a TTF file loaded from storage, used to create Text objects for drawing.

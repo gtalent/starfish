@@ -80,7 +80,15 @@ func (me *Canvas) FillRect(x, y, width, height int) {
 	me.pane.FillRect(&sdl.Rect{int16(x + me.origin.X), int16(y + me.origin.Y), uint16(width), uint16(height)}, me.color)
 }
 
-//Draws the image at the given coordinates with the given dimensions.
+//Draws the text at the given coordinates.
+func (me *Canvas) DrawText(text *Text, x, y int) {
+	var dest sdl.Rect
+	dest.X = int16(x + me.origin.X)
+	dest.Y = int16(y + me.origin.Y)
+	me.pane.Blit(&dest, text.text, nil)
+}
+
+//Draws the image at the given coordinates.
 func (me *Canvas) DrawImage(img *Image, x, y int) {
 	var dest sdl.Rect
 	dest.X = int16(x + me.origin.X)
