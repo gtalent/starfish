@@ -25,7 +25,7 @@ type resourceKey interface {
 }
 
 type resourceCatalog struct {
-	rsrcs map[string]*resourceNode
+	rsrcs  map[string]*resourceNode
 	out    chan interface{}
 	in     chan interface{}
 	load   func(resourceKey) (interface{}, bool)
@@ -55,7 +55,7 @@ func (me *resourceCatalog) checkin(key resourceKey) {
 func (me *resourceCatalog) run() {
 	for {
 		select {
-		case input := <-me.out://checkout
+		case input := <-me.out: //checkout
 			key := input.(resourceKey)
 			i, ok := me.rsrcs[key.String()]
 			if ok {
@@ -73,7 +73,7 @@ func (me *resourceCatalog) run() {
 					me.out <- nil
 				}
 			}
-		case input := <-me.in://checkin
+		case input := <-me.in: //checkin
 			key := input.(resourceKey)
 			i, ok := me.rsrcs[key.String()]
 			if ok {

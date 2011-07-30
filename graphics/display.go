@@ -18,6 +18,7 @@ package graphics
 import (
 	"time"
 	"sdl"
+	"sdl/ttf"
 )
 
 //A type to listen for draw instructions.
@@ -82,6 +83,7 @@ func (me *Display) run() {
 func (me *Display) Open(width, height int) {
 	if me.surface == nil {
 		sdl.Init(sdl.INIT_VIDEO)
+		ttf.Init()
 		me.surface = sdl.SetVideoMode(width, height, 32, sdl.RESIZABLE|sdl.DOUBLEBUF)
 		me.running = true
 		go me.run()

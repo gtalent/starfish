@@ -16,6 +16,7 @@
 package graphics
 
 import (
+	"fmt"
 	"strconv"
 	"sdl"
 	"sdl/ttf"
@@ -30,18 +31,21 @@ func (me *fontKey) String() string {
 	return me.path + strconv.Itoa(me.size)
 }
 
-var fonts = newResourceCatalog(func(key resourceKey) (interface{}, bool) {
-	k := key.(*fontKey)
-	font := ttf.OpenFont(k.path, k.size)
-	return font, font == nil
-}, func(path resourceKey, val interface{}) {
-	val.(*ttf.Font).Close()
-})
+var fonts = newResourceCatalog(
+	func(key resourceKey) (interface{}, bool) {
+		k := key.(*fontKey)
+		font := ttf.OpenFont(k.path, k.size)
+		fmt.Println(sdl.GetError())
+		return font, font != nil
+	},
+	func(path resourceKey, val interface{}) {
+		val.(*ttf.Font).Close()
+	})
 
 //A drawable representation of a string.
 type Text struct {
 	color Color
-	text *sdl.Surface
+	text  *sdl.Surface
 }
 
 //Returns a Color object representing the color of the text.
@@ -61,9 +65,9 @@ func (me *Text) Height() int {
 
 //A font type that represents a TTF file loaded from storage, used to create Text objects for drawing.
 type Font struct {
-	path string
-	size int
-	font *ttf.Font
+	path  string
+	size  int
+	font  *ttf.Font
 	color Color
 }
 
@@ -72,10 +76,12 @@ func LoadFont(path string, size int) (font *Font) {
 	var key fontKey
 	key.path = path
 	key.size = size
-	i := fonts.checkout(&key).(*ttf.Font)
-	font = new(Font)
-	font.font = i
-	font.path = path
+
+	if f := fonts.checkout(&key); f != nil {
+		font = new(Font)
+		font.font = f.(*ttf.Font)
+		font.path = path
+	}
 	return
 }
 
@@ -91,11 +97,12 @@ func (me *Font) SetRGB(red, green, blue byte) {
 	me.color.Blue = blue
 }
 
-//Returns a drawable representation of the given string.
-func (me *Font) Write(text string) (t Text) {
+//Loads text into the Text object passed in.
+//Returns true if successful, false otherwise.
+func (me *Font) Write(text string, t *Text) bool {
 	t.color = me.color
 	t.text = ttf.RenderText_Blended(me.font, text, me.color.toSDL_Color())
-	return
+	return t.text != nil
 }
 
 //Returns the size of this font.

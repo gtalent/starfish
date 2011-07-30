@@ -31,13 +31,12 @@ func (me *imageKey) String() string {
 }
 
 
-
 //Reads images from the disk and caches them.
 var imageFiles = newResourceCatalog(func(path resourceKey) (interface{}, bool) {
 	key := path.(*imageKey)
 	i := sdl.Load(key.path)
 	return i, i != nil
-}, func (path resourceKey, img interface{}) {
+}, func(path resourceKey, img interface{}) {
 	i := img.(*sdl.Surface)
 	i.Free()
 })
@@ -50,7 +49,7 @@ var images = newResourceCatalog(func(path resourceKey) (interface{}, bool) {
 		i = resize(i, key.width, key.height)
 	}
 	return i, i != nil
-}, func (path resourceKey, img interface{}) {
+}, func(path resourceKey, img interface{}) {
 	imageFiles.checkin(path)
 })
 
