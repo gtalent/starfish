@@ -27,5 +27,5 @@ func (me *Color) toSDL_Color() sdl.Color {
 }
 
 func (me *Color) toUint32() uint32 {
-	return uint32(me.Red) | (uint32(me.Green) << 8) | (uint32(me.Blue) << 16)
+	return (uint32(me.Red) << 16) | (uint32(me.Green) << 8) | uint32(me.Blue)
 }
