@@ -53,9 +53,46 @@ func (me *Image) Height() int {
 	return int(me.img.H)
 }
 
+//Returns the path to the image on the disk.
+func (me *Image) Path() string {
+	return me.path
+}
+
 //Nils this image and lets the resource manager know this object is no longer using the image data.
 func (me *Image) Free() {
-	images.checkin <- me.img
+	images.checkin <- me.path
 	me.img = nil
 	me.path = ""
+}
+
+func (me *Image) Resize(width, height int) {
+	if me.img.W == 0 || me.img.H == 0 {
+		return
+	}
+	bpp := me.img.Format.BitsPerPixel
+	flags := me.img.Flags
+	rmask := me.img.Format.Rmask
+	gmask := me.img.Format.Gmask
+	bmask := me.img.Format.Bmask
+	amask := me.img.Format.Amask
+	r := sdl.CreateRGBSurface(flags, width, height, int(bpp), rmask, gmask, bmask, amask)
+	xstretch := float64(width) / float64(me.img.W)
+	ystretch := float64(height) / float64(me.img.H)
+	e1 := int(me.img.H)
+	e2 := int(me.img.W)
+	e3 := int(ystretch)
+	e4 := int(xstretch)
+	for oy := 0; oy < e1; oy++ {
+		for ox := 0; ox < e2; ox++ {
+			for ny := 0; ny < e3; ny++ {
+				for nx := 0; nx < e4; nx++ {
+					xp := int(xstretch * float64(ox)) + nx
+					yp := int(ystretch * float64(oy)) + ny
+					color := me.img.At(ox, oy)
+					r.Set(xp, yp, color)
+				}
+			}
+		}
+	}
+	me.img = r
 }
