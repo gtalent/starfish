@@ -25,17 +25,19 @@ type resourceKey interface {
 }
 
 type resourceCatalog struct {
-	images map[string]*resourceNode
+	rsrcs map[string]*resourceNode
 	out    chan interface{}
 	in     chan interface{}
 	load   func(resourceKey) (interface{}, bool)
+	delete func(resourceKey, interface{})
 }
 
-func newResourceCatalog(load func(resourceKey) (interface{}, bool)) (r resourceCatalog) {
-	r.images = make(map[string]*resourceNode)
+func newResourceCatalog(load func(resourceKey) (interface{}, bool), delete func(resourceKey, interface{})) (r resourceCatalog) {
+	r.rsrcs = make(map[string]*resourceNode)
 	r.out = make(chan interface{})
 	r.in = make(chan interface{})
 	r.load = load
+	r.delete = delete
 	go r.run()
 	return r
 }
@@ -47,14 +49,15 @@ func (me *resourceCatalog) checkout(key resourceKey) interface{} {
 
 func (me *resourceCatalog) checkin(key resourceKey) {
 	me.in <- key
+	<-me.in
 }
 
 func (me *resourceCatalog) run() {
 	for {
 		select {
-		case input := <-me.out:
+		case input := <-me.out://checkout
 			key := input.(resourceKey)
-			i, ok := me.images[key.String()]
+			i, ok := me.rsrcs[key.String()]
 			if ok {
 				i.uses++
 				me.out <- i.rsrc
@@ -64,19 +67,20 @@ func (me *resourceCatalog) run() {
 					i = new(resourceNode)
 					i.rsrc = tmp
 					i.uses++
-					me.images[key.String()] = i
+					me.rsrcs[key.String()] = i
 					me.out <- i.rsrc
 				} else {
 					me.out <- nil
 				}
 			}
-		case input := <-me.in:
+		case input := <-me.in://checkin
 			key := input.(resourceKey)
-			i, ok := me.images[key.String()]
+			i, ok := me.rsrcs[key.String()]
 			if ok {
 				i.uses--
 				if i.uses == 0 {
-					me.images[key.String()] = nil, false
+					me.delete(key, me.rsrcs[key.String()].rsrc)
+					me.rsrcs[key.String()] = nil, false
 				}
 				me.in <- true
 			} else {

@@ -33,6 +33,8 @@ var fonts = newResourceCatalog(func(key resourceKey) (interface{}, bool) {
 	k := key.(*fontKey)
 	font := ttf.OpenFont(k.path, k.size)
 	return font, font == nil
+}, func(path resourceKey, val interface{}) {
+	val.(*ttf.Font).Close()
 })
 
 type Font struct {
