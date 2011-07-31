@@ -80,10 +80,10 @@ type mouseManager struct {
 	mouseButtonDownListeners []func(int)
 	mouseButtonUpListeners   []func(int)
 	input                    chan *sdl.MouseButtonEvent
-	addMouseUpChan chan func(int)
-	addMouseDownChan chan func(int)
-	removeMouseUpChan chan func(int)
-	removeMouseDownChan chan func(int)
+	addMouseUpChan           chan func(int)
+	addMouseDownChan         chan func(int)
+	removeMouseUpChan        chan func(int)
+	removeMouseDownChan      chan func(int)
 	clicker                  clicker
 }
 
@@ -93,6 +93,10 @@ func newMouseManager() mouseManager {
 	m.mouseButtonDownListeners = make([]func(int), 0)
 	m.mouseButtonUpListeners = make([]func(int), 0)
 	m.input = make(chan *sdl.MouseButtonEvent)
+	m.addMouseUpChan = make(chan func(int))
+	m.addMouseDownChan = make(chan func(int))
+	m.removeMouseUpChan = make(chan func(int))
+	m.removeMouseDownChan = make(chan func(int))
 	m.clicker = newClicker()
 	go m.run()
 	return m
@@ -115,7 +119,7 @@ func (me *mouseManager) removeMouseDown(f func(int)) {
 		}
 	}
 
-	for i := i; i + 1 < len(l); i++ {
+	for i := i; i+1 < len(l); i++ {
 		l[i] = l[i+1]
 	}
 }
@@ -129,7 +133,7 @@ func (me *mouseManager) removeMouseUp(f func(int)) {
 		}
 	}
 
-	for i := i; i + 1 < len(l); i++ {
+	for i := i; i+1 < len(l); i++ {
 		l[i] = l[i+1]
 	}
 }
