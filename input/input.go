@@ -23,7 +23,27 @@ import (
 
 type inputManager struct {
 	quitListeners []func()
-	mice          [100]mouse
+	mouse         mouseManager
+}
+
+//Adds a function to listn for the pressing of a mouse button.
+func (me *inputManager) AddMouseDown(f func(int)) {
+	me.mouse.addMouseDownChan <-f
+}
+
+//Removes a function to listn for the pressing of a mouse button.
+func (me *inputManager) RemoveMouseDown(f func(int)) {
+	me.mouse.removeMouseDownChan <-f
+}
+
+//Adds a function to listn for the releasing of a mouse button.
+func (me *inputManager) AddMouseUp(f func(int)) {
+	me.mouse.addMouseUpChan <-f
+}
+
+//Removes a function to listn for the releasing of a mouse button.
+func (me *inputManager) RemoveMouseUp(f func(int)) {
+	me.mouse.removeMouseUpChan <-f
 }
 
 func (me *inputManager) run() {
@@ -35,6 +55,7 @@ func (me *inputManager) run() {
 					go a()
 				}
 			case *sdl.MouseButtonEvent:
+				me.mouse.input <- et
 			}
 		}
 		time.Sleep(6000000)
