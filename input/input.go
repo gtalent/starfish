@@ -18,6 +18,7 @@ package input
 import (
 	"time"
 	"sdl"
+	"dog/base/util"
 )
 
 func Init() {
@@ -44,32 +45,32 @@ func RemoveQuit(f func()) {
 }
 
 //Adds a function to listen for the clicking of a mouse button.
-func AddMouseClick(f func(byte)) {
+func AddMouseClick(f func(byte, util.Point)) {
 	input.mouse.addClickChan <- f
 }
 
 //Removes a function to listen for the pressing of a mouse button.
-func RemoveMouseClick(f func(byte)) {
+func RemoveMouseClick(f func(byte, util.Point)) {
 	input.mouse.removeClickChan <- f
 }
 
 //Adds a function to listen for the pressing of a mouse button.
-func AddMousePress(f func(byte)) {
+func AddMousePress(f func(byte, util.Point)) {
 	input.mouse.addDownChan <- f
 }
 
 //Removes a function to listen for the pressing of a mouse button.
-func RemoveMousePress(f func(byte)) {
+func RemoveMousePress(f func(byte, util.Point)) {
 	input.mouse.removeDownChan <- f
 }
 
 //Adds a function to listen for the releasing of a mouse button.
-func AddMouseRelease(f func(byte)) {
+func AddMouseRelease(f func(byte, util.Point)) {
 	input.mouse.addUpChan <- f
 }
 
 //Removes a function to listen for the releasing of a mouse button.
-func RemoveMouseRelease(f func(byte)) {
+func RemoveMouseRelease(f func(byte, util.Point)) {
 	input.mouse.removeUpChan <- f
 }
 
