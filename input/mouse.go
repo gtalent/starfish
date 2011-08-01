@@ -34,10 +34,10 @@ type clicker struct {
 	releaseListeners []func(byte, util.Point)
 	addUpChan        chan func(byte, util.Point)
 	addDownChan      chan func(byte, util.Point)
-	addClickChan      chan func(byte, util.Point)
+	addClickChan     chan func(byte, util.Point)
 	removeUpChan     chan func(byte, util.Point)
 	removeDownChan   chan func(byte, util.Point)
-	removeClickChan   chan func(byte, util.Point)
+	removeClickChan  chan func(byte, util.Point)
 }
 
 //Makes and runs a clicker
@@ -132,7 +132,7 @@ func (me *clicker) run() {
 			switch et.(*sdl.MouseButtonEvent).Type {
 			case sdl.MOUSEBUTTONUP: //release
 				i := et.(*sdl.MouseButtonEvent).Button
-				if clickTimeout < time.Nanoseconds() - me.mice[i].lastPress {
+				if clickTimeout < time.Nanoseconds()-me.mice[i].lastPress {
 					var p util.Point
 					p.X = int(et.(*sdl.MouseButtonEvent).X)
 					p.Y = int(et.(*sdl.MouseButtonEvent).Y)
