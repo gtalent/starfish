@@ -26,24 +26,31 @@ type inputManager struct {
 	mouse         mouseManager
 }
 
+var input = func() inputManager {
+	var i inputManager
+	i.quitListeners = make([]func(), 0)
+	i.mouse = newMouseManager()
+	return i
+}
+
 //Adds a function to listn for the pressing of a mouse button.
-func (me *inputManager) AddMouseDown(f func(int)) {
-	me.mouse.addMouseDownChan <- f
+func (me *inputManager) AddMouseDown(f func(byte)) {
+	me.mouse.addDownChan <- f
 }
 
 //Removes a function to listn for the pressing of a mouse button.
-func (me *inputManager) RemoveMouseDown(f func(int)) {
-	me.mouse.removeMouseDownChan <- f
+func (me *inputManager) RemoveMouseDown(f func(byte)) {
+	me.mouse.removeDownChan <- f
 }
 
 //Adds a function to listn for the releasing of a mouse button.
-func (me *inputManager) AddMouseUp(f func(int)) {
-	me.mouse.addMouseUpChan <- f
+func (me *inputManager) AddMouseUp(f func(byte)) {
+	me.mouse.addUpChan <- f
 }
 
 //Removes a function to listn for the releasing of a mouse button.
-func (me *inputManager) RemoveMouseUp(f func(int)) {
-	me.mouse.removeMouseUpChan <- f
+func (me *inputManager) RemoveMouseUp(f func(byte)) {
+	me.mouse.removeUpChan <- f
 }
 
 func (me *inputManager) run() {
