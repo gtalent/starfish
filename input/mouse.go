@@ -134,6 +134,8 @@ func (me *clicker) run() {
 				i := et.(*sdl.MouseButtonEvent).Button
 				if clickTimeout < time.Nanoseconds() - me.mice[i].lastPress {
 					var p util.Point
+					p.X = int(et.(*sdl.MouseButtonEvent).X)
+					p.Y = int(et.(*sdl.MouseButtonEvent).Y)
 					for _, a := range me.releaseListeners {
 						go a(i, p)
 					}
@@ -143,6 +145,8 @@ func (me *clicker) run() {
 				i := et.(*sdl.MouseButtonEvent).Button
 				me.mice[i].lastPress = time.Nanoseconds()
 				var p util.Point
+				p.X = int(et.(*sdl.MouseButtonEvent).X)
+				p.Y = int(et.(*sdl.MouseButtonEvent).Y)
 				go f(i, p)
 			}
 		//manage listeners
