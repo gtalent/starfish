@@ -21,7 +21,7 @@ import (
 )
 
 func Init() {
-	input.run()
+	go input.run()
 }
 
 var input = func() inputManager {
@@ -41,33 +41,33 @@ type inputManager struct {
 }
 
 //Adds a function to listen for quit requests.
-func (me *inputManager) AddQuit(f func()) {
-	me.addQuitChan <- f
+func AddQuit(f func()) {
+	input.addQuitChan <- f
 }
 
 //Removes a function that listens for quit requests.
-func (me *inputManager) RemoveQuit(f func()) {
-	me.removeQuitChan <- f
+func RemoveQuit(f func()) {
+	input.removeQuitChan <- f
 }
 
 //Adds a function to listn for the pressing of a mouse button.
-func (me *inputManager) AddMouseDown(f func(byte)) {
-	me.mouse.addDownChan <- f
+func AddMouseDown(f func(byte)) {
+	input.mouse.addDownChan <- f
 }
 
 //Removes a function to listn for the pressing of a mouse button.
-func (me *inputManager) RemoveMouseDown(f func(byte)) {
-	me.mouse.removeDownChan <- f
+func RemoveMouseDown(f func(byte)) {
+	input.mouse.removeDownChan <- f
 }
 
 //Adds a function to listn for the releasing of a mouse button.
-func (me *inputManager) AddMouseUp(f func(byte)) {
-	me.mouse.addUpChan <- f
+func AddMouseUp(f func(byte)) {
+	input.mouse.addUpChan <- f
 }
 
 //Removes a function to listn for the releasing of a mouse button.
-func (me *inputManager) RemoveMouseUp(f func(byte)) {
-	me.mouse.removeUpChan <- f
+func RemoveMouseUp(f func(byte)) {
+	input.mouse.removeUpChan <- f
 }
 
 func (me *inputManager) run() {
