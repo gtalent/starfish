@@ -33,13 +33,6 @@ var input = func() inputManager {
 	return i
 }()
 
-type inputManager struct {
-	quitListeners  []func()
-	addQuitChan    chan func()
-	removeQuitChan chan func()
-	mouse          clicker
-}
-
 //Adds a function to listen for quit requests.
 func AddQuit(f func()) {
 	input.addQuitChan <- f
@@ -50,24 +43,41 @@ func RemoveQuit(f func()) {
 	input.removeQuitChan <- f
 }
 
-//Adds a function to listn for the pressing of a mouse button.
-func AddMouseDown(f func(byte)) {
+//Adds a function to listen for the clicking of a mouse button.
+func AddMouseClick(f func(byte)) {
+	input.mouse.addClickChan <- f
+}
+
+//Removes a function to listen for the pressing of a mouse button.
+func RemoveMouseClick(f func(byte)) {
+	input.mouse.removeClickChan <- f
+}
+
+//Adds a function to listen for the pressing of a mouse button.
+func AddMouseRelease(f func(byte)) {
 	input.mouse.addDownChan <- f
 }
 
-//Removes a function to listn for the pressing of a mouse button.
+//Removes a function to listen for the pressing of a mouse button.
 func RemoveMouseDown(f func(byte)) {
 	input.mouse.removeDownChan <- f
 }
 
-//Adds a function to listn for the releasing of a mouse button.
+//Adds a function to listen for the releasing of a mouse button.
 func AddMouseUp(f func(byte)) {
 	input.mouse.addUpChan <- f
 }
 
-//Removes a function to listn for the releasing of a mouse button.
+//Removes a function to listen for the releasing of a mouse button.
 func RemoveMouseUp(f func(byte)) {
 	input.mouse.removeUpChan <- f
+}
+
+type inputManager struct {
+	quitListeners  []func()
+	addQuitChan    chan func()
+	removeQuitChan chan func()
+	mouse          clicker
 }
 
 func (me *inputManager) run() {

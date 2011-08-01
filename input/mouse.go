@@ -33,8 +33,10 @@ type clicker struct {
 	releaseListeners []func(byte)
 	addUpChan        chan func(byte)
 	addDownChan      chan func(byte)
+	addClickChan      chan func(byte)
 	removeUpChan     chan func(byte)
 	removeDownChan   chan func(byte)
+	removeClickChan   chan func(byte)
 }
 
 //Makes and runs a clicker
@@ -43,19 +45,40 @@ func newClicker() clicker {
 	c.clickListeners = make([]func(byte), 0)
 	c.pressListeners = make([]func(byte), 0)
 	c.input = make(chan sdl.Event)
+	c.addClickChan = make(chan func(byte))
 	c.addUpChan = make(chan func(byte))
 	c.addDownChan = make(chan func(byte))
+	c.removeClickChan = make(chan func(byte))
 	c.removeUpChan = make(chan func(byte))
 	c.removeDownChan = make(chan func(byte))
 	go c.run()
 	return c
 }
+
+func (me *clicker) addClick(f func(byte)) {
+	me.clickListeners = append(me.clickListeners, f)
+}
+
 func (me *clicker) addDown(f func(byte)) {
 	me.pressListeners = append(me.pressListeners, f)
 }
 
 func (me *clicker) addUp(f func(byte)) {
 	me.releaseListeners = append(me.releaseListeners, f)
+}
+
+func (me *clicker) removeClick(f func(byte)) {
+	l := me.clickListeners
+	var i int
+	for i, _ = range l {
+		if l[i] == f {
+			break
+		}
+	}
+
+	for i := i; i+1 < len(l); i++ {
+		l[i] = l[i+1]
+	}
 }
 
 func (me *clicker) removeDown(f func(byte)) {
@@ -128,6 +151,10 @@ func (me *clicker) run() {
 			me.removeUp(c)
 		case d := <-me.removeDownChan:
 			me.removeDown(d)
+		case e := <-me.addClickChan:
+			me.addClick(e)
+		case f := <-me.removeClickChan:
+			me.removeClick(f)
 		}
 	}
 }
