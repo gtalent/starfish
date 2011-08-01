@@ -24,17 +24,31 @@ func Init() {
 	input.run()
 }
 
-type inputManager struct {
-	quitListeners []func()
-	mouse         clicker
-}
-
 var input = func() inputManager {
 	var i inputManager
 	i.quitListeners = make([]func(), 0)
+	i.addQuitChan = make(chan func())
+	i.removeQuitChan = make(chan func())
 	i.mouse = newClicker()
 	return i
 }()
+
+type inputManager struct {
+	quitListeners  []func()
+	addQuitChan    chan func()
+	removeQuitChan chan func()
+	mouse          clicker
+}
+
+//Adds a function to listen for quit requests.
+func (me *inputManager) AddQuit(f func()) {
+	me.addQuitChan <- f
+}
+
+//Removes a function that listens for quit requests.
+func (me *inputManager) RemoveQuit(f func()) {
+	me.removeQuitChan <- f
+}
 
 //Adds a function to listn for the pressing of a mouse button.
 func (me *inputManager) AddMouseDown(f func(byte)) {
@@ -66,6 +80,26 @@ func (me *inputManager) run() {
 				}
 			case *sdl.MouseButtonEvent:
 				me.mouse.input <- et
+			}
+		}
+		for loop := true; loop; {
+			select {
+			case q := <-me.addQuitChan:
+				me.quitListeners = append(me.quitListeners, q)
+			case r := <-me.removeQuitChan:
+				l := me.quitListeners
+				var i int
+				for i, _ = range l {
+					if l[i] == r {
+						break
+					}
+				}
+
+				for i := i; i+1 < len(l); i++ {
+					l[i] = l[i+1]
+				}
+			default:
+				loop = false
 			}
 		}
 		time.Sleep(6000000)
