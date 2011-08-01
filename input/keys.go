@@ -92,4 +92,6 @@ const (
 	Key_Down = sdl.K_DOWN
 	Key_Left = sdl.K_LEFT
 	Key_Right = sdl.K_RIGHT
+	Key_RCtrl = sdl.K_RCTRL
+	Key_LCtrl = sdl.K_LCTRL
 )
