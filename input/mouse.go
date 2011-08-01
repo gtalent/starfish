@@ -34,11 +34,14 @@ type click struct {
 type clicker struct {
 	click            [256]click
 	mice             [256]mouseButton
-	release          chan byte
-	press            chan byte
+	input            chan sdl.Event
 	clickListeners   []func(byte)
 	pressListeners   []func(byte)
 	releaseListeners []func(byte)
+	addUpChan        chan func(byte)
+	addDownChan      chan func(byte)
+	removeUpChan     chan func(byte)
+	removeDownChan   chan func(byte)
 }
 
 func (me *clicker) addDown(f func(byte)) {
@@ -94,17 +97,31 @@ func (me *clicker) run() {
 	}
 	for {
 		select {
-		case i := <-me.release:
-			me.mice[i].lastRelease = time.Nanoseconds()
-			if me.mice[i].lastRelease < me.mice[i].lastPress {
-				for _, a := range me.releaseListeners {
-					go a(i)
+		case et := <-me.input:
+			switch et.(*sdl.MouseButtonEvent).Type {
+			case sdl.MOUSEBUTTONUP: //release
+				i := et.(*sdl.MouseButtonEvent).Button
+				me.mice[i].lastRelease = time.Nanoseconds()
+				if me.mice[i].lastRelease < me.mice[i].lastPress {
+					for _, a := range me.releaseListeners {
+						go a(i)
+					}
 				}
+				me.mice[i].lastRelease = time.Nanoseconds()
+			case sdl.MOUSEBUTTONDOWN: //press
+				i := et.(*sdl.MouseButtonEvent).Button
+				me.mice[i].lastPress = time.Nanoseconds()
+				go f(i)
 			}
-			me.mice[i].lastRelease = time.Nanoseconds()
-		case p := <-me.press:
-			me.mice[p].lastPress = time.Nanoseconds()
-			go f(p)
+		//manage listeners
+		case a := <-me.addUpChan:
+			me.addUp(a)
+		case b := <-me.addDownChan:
+			me.addDown(b)
+		case c := <-me.removeUpChan:
+			me.removeUp(c)
+		case d := <-me.removeDownChan:
+			me.removeDown(d)
 		}
 	}
 }
@@ -112,9 +129,12 @@ func (me *clicker) run() {
 //Makes and runs a clicker
 func newClicker() clicker {
 	var c clicker
-	c.release = make(chan byte)
 	c.clickListeners = make([]func(byte), 0)
 	c.pressListeners = make([]func(byte), 0)
+	c.addUpChan = make(chan func(byte))
+	c.addDownChan = make(chan func(byte))
+	c.removeUpChan = make(chan func(byte))
+	c.removeDownChan = make(chan func(byte))
 	go c.run()
 	return c
 }
@@ -124,55 +144,4 @@ type mouseButton struct {
 	lastPress   int64 // the time of the last mousebutton press
 	lastRelease int64 // the time of the last mousebutton release
 	lastClick   int64 // the time of the last mouse click 
-}
-
-//mouseManager
-type mouseManager struct {
-	mice                [256]mouseButton
-	input               chan *sdl.MouseButtonEvent
-	addUpChan      chan func(byte)
-	addDownChan    chan func(byte)
-	removeUpChan   chan func(byte)
-	removeDownChan chan func(byte)
-	clicker             clicker
-}
-
-//Creates a new mouseManager and runs it.
-func newMouseManager() mouseManager {
-	var m mouseManager
-	m.input = make(chan *sdl.MouseButtonEvent)
-	m.addUpChan = make(chan func(byte))
-	m.addDownChan = make(chan func(byte))
-	m.removeUpChan = make(chan func(byte))
-	m.removeDownChan = make(chan func(byte))
-	m.clicker = newClicker()
-	go m.run()
-	return m
-}
-
-func (me *mouseManager) run() {
-	for {
-		et := <-me.input
-		switch et.Type {
-		case sdl.MOUSEBUTTONUP:
-			me.clicker.release <- et.Button
-		case sdl.MOUSEBUTTONDOWN:
-			me.clicker.press <- et.Button
-		}
-	}
-
-	for loop := true; loop; {
-		select {
-		case a := <-me.addUpChan:
-			me.clicker.addUp(a)
-		case b := <-me.addDownChan:
-			me.clicker.addDown(b)
-		case c := <-me.removeUpChan:
-			me.clicker.removeUp(c)
-		case d := <-me.removeDownChan:
-			me.clicker.removeDown(d)
-		default:
-			loop = false
-		}
-	}
 }

@@ -20,18 +20,21 @@ import (
 	"sdl"
 )
 
+func Init() {
+	input.run()
+}
 
 type inputManager struct {
 	quitListeners []func()
-	mouse         mouseManager
+	mouse         clicker
 }
 
 var input = func() inputManager {
 	var i inputManager
 	i.quitListeners = make([]func(), 0)
-	i.mouse = newMouseManager()
+	i.mouse = newClicker()
 	return i
-}
+}()
 
 //Adds a function to listn for the pressing of a mouse button.
 func (me *inputManager) AddMouseDown(f func(byte)) {
