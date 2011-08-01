@@ -54,22 +54,22 @@ func RemoveMouseClick(f func(byte)) {
 }
 
 //Adds a function to listen for the pressing of a mouse button.
-func AddMouseRelease(f func(byte)) {
+func AddMousePress(f func(byte)) {
 	input.mouse.addDownChan <- f
 }
 
 //Removes a function to listen for the pressing of a mouse button.
-func RemoveMouseDown(f func(byte)) {
+func RemoveMousePress(f func(byte)) {
 	input.mouse.removeDownChan <- f
 }
 
 //Adds a function to listen for the releasing of a mouse button.
-func AddMouseUp(f func(byte)) {
+func AddMouseRelease(f func(byte)) {
 	input.mouse.addUpChan <- f
 }
 
 //Removes a function to listen for the releasing of a mouse button.
-func RemoveMouseUp(f func(byte)) {
+func RemoveMouseRelease(f func(byte)) {
 	input.mouse.removeUpChan <- f
 }
 

@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	clickTimeout int64 = 1000000000
+	clickTimeout int64 = 150000000
 )
 
 //clicker
@@ -130,8 +130,7 @@ func (me *clicker) run() {
 			switch et.(*sdl.MouseButtonEvent).Type {
 			case sdl.MOUSEBUTTONUP: //release
 				i := et.(*sdl.MouseButtonEvent).Button
-				me.mice[i].lastRelease = time.Nanoseconds()
-				if me.mice[i].lastRelease < me.mice[i].lastPress {
+				if clickTimeout < time.Nanoseconds() - me.mice[i].lastPress {
 					for _, a := range me.releaseListeners {
 						go a(i)
 					}
