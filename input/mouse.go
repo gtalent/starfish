@@ -24,15 +24,8 @@ const (
 	clickTimeout int64 = 1000000000
 )
 
-//Click
-type click struct {
-	//The time of the click.
-	time int64
-}
-
-//clickMgr
+//clicker
 type clicker struct {
-	click            [256]click
 	mice             [256]mouseButton
 	input            chan sdl.Event
 	clickListeners   []func(byte)
@@ -44,6 +37,19 @@ type clicker struct {
 	removeDownChan   chan func(byte)
 }
 
+//Makes and runs a clicker
+func newClicker() clicker {
+	var c clicker
+	c.clickListeners = make([]func(byte), 0)
+	c.pressListeners = make([]func(byte), 0)
+	c.input = make(chan sdl.Event)
+	c.addUpChan = make(chan func(byte))
+	c.addDownChan = make(chan func(byte))
+	c.removeUpChan = make(chan func(byte))
+	c.removeDownChan = make(chan func(byte))
+	go c.run()
+	return c
+}
 func (me *clicker) addDown(f func(byte)) {
 	me.pressListeners = append(me.pressListeners, f)
 }
@@ -126,18 +132,6 @@ func (me *clicker) run() {
 	}
 }
 
-//Makes and runs a clicker
-func newClicker() clicker {
-	var c clicker
-	c.clickListeners = make([]func(byte), 0)
-	c.pressListeners = make([]func(byte), 0)
-	c.addUpChan = make(chan func(byte))
-	c.addDownChan = make(chan func(byte))
-	c.removeUpChan = make(chan func(byte))
-	c.removeDownChan = make(chan func(byte))
-	go c.run()
-	return c
-}
 
 //mouseButton
 type mouseButton struct {
