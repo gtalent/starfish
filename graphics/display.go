@@ -21,19 +21,15 @@ import (
 	"sdl/ttf"
 )
 
-//A type to listen for draw instructions.
-type Drawer interface {
-	Draw(*Canvas)
-}
-
 //Holds a Drawer and its Canvas.
 type canvasHolder struct {
 	canvas Canvas
-	drawer Drawer
+	drawer func(*Canvas)
 }
 
 type Display struct {
 	surface *sdl.Surface
+	title   string
 	panes   []*canvasHolder
 	dead    chan interface{}
 	running bool
@@ -43,17 +39,18 @@ func NewDisplay() *Display {
 	s := new(Display)
 	s.panes = make([]*canvasHolder, 0)
 	s.dead = make(chan interface{})
+	sdl.WM_SetCaption(s.title, "")
 	return s
 }
 
-func (me *Display) AddDrawer(drawer Drawer) {
+func (me *Display) AddDrawer(drawer func(*Canvas)) {
 	ch := new(canvasHolder)
 	ch.drawer = drawer
 	ch.canvas = newCanvas(me.surface)
 	me.panes = append(me.panes, ch)
 }
 
-func (me *Display) RemoveDrawer(drawer Drawer) {
+func (me *Display) RemoveDrawer(drawer func(*Canvas)) {
 	for n, a := range me.panes {
 		if a.drawer == drawer {
 			end := len(me.panes) - 1
@@ -71,7 +68,7 @@ func (me *Display) run() {
 		for _, a := range me.panes {
 			a.canvas.pane = me.surface
 			a.canvas.load()
-			a.drawer.Draw(&a.canvas)
+			a.drawer(&a.canvas)
 		}
 		me.surface.Flip()
 		time.Sleep(16000000)

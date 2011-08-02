@@ -25,12 +25,20 @@ const (
 )
 
 type KeyEvent struct {
-	Key int
-	Shift bool
-	Ctrl bool
-	Meta bool
-	Alt bool
+	Key      int
+	Shift    bool
+	Ctrl     bool
+	Meta     bool
+	Alt      bool
 	CapsLock bool
+}
+
+func (me *KeyEvent) setMods(mod uint32) {
+	me.Shift = 0 != mod|sdl.KMOD_LSHIFT|sdl.KMOD_RSHIFT
+	me.Ctrl = 0 != mod|sdl.KMOD_LCTRL|sdl.KMOD_RCTRL
+	me.Meta = 0 != mod|sdl.KMOD_LMETA|sdl.KMOD_RMETA
+	me.Alt = 0 != mod|sdl.KMOD_LALT|sdl.KMOD_RALT
+	me.CapsLock = 0 != mod|sdl.KMOD_CAPS|sdl.KMOD_CAPS
 }
 
 //clicker
@@ -136,21 +144,22 @@ func (me *keyboard) run() {
 	}
 	for {
 		select {
-		case et := <-me.input:
-			switch et.(*sdl.KeyboardEvent).Type {
+		case in := <-me.input:
+			et := in.(*sdl.KeyboardEvent)
+			i := et.Keysym.Sym
+			var event KeyEvent
+			event.Key = int(i)
+			event.setMods(et.Keysym.Mod)
+			switch et.Type {
 			case sdl.KEYUP: //release
-				i := et.(*sdl.KeyboardEvent).Keysym.Sym
 				if clickTimeout < time.Nanoseconds()-me.keys[i].lastPress {
-					var event KeyEvent
 					for _, a := range me.releaseListeners {
 						go a(event)
 					}
 				}
 				me.keys[i].lastRelease = time.Nanoseconds()
 			case sdl.KEYDOWN: //press
-				i := et.(*sdl.KeyboardEvent).Keysym.Sym
 				me.keys[i].lastPress = time.Nanoseconds()
-				var event KeyEvent
 				go f(event)
 			}
 		//manage listeners
