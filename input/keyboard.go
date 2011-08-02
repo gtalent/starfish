@@ -43,7 +43,7 @@ func (me *KeyEvent) setMods(mod uint32) {
 
 //clicker
 type keyboard struct {
-	keys             [256]key
+	keys             [1000]key
 	input            chan sdl.Event
 	typeListeners    []func(KeyEvent)
 	pressListeners   []func(KeyEvent)
