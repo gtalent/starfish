@@ -31,9 +31,9 @@ var input = func() inputManager {
 	i.addQuitChan = make(chan func())
 	i.removeQuitChan = make(chan func())
 	i.mouse = newClicker()
+	i.keyboard = newKeyboard()
 	return i
 }()
-
 //Adds a function to listen for quit requests.
 func AddQuit(f func()) {
 	input.addQuitChan <- f
@@ -74,11 +74,44 @@ func RemoveMouseRelease(f func(byte, util.Point)) {
 	input.mouse.removeUpChan <- f
 }
 
+//keyboard listening
+
+//Adds a function to listen for the clicking of a key.
+func AddKeyType(f func(KeyEvent)) {
+	input.keyboard.addTypeChan <- f
+}
+
+//Removes a function to listen for the pressing of a key.
+func RemoveKeyType(f func(KeyEvent)) {
+	input.keyboard.removeTypeChan <- f
+}
+
+//Adds a function to listen for the pressing of a key.
+func AddKeyPress(f func(KeyEvent)) {
+	input.keyboard.addDownChan <- f
+}
+
+//Removes a function to listen for the pressing of a key.
+func RemoveKeyPress(f func(KeyEvent)) {
+	input.keyboard.removeDownChan <- f
+}
+
+//Adds a function to listen for the releasing of a key.
+func AddKeyRelease(f func(KeyEvent)) {
+	input.keyboard.addUpChan <- f
+}
+
+//Removes a function to listen for the releasing of a key.
+func RemoveKeyRelease(f func(KeyEvent)) {
+	input.keyboard.removeUpChan <- f
+}
+
 type inputManager struct {
 	quitListeners  []func()
 	addQuitChan    chan func()
 	removeQuitChan chan func()
 	mouse          clicker
+	keyboard       keyboard
 }
 
 func (me *inputManager) run() {
