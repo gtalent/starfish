@@ -18,7 +18,7 @@ package input
 import (
 	"time"
 	"sdl"
-	"dog/base/util"
+	"dog/core/util"
 )
 
 func Init() {

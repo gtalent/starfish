@@ -17,7 +17,7 @@ package graphics
 
 import (
 	"testing"
-	"dog/base/util"
+	"dog/core/util"
 )
 
 func TestViewportPushPop(t *testing.T) {

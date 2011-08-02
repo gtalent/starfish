@@ -16,7 +16,7 @@
 package graphics
 
 import (
-	"dog/base/util"
+	"dog/core/util"
 	"sdl"
 )
 
