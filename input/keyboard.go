@@ -24,51 +24,60 @@ const (
 	typeTimeout int64 = 150000000
 )
 
+type KeyEvent struct {
+	Key int
+	Shift bool
+	Ctrl bool
+	Meta bool
+	Alt bool
+	CapsLock bool
+}
+
 //clicker
 type keyboard struct {
 	keys             [256]key
 	input            chan sdl.Event
-	typeListeners   []func(byte)
-	pressListeners   []func(byte)
-	releaseListeners []func(byte)
-	addUpChan        chan func(byte)
-	addDownChan      chan func(byte)
-	addTypeChan     chan func(byte)
-	removeUpChan     chan func(byte)
-	removeDownChan   chan func(byte)
-	removeTypeChan  chan func(byte)
+	typeListeners    []func(KeyEvent)
+	pressListeners   []func(KeyEvent)
+	releaseListeners []func(KeyEvent)
+	addUpChan        chan func(KeyEvent)
+	addDownChan      chan func(KeyEvent)
+	addTypeChan      chan func(KeyEvent)
+	removeUpChan     chan func(KeyEvent)
+	removeDownChan   chan func(KeyEvent)
+	removeTypeChan   chan func(KeyEvent)
 }
 
 //Makes and runs a keyboard
 func newKeyboard() keyboard {
 	var c keyboard
-	c.typeListeners = make([]func(byte), 0)
-	c.pressListeners = make([]func(byte), 0)
-	c.releaseListeners = make([]func(byte), 0)
+	c.typeListeners = make([]func(KeyEvent), 0)
+	c.pressListeners = make([]func(KeyEvent), 0)
+	c.releaseListeners = make([]func(KeyEvent), 0)
 	c.input = make(chan sdl.Event)
-	c.addTypeChan = make(chan func(byte))
-	c.addUpChan = make(chan func(byte))
-	c.addDownChan = make(chan func(byte))
-	c.removeTypeChan = make(chan func(byte))
-	c.removeUpChan = make(chan func(byte))
-	c.removeDownChan = make(chan func(byte))
+	c.addTypeChan = make(chan func(KeyEvent))
+	c.addUpChan = make(chan func(KeyEvent))
+	c.addDownChan = make(chan func(KeyEvent))
+	c.removeTypeChan = make(chan func(KeyEvent))
+	c.removeUpChan = make(chan func(KeyEvent))
+	c.removeDownChan = make(chan func(KeyEvent))
 	go c.run()
 	return c
 }
 
-func (me *keyboard) addType(f func(byte)) {
+func (me *keyboard) addType(f func(KeyEvent)) {
 	me.typeListeners = append(me.typeListeners, f)
 }
 
-func (me *keyboard) addDown(f func(byte)) {
+func (me *keyboard) addDown(f func(KeyEvent)) {
 	me.pressListeners = append(me.pressListeners, f)
 }
 
-func (me *keyboard) addUp(f func(byte)) {
+func (me *keyboard) addUp(f func(KeyEvent)) {
 	me.releaseListeners = append(me.releaseListeners, f)
 }
 
-func (me *keyboard) removeType(f func(byte)) {
+func (me *keyboard) removeType(f func(KeyEvent)) {
 	l := me.typeListeners
 	var i int
 	for i, _ = range l {
@@ -82,7 +91,7 @@ func (me *keyboard) removeType(f func(byte)) {
 	}
 }
 
-func (me *keyboard) removeDown(f func(byte)) {
+func (me *keyboard) removeDown(f func(KeyEvent)) {
 	l := me.pressListeners
 	var i int
 	for i, _ = range l {
@@ -96,7 +105,7 @@ func (me *keyboard) removeDown(f func(byte)) {
 	}
 }
 
-func (me *keyboard) removeUp(f func(byte)) {
+func (me *keyboard) removeUp(f func(KeyEvent)) {
 	l := me.releaseListeners
 	var i int
 	for i, _ = range l {
@@ -111,9 +120,9 @@ func (me *keyboard) removeUp(f func(byte)) {
 }
 
 func (me *keyboard) run() {
-	f := func(i byte) {
+	f := func(i KeyEvent) {
 		time.Sleep(clickTimeout)
-		if me.keys[i].lastRelease > me.keys[i].lastPress {
+		if me.keys[i.Key].lastRelease > me.keys[i.Key].lastPress {
 			//call type listeners
 			for _, a := range me.typeListeners {
 				go a(i)
@@ -128,19 +137,21 @@ func (me *keyboard) run() {
 	for {
 		select {
 		case et := <-me.input:
-			switch et.(*sdl.MouseButtonEvent).Type {
-			case sdl.MOUSEBUTTONUP: //release
-				i := et.(*sdl.MouseButtonEvent).Button
+			switch et.(*sdl.KeyboardEvent).Type {
+			case sdl.KEYUP: //release
+				i := et.(*sdl.KeyboardEvent).Keysym.Sym
 				if clickTimeout < time.Nanoseconds()-me.keys[i].lastPress {
+					var event KeyEvent
 					for _, a := range me.releaseListeners {
-						go a(i)
+						go a(event)
 					}
 				}
 				me.keys[i].lastRelease = time.Nanoseconds()
-			case sdl.MOUSEBUTTONDOWN: //press
-				i := et.(*sdl.MouseButtonEvent).Button
+			case sdl.KEYDOWN: //press
+				i := et.(*sdl.KeyboardEvent).Keysym.Sym
 				me.keys[i].lastPress = time.Nanoseconds()
-				go f(i)
+				var event KeyEvent
+				go f(event)
 			}
 		//manage listeners
 		case a := <-me.addUpChan:
@@ -164,5 +175,5 @@ func (me *keyboard) run() {
 type key struct {
 	lastPress   int64 // the time of the last mousebutton press
 	lastRelease int64 // the time of the last mousebutton release
-	lastType   int64 // the time of the last mouse click 
+	lastType    int64 // the time of the last mouse click 
 }
