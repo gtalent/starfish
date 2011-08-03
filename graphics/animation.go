@@ -15,11 +15,38 @@
 */
 package graphics
 
+import "time"
+
 //A type to automatically flip through a series of images.
 type Animation struct {
-	interval int
-	images   []*Image
+	interval   int64
+	lastUpdate int64
+	slide      int
+	images     []*Image
+}
 
+//Sets the number of milliseconds per image.
+func (me *Animation) SetInterval(ms int) {
+	me.interval = int64(ms) * 1000000
+}
+
+//Gets the current image.
+func (me *Animation) GetImage() *Image {
+	if me.images == nil {
+		return nil
+	}
+	if time.Nanoseconds()-me.lastUpdate >= me.interval {
+		slides := len(me.images)
+		me.slide += int((time.Nanoseconds() - me.lastUpdate) / me.interval)
+		me.slide -= (me.slide / slides) * slides
+		me.lastUpdate = time.Nanoseconds()
+	}
+	return me.images[me.slide]
+}
+
+//Returns the image at the given index.
+func (me *Animation) At(i int) *Image {
+	return me.images[i]
 }
 
 //Returns the number of images in this Animation.
@@ -36,5 +63,12 @@ func (me *Animation) LoadImage(path string) {
 func (me *Animation) LoadImageSize(path string, width, height int) {
 	if i := LoadImageSize(path, width, height); i != nil {
 		me.images = append(me.images, i)
+	}
+}
+
+//Frees this Animations images, rendering it useless.
+func (me *Animation) Free() {
+	for _, a := range me.images {
+		a.Free()
 	}
 }
