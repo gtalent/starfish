@@ -81,6 +81,7 @@ func (me *clicker) removeClick(f func(byte, util.Point)) {
 	for i := i; i+1 < len(l); i++ {
 		l[i] = l[i+1]
 	}
+	l = l[0:len(l)-1]
 }
 
 func (me *clicker) removeDown(f func(byte, util.Point)) {
@@ -95,6 +96,7 @@ func (me *clicker) removeDown(f func(byte, util.Point)) {
 	for i := i; i+1 < len(l); i++ {
 		l[i] = l[i+1]
 	}
+	l = l[0:len(l)-1]
 }
 
 func (me *clicker) removeUp(f func(byte, util.Point)) {
@@ -109,6 +111,7 @@ func (me *clicker) removeUp(f func(byte, util.Point)) {
 	for i := i; i+1 < len(l); i++ {
 		l[i] = l[i+1]
 	}
+	l = l[0:len(l)-1]
 }
 
 func (me *clicker) run() {

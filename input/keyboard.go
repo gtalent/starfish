@@ -97,6 +97,7 @@ func (me *keyboard) removeType(f func(KeyEvent)) {
 	for i := i; i+1 < len(l); i++ {
 		l[i] = l[i+1]
 	}
+	l = l[0:len(l)-1]
 }
 
 func (me *keyboard) removeDown(f func(KeyEvent)) {
@@ -111,6 +112,7 @@ func (me *keyboard) removeDown(f func(KeyEvent)) {
 	for i := i; i+1 < len(l); i++ {
 		l[i] = l[i+1]
 	}
+	l = l[0:len(l)-1]
 }
 
 func (me *keyboard) removeUp(f func(KeyEvent)) {
@@ -125,6 +127,7 @@ func (me *keyboard) removeUp(f func(KeyEvent)) {
 	for i := i; i+1 < len(l); i++ {
 		l[i] = l[i+1]
 	}
+	l = l[0:len(l)-1]
 }
 
 func (me *keyboard) run() {
