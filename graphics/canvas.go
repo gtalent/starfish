@@ -89,6 +89,11 @@ func (me *Canvas) DrawText(text *Text, x, y int) {
 }
 
 //Draws the image at the given coordinates.
+func (me *Canvas) DrawAnimation(animation *Animation, x, y int) {
+	me.DrawImage(animation.GetImage(), x, y)
+}
+
+//Draws the image at the given coordinates.
 func (me *Canvas) DrawImage(img *Image, x, y int) {
 	var dest sdl.Rect
 	dest.X = int16(x + me.origin.X)
