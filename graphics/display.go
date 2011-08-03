@@ -39,8 +39,20 @@ func NewDisplay() *Display {
 	s := new(Display)
 	s.panes = make([]*canvasHolder, 0)
 	s.dead = make(chan interface{})
-	sdl.WM_SetCaption(s.title, "")
 	return s
+}
+
+//Sets the title of the window.
+func (me *Display) SetTitle(title string) {
+	me.title = title
+	if me.surface != nil {
+		sdl.WM_SetCaption(me.title, "")
+	}
+}
+
+//Returns the title of this window.
+func (me *Display) GetTitle() string {
+	return me.title
 }
 
 func (me *Display) AddDrawer(drawer func(*Canvas)) {
@@ -83,6 +95,7 @@ func (me *Display) Open(width, height int) {
 		ttf.Init()
 		me.surface = sdl.SetVideoMode(width, height, 32, sdl.RESIZABLE|sdl.DOUBLEBUF)
 		me.running = true
+		sdl.WM_SetCaption(me.title, "")
 		go me.run()
 	}
 }
