@@ -87,47 +87,35 @@ func (me *keyboard) addUp(f func(KeyEvent)) {
 
 func (me *keyboard) removeType(f func(KeyEvent)) {
 	l := me.typeListeners
-	var i int
-	for i, _ = range l {
+	for i, _ := range l {
 		if l[i] == f {
+			l[i] = l[len(l)-1]
+			l = l[0 : len(l)-1]
 			break
 		}
 	}
-
-	for i := i; i+1 < len(l); i++ {
-		l[i] = l[i+1]
-	}
-	l = l[0:len(l)-1]
 }
 
 func (me *keyboard) removeDown(f func(KeyEvent)) {
 	l := me.pressListeners
-	var i int
-	for i, _ = range l {
+	for i, _ := range l {
 		if l[i] == f {
+			l[i] = l[len(l)-1]
+			l = l[0 : len(l)-1]
 			break
 		}
 	}
-
-	for i := i; i+1 < len(l); i++ {
-		l[i] = l[i+1]
-	}
-	l = l[0:len(l)-1]
 }
 
 func (me *keyboard) removeUp(f func(KeyEvent)) {
 	l := me.releaseListeners
-	var i int
-	for i, _ = range l {
+	for i, _ := range l {
 		if l[i] == f {
+			l[i] = l[len(l)-1]
+			l = l[0 : len(l)-1]
 			break
 		}
 	}
-
-	for i := i; i+1 < len(l); i++ {
-		l[i] = l[i+1]
-	}
-	l = l[0:len(l)-1]
 }
 
 func (me *keyboard) run() {

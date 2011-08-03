@@ -71,47 +71,35 @@ func (me *clicker) addUp(f func(byte, util.Point)) {
 
 func (me *clicker) removeClick(f func(byte, util.Point)) {
 	l := me.clickListeners
-	var i int
-	for i, _ = range l {
+	for i, _ := range l {
 		if l[i] == f {
+			l[i] = l[len(l)-1]
+			l = l[0 : len(l)-1]
 			break
 		}
 	}
-
-	for i := i; i+1 < len(l); i++ {
-		l[i] = l[i+1]
-	}
-	l = l[0:len(l)-1]
 }
 
 func (me *clicker) removeDown(f func(byte, util.Point)) {
 	l := me.pressListeners
-	var i int
-	for i, _ = range l {
+	for i, _ := range l {
 		if l[i] == f {
+			l[i] = l[len(l)-1]
+			l = l[0 : len(l)-1]
 			break
 		}
 	}
-
-	for i := i; i+1 < len(l); i++ {
-		l[i] = l[i+1]
-	}
-	l = l[0:len(l)-1]
 }
 
 func (me *clicker) removeUp(f func(byte, util.Point)) {
 	l := me.releaseListeners
-	var i int
-	for i, _ = range l {
+	for i, _ := range l {
 		if l[i] == f {
+			l[i] = l[len(l)-1]
+			l = l[0 : len(l)-1]
 			break
 		}
 	}
-
-	for i := i; i+1 < len(l); i++ {
-		l[i] = l[i+1]
-	}
-	l = l[0:len(l)-1]
 }
 
 func (me *clicker) run() {
