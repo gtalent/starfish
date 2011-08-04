@@ -117,7 +117,7 @@ func (me *Point) SubtractOf(point Point) (p Point) {
 }
 
 // Subracts the coordinates of the given Point from the coordinates of this Point.
-func (me *Point) SubractFrom(point Point) {
+func (me *Point) SubtractFrom(point Point) {
 	me.X -= point.X
 	me.Y -= point.Y
 }

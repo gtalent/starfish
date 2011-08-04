@@ -108,14 +108,14 @@ func (me *Size) AddTo(size Size) {
 }
 
 // Returns the value of this Size with the dimensions of the given subracted from its dimensions.
-func (me *Size) SubractOf(size Size) (s Size) {
+func (me *Size) SubtractOf(size Size) (s Size) {
 	s.Width = me.Width - size.Width
 	s.Height = me.Height - size.Height
 	return
 }
 
 // Subracts the coordinates of the given Size from the coordinates of this Size.
-func (me *Size) SubractFrom(size Size) {
+func (me *Size) SubtractFrom(size Size) {
 	me.Width -= size.Width
 	me.Height -= size.Height
 }
