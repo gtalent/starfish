@@ -52,6 +52,11 @@ func (me *Bounds) Y2() int {
 	return me.Y + me.Height
 }
 
+//Returns X2 and Y2 in a Point.
+func (me *Bounds) Point2() Point {
+	return Point{me.X2(), me.Y2()}
+}
+
 //Returns true if the given Point is in this Bounds, false otherwise.
 func (me *Bounds) ContainsPoint(p Point) bool {
 	return p.X >= me.X && p.Y >= me.Y && p.X <= me.X2() && p.Y <= me.Y2()
