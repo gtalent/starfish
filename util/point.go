@@ -109,15 +109,41 @@ func (me *Point) AddTo(point Point) {
 	me.Y += point.Y
 }
 
-// Returns the value of this Point with the coordinates of the given subracted from its coordinates.
+// Returns the value of this Point with the coordinates of the given subtracted from its coordinates.
 func (me *Point) SubtractOf(point Point) (p Point) {
 	p.X = me.X - point.X
 	p.Y = me.Y - point.Y
 	return
 }
 
-// Subracts the coordinates of the given Point from the coordinates of this Point.
+// Subtracts the coordinates of the given Point from the coordinates of this Point.
 func (me *Point) SubtractFrom(point Point) {
 	me.X -= point.X
 	me.Y -= point.Y
+}
+
+// Returns the value of this Point with the coordinates of the given divided by its coordinates.
+func (me *Point) DivideOf(point Point) (p Point) {
+	p.X = me.X / point.X
+	p.Y = me.Y / point.Y
+	return
+}
+
+// Divides the coordinates of the given Point by the coordinates of this Point.
+func (me *Point) DivideBy(point Point) {
+	me.X /= point.X
+	me.Y /= point.Y
+}
+
+// Returns the value of this Point with the coordinates of the given multiplied by its coordinates.
+func (me *Point) MultiplyOf(point Point) (p Point) {
+	p.X = me.X * point.X
+	p.Y = me.Y * point.Y
+	return
+}
+
+// Multiplies the coordinates of the given Point by the coordinates of this Point.
+func (me *Point) MultiplyBy(point Point) {
+	me.X *= point.X
+	me.Y *= point.Y
 }
