@@ -149,6 +149,6 @@ func (me *Point) MultiplyBy(point Point) {
 }
 
 // Returns this Point as a Size.
-func (me *Point) AsSize() Size {
+func (me *Point) ToSize() Size {
 	return Size{me.X, me.Y}
 }
