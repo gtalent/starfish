@@ -119,3 +119,8 @@ func (me *Size) SubtractFrom(size Size) {
 	me.Width -= size.Width
 	me.Height -= size.Height
 }
+
+// Returns this Size as a Point.
+func (me *Size) AsPoint() Point {
+	return Point{me.Width, me.Height}
+}
