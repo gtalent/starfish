@@ -15,6 +15,8 @@
 */
 package util
 
+import "strconv"
+
 /*
   Used to track a point on a 2 dimensional Cartesian plane.
 */
@@ -151,4 +153,8 @@ func (me *Point) MultiplyBy(point Point) {
 // Returns this Point as a Size.
 func (me *Point) ToSize() Size {
 	return Size{me.X, me.Y}
+}
+
+func (me *Point) String() string {
+	return "(" + strconv.Itoa(me.X) + strconv.Itoa(me.Y) + ")"
 }
