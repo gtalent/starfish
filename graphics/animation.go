@@ -15,7 +15,10 @@
 */
 package graphics
 
-import "time"
+import (
+	"strconv"
+	"time"
+)
 
 //A type to automatically flip through a series of images.
 type Animation struct {
@@ -23,6 +26,17 @@ type Animation struct {
 	lastUpdate int64
 	slide      int
 	images     []*Image
+}
+
+//Returns a string that can be used to identify the values of this Animation.
+func (me *Animation) String() string {
+	retval := strconv.Itoa64(me.interval)
+	retval += "\n" + strconv.Itoa64(me.lastUpdate)
+	retval += "\n" + strconv.Itoa(me.slide)
+	for _, i := range me.images {
+		retval += "\n" + i.String()
+	}
+	return retval
 }
 
 //Sets the number of milliseconds per image.

@@ -61,6 +61,11 @@ type Image struct {
 	path string
 }
 
+//Returns a unique string that can be used to identify the values of this Image.
+func (me *Image) String() string {
+	return strconv.Itoa(me.Width()) + strconv.Itoa(me.Height()) + me.path
+}
+
 //Loads the image at the given path, or nil if the image was not found.
 func LoadImage(path string) (img *Image) {
 	var key imageKey
