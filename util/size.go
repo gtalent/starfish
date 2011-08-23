@@ -15,6 +15,8 @@
 */
 package util
 
+import "strconv"
+
 /*
   Used to track a Cartesian size.
 */
@@ -123,4 +125,9 @@ func (me *Size) SubtractFrom(size Size) {
 // Returns this Size as a Point.
 func (me *Size) ToPoint() Point {
 	return Point{me.Width, me.Height}
+}
+
+//A string representation of this Size for use as a map key.
+func (me *Size) String() string {
+	return "(" + strconv.Itoa(me.Width) + strconv.Itoa(me.Height) + ")"
 }
