@@ -170,7 +170,6 @@ func (me *keyboard) run() {
 	}
 }
 
-
 //mouseButton
 type key struct {
 	lastPress   int64 // the time of the last mousebutton press

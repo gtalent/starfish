@@ -132,15 +132,12 @@ func (me *inputManager) run() {
 				me.quitListeners = append(me.quitListeners, q)
 			case r := <-me.removeQuitChan:
 				l := me.quitListeners
-				var i int
-				for i, _ = range l {
+				for i, _ := range l {
 					if l[i] == r {
+						l[i] = l[len(l)-1]
+						me.quitListeners = l[0 : len(l)-1]
 						break
 					}
-				}
-
-				for i := i; i+1 < len(l); i++ {
-					l[i] = l[i+1]
 				}
 			default:
 				loop = false

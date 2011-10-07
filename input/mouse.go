@@ -157,7 +157,6 @@ func (me *clicker) run() {
 	}
 }
 
-
 //mouseButton
 type mouseButton struct {
 	lastPress   int64 // the time of the last mousebutton press
