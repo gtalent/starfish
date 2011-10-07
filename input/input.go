@@ -124,6 +124,8 @@ func (me *inputManager) run() {
 				}
 			case *sdl.MouseButtonEvent:
 				me.mouse.input <- et
+			case *sdl.KeyboardEvent:
+				me.keyboard.input <- et
 			}
 		}
 		for loop := true; loop; {

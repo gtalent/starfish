@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	clickTimeout int64 = 150000000
+	clickTimeout int64 = 200000000
 )
 
 //clicker
