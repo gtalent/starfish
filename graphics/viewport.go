@@ -16,7 +16,7 @@
 package graphics
 
 import (
-	"dog/core/util"
+	"wombat/core/util"
 )
 
 type viewport struct {

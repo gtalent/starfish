@@ -18,7 +18,7 @@ package input
 import (
 	"time"
 	"sdl"
-	"dog/core/util"
+	"wombat/core/util"
 )
 
 func Init() {

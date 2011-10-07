@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=dog/core/input
+TARG=wombat/core/input
 GOFILES=\
 	*.go\
 
