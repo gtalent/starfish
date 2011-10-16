@@ -21,10 +21,14 @@ import (
 	"sdl/ttf"
 )
 
+type Drawer interface {
+	Draw(*Canvas)
+}
+
 //Holds a Drawer and its Canvas.
 type canvasHolder struct {
 	canvas Canvas
-	drawer func(*Canvas)
+	drawer interface{}
 }
 
 type Display struct {
@@ -55,14 +59,34 @@ func (me *Display) GetTitle() string {
 	return me.title
 }
 
-func (me *Display) AddDrawer(drawer func(*Canvas)) {
+func (me *Display) AddDrawer(drawer Drawer) {
 	ch := new(canvasHolder)
 	ch.drawer = drawer
 	ch.canvas = newCanvas(me.surface)
 	me.panes = append(me.panes, ch)
 }
 
-func (me *Display) RemoveDrawer(drawer func(*Canvas)) {
+func (me *Display) RemoveDrawer(drawer Drawer) {
+	for n, a := range me.panes {
+		if a.drawer == drawer {
+			end := len(me.panes) - 1
+			for i := n; i < end; i++ {
+				me.panes[i] = me.panes[i+1]
+			}
+			me.panes = me.panes[0 : len(me.panes)-1]
+			break
+		}
+	}
+}
+
+func (me *Display) AddDrawFunc(drawer func(*Canvas)) {
+	ch := new(canvasHolder)
+	ch.drawer = drawer
+	ch.canvas = newCanvas(me.surface)
+	me.panes = append(me.panes, ch)
+}
+
+func (me *Display) RemoveDrawFunc(drawer func(*Canvas)) {
 	for n, a := range me.panes {
 		if a.drawer == drawer {
 			end := len(me.panes) - 1
@@ -80,7 +104,12 @@ func (me *Display) run() {
 		for _, a := range me.panes {
 			a.canvas.pane = me.surface
 			a.canvas.load()
-			a.drawer(&a.canvas)
+			switch a.drawer.(type) {
+			case func(*Canvas):
+				a.drawer.(func(*Canvas))(&a.canvas)
+			case Drawer:
+				a.drawer.(Drawer).Draw(&a.canvas)
+			}
 		}
 		me.surface.Flip()
 		time.Sleep(16000000)
