@@ -97,7 +97,7 @@ func (me *Size) Get() (int, int) {
 }
 
 // Returns the value of this Point with the dimensions of the given added to its dimensions.
-func (me *Size) AddOf(size Size) (s Size) {
+func (me Size) AddOf(size Size) (s Size) {
 	s.Width = me.Width + size.Width
 	s.Height = me.Height + size.Height
 	return
@@ -110,7 +110,7 @@ func (me *Size) AddTo(size Size) {
 }
 
 // Returns the value of this Size with the dimensions of the given subracted from its dimensions.
-func (me *Size) SubtractOf(size Size) (s Size) {
+func (me Size) SubtractOf(size Size) (s Size) {
 	s.Width = me.Width - size.Width
 	s.Height = me.Height - size.Height
 	return
@@ -122,19 +122,19 @@ func (me *Size) SubtractFrom(size Size) {
 	me.Height -= size.Height
 }
 
-// Divideds the coordinates of this given Size by the coordinates of the given Size.
-func (me *Size) DivideBy(size Size) {
-	me.Width /= size.Width
-	me.Height /= size.Height
-}
 
 // Returns the value of this Size with the dimensions divided by the dimesions of the given.
-func (me *Size) DivideOf(size Size) (s Size) {
+func (me Size) DivideOf(size Size) (s Size) {
 	s.Width = me.Width / size.Width
 	s.Height = me.Height / size.Height
 	return
 }
 
+// Divideds the coordinates of this given Size by the coordinates of the given Size.
+func (me *Size) DivideBy(size Size) {
+	me.Width /= size.Width
+	me.Height /= size.Height
+}
 // Returns this Size as a Point.
 func (me *Size) ToPoint() Point {
 	return Point{me.Width, me.Height}
