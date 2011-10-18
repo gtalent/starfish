@@ -46,6 +46,14 @@ func NewDisplay() *Display {
 	return s
 }
 
+func (me *Display) GetWidth() int {
+	return int(me.surface.W)
+}
+
+func (me *Display) GetHeight() int {
+	return int(me.surface.H)
+}
+
 //Sets the title of the window.
 func (me *Display) SetTitle(title string) {
 	me.title = title
