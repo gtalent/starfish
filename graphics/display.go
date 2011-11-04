@@ -25,10 +25,16 @@ type Drawer interface {
 	Draw(*Canvas)
 }
 
+type drawFunc func(*Canvas)
+
+func (me drawFunc) Draw(c *Canvas) {
+	me(c)
+}
+
 //Holds a Drawer and its Canvas.
 type canvasHolder struct {
 	canvas Canvas
-	drawer interface{}
+	drawer Drawer
 }
 
 type Display struct {
@@ -89,14 +95,14 @@ func (me *Display) RemoveDrawer(drawer Drawer) {
 
 func (me *Display) AddDrawFunc(drawer func(*Canvas)) {
 	ch := new(canvasHolder)
-	ch.drawer = drawer
+	ch.drawer = drawFunc(drawer)
 	ch.canvas = newCanvas(me.surface)
 	me.panes = append(me.panes, ch)
 }
 
 func (me *Display) RemoveDrawFunc(drawer func(*Canvas)) {
 	for n, a := range me.panes {
-		if a.drawer == drawer {
+		if a.drawer == drawFunc(drawer) {
 			end := len(me.panes) - 1
 			for i := n; i < end; i++ {
 				me.panes[i] = me.panes[i+1]
@@ -112,12 +118,7 @@ func (me *Display) run() {
 		for _, a := range me.panes {
 			a.canvas.pane = me.surface
 			a.canvas.load()
-			switch a.drawer.(type) {
-			case func(*Canvas):
-				a.drawer.(func(*Canvas))(&a.canvas)
-			case Drawer:
-				a.drawer.(Drawer).Draw(&a.canvas)
-			}
+			a.drawer.Draw(&a.canvas)
 		}
 		me.surface.Flip()
 		time.Sleep(16000000)
