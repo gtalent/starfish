@@ -142,5 +142,5 @@ func (me *Size) ToPoint() Point {
 
 //A string representation of this Size for use as a map key.
 func (me *Size) String() string {
-	return "(" + strconv.Itoa(me.Width) + strconv.Itoa(me.Height) + ")"
+	return "(" + strconv.Itoa(me.Width) + ", " + strconv.Itoa(me.Height) + ")"
 }

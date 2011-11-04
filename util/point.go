@@ -156,5 +156,5 @@ func (me *Point) ToSize() Size {
 }
 
 func (me *Point) String() string {
-	return "(" + strconv.Itoa(me.X) + strconv.Itoa(me.Y) + ")"
+	return "(" + strconv.Itoa(me.X) + ", " + strconv.Itoa(me.Y) + ")"
 }

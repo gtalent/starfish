@@ -34,6 +34,7 @@ var input = func() inputManager {
 	i.keyboard = newKeyboard()
 	return i
 }()
+
 //Adds a function to listen for quit requests.
 func AddQuit(f func()) {
 	input.addQuitChan <- f
