@@ -15,9 +15,17 @@
 */
 package graphics
 
+/*
+#cgo LDFLAGS: -lSDL -lSDL_image
+#include "SDL/SDL.h"
+#include "SDL/SDL_rotozoom.h"
+#include "SDL/SDL_image.h"
+
+*/
+import "C"
+
 import (
 	"strconv"
-	"sdl"
 )
 
 type imageKey struct {
@@ -34,19 +42,19 @@ func (me *imageKey) String() string {
 var images = newFlyweight(
 	func(path key) interface{} {
 		key := path.(*imageKey)
-		i := sdl.Load(key.path)
-		if (i != nil) && (int(i.W) != key.width || int(i.H) != key.height) {
+		i := C.IMG_Load(C.CString(key.path))
+		if (i != nil) && (int(i.w) != key.width || int(i.h) != key.height) {
 			i = resize(i, key.width, key.height)
 		}
 		return i
 	},
 	func(path key, img interface{}) {
-		i := img.(*sdl.Surface)
-		i.Free()
+		i := img.(*C.SDL_Surface)
+		C.SDL_FreeSurface(i)
 	})
 
 type Image struct {
-	img  *sdl.Surface
+	img  *C.SDL_Surface
 	path string
 }
 
@@ -59,7 +67,7 @@ func (me *Image) String() string {
 func LoadImage(path string) (img *Image) {
 	var key imageKey
 	key.path = path
-	i := images.checkout(&key).(*sdl.Surface)
+	i := images.checkout(&key).(*C.SDL_Surface)
 	img = new(Image)
 	img.img = i
 	img.path = path
@@ -72,7 +80,7 @@ func LoadImageSize(path string, width, height int) (img *Image) {
 	key.path = path
 	key.width = width
 	key.height = height
-	i := images.checkout(&key).(*sdl.Surface)
+	i := images.checkout(&key).(*C.SDL_Surface)
 	img = new(Image)
 	img.img = i
 	img.path = path
@@ -81,12 +89,12 @@ func LoadImageSize(path string, width, height int) (img *Image) {
 
 //Returns the width of the image.
 func (me *Image) Width() int {
-	return int(me.img.W)
+	return int(me.img.w)
 }
 
 //Returns the height of the image.
 func (me *Image) Height() int {
-	return int(me.img.H)
+	return int(me.img.h)
 }
 
 //Returns the path to the image on the disk.
@@ -101,34 +109,12 @@ func (me *Image) Free() {
 	me.path = ""
 }
 
-func resize(img *sdl.Surface, width, height int) *sdl.Surface {
-	if img.W == 0 || img.H == 0 {
+func resize(img *C.SDL_Surface, width, height int) *C.SDL_Surface {
+	if img.w == 0 || img.h == 0 {
 		return nil
 	}
-	bpp := img.Format.BitsPerPixel
-	flags := img.Flags
-	rmask := img.Format.Rmask
-	gmask := img.Format.Gmask
-	bmask := img.Format.Bmask
-	amask := img.Format.Amask
-	r := sdl.CreateRGBSurface(flags, width, height, int(bpp), rmask, gmask, bmask, amask)
-	xstretch := float64(width) / float64(img.W)
-	ystretch := float64(height) / float64(img.H)
-	e1 := float64(img.H)
-	e2 := float64(img.W)
-	e3 := float64(ystretch)
-	e4 := float64(xstretch)
-	for oy := float64(0); oy < e1; oy++ {
-		for ox := float64(0); ox < e2; ox++ {
-			for ny := float64(0); ny < e3; ny++ {
-				for nx := float64(0); nx < e4; nx++ {
-					xp := int(xstretch*float64(ox) + nx)
-					yp := int(ystretch*float64(oy) + ny)
-					color := img.At(int(ox), int(oy))
-					r.Set(xp, yp, color)
-				}
-			}
-		}
-	}
-	return r
+	xstretch := C.double(float64(width) / float64(img.w))
+	ystretch := C.double(float64(height) / float64(img.h))
+	C.zoomSurface(img, xstretch, ystretch, 1)
+	return img
 }
