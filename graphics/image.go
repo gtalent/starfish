@@ -30,30 +30,19 @@ func (me *imageKey) String() string {
 	return me.path + strconv.Itoa(me.width) + strconv.Itoa(me.height)
 }
 
-//Reads images from the disk and caches them.
-var imageFiles = newResourceCatalog(
-	func(path resourceKey) (interface{}, bool) {
+//Resizes images from imageFiles and caches them.
+var images = newFlyweight(
+	func(path key) interface{} {
 		key := path.(*imageKey)
 		i := sdl.Load(key.path)
-		return i, i != nil
-	},
-	func(path resourceKey, img interface{}) {
-		i := img.(*sdl.Surface)
-		i.Free()
-	})
-
-//Resizes images from imageFiles and caches them.
-var images = newResourceCatalog(
-	func(path resourceKey) (interface{}, bool) {
-		key := path.(*imageKey)
-		i := imageFiles.checkout(path).(*sdl.Surface)
-		if i != nil {
+		if (i != nil) && (int(i.W) != key.width || int(i.H) != key.height) {
 			i = resize(i, key.width, key.height)
 		}
-		return i, i != nil
+		return i
 	},
-	func(path resourceKey, img interface{}) {
-		imageFiles.checkin(path)
+	func(path key, img interface{}) {
+		i := img.(*sdl.Surface)
+		i.Free()
 	})
 
 type Image struct {
@@ -70,7 +59,7 @@ func (me *Image) String() string {
 func LoadImage(path string) (img *Image) {
 	var key imageKey
 	key.path = path
-	i := imageFiles.checkout(&key).(*sdl.Surface)
+	i := images.checkout(&key).(*sdl.Surface)
 	img = new(Image)
 	img.img = i
 	img.path = path

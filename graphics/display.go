@@ -37,114 +37,102 @@ type canvasHolder struct {
 	drawer Drawer
 }
 
-type Display struct {
-	surface *sdl.Surface
-	title   string
-	panes   []*canvasHolder
-	dead    chan interface{}
-	running bool
-}
+var screen *sdl.Surface
+var displayTitle string
+var drawers []*canvasHolder
+var displayDead chan interface{}
+var running bool
 
-func NewDisplay() *Display {
-	s := new(Display)
-	s.panes = make([]*canvasHolder, 0)
-	s.dead = make(chan interface{})
-	return s
-}
-
-func (me *Display) GetWidth() int {
-	return int(me.surface.W)
-}
-
-func (me *Display) GetHeight() int {
-	return int(me.surface.H)
+func NewDisplay() {
+	drawers = make([]*canvasHolder, 0)
+	displayDead = make(chan interface{})
 }
 
 //Sets the title of the window.
-func (me *Display) SetTitle(title string) {
-	me.title = title
-	if me.surface != nil {
-		sdl.WM_SetCaption(me.title, "")
+func SetDisplayTitle(title string) {
+	displayTitle = title
+	if screen != nil {
+		sdl.WM_SetCaption(displayTitle, "")
 	}
 }
 
 //Returns the title of this window.
-func (me *Display) GetTitle() string {
-	return me.title
+func GetDisplayTitle() string {
+	return displayTitle
 }
 
-func (me *Display) AddDrawer(drawer Drawer) {
+func AddDrawer(drawer Drawer) {
 	ch := new(canvasHolder)
 	ch.drawer = drawer
-	ch.canvas = newCanvas(me.surface)
-	me.panes = append(me.panes, ch)
+	ch.canvas = newCanvas(screen)
+	drawers = append(drawers, ch)
 }
 
-func (me *Display) RemoveDrawer(drawer Drawer) {
-	for n, a := range me.panes {
+func RemoveDrawer(drawer Drawer) {
+	for n, a := range drawers {
 		if a.drawer == drawer {
-			end := len(me.panes) - 1
+			end := len(drawers) - 1
 			for i := n; i < end; i++ {
-				me.panes[i] = me.panes[i+1]
+				drawers[i] = drawers[i+1]
 			}
-			me.panes = me.panes[0 : len(me.panes)-1]
+			drawers = drawers[0 : len(drawers)-1]
 			break
 		}
 	}
 }
 
-func (me *Display) AddDrawFunc(drawer func(*Canvas)) {
+func AddDrawFunc(drawer func(*Canvas)) {
 	ch := new(canvasHolder)
 	ch.drawer = drawFunc(drawer)
-	ch.canvas = newCanvas(me.surface)
-	me.panes = append(me.panes, ch)
+	ch.canvas = newCanvas(screen)
+	drawers = append(drawers, ch)
 }
 
-func (me *Display) RemoveDrawFunc(drawer func(*Canvas)) {
-	for n, a := range me.panes {
+func RemoveDrawFunc(drawer func(*Canvas)) {
+	for n, a := range drawers {
 		if a.drawer == drawFunc(drawer) {
-			end := len(me.panes) - 1
+			end := len(drawers) - 1
 			for i := n; i < end; i++ {
-				me.panes[i] = me.panes[i+1]
+				drawers[i] = drawers[i+1]
 			}
-			me.panes = me.panes[0 : len(me.panes)-1]
+			drawers = drawers[0 : len(drawers)-1]
 			break
 		}
 	}
 }
 
-func (me *Display) run() {
-	for me.running {
-		for _, a := range me.panes {
-			a.canvas.pane = me.surface
+func run() {
+	for running {
+		for _, a := range drawers {
+			a.canvas.pane = screen
 			a.canvas.load()
 			a.drawer.Draw(&a.canvas)
 		}
-		me.surface.Flip()
+		screen.Flip()
 		time.Sleep(16000000)
 	}
-	me.dead <- nil
+	displayDead <- nil
 }
 
 //Opens a window.
-func (me *Display) Open(width, height int) {
-	if me.surface == nil {
+func OpenDisplay(width, height int) {
+	if screen == nil {
 		sdl.Init(sdl.INIT_VIDEO)
 		ttf.Init()
-		me.surface = sdl.SetVideoMode(width, height, 32, sdl.RESIZABLE|sdl.DOUBLEBUF)
-		me.running = true
-		sdl.WM_SetCaption(me.title, "")
-		go me.run()
+		screen = sdl.SetVideoMode(width, height, 32, sdl.RESIZABLE|sdl.DOUBLEBUF)
+		running = true
+		sdl.WM_SetCaption(displayTitle, "")
+		go run()
 	}
 }
 
 //Closes the window.
-func (me *Display) Close() {
-	if me.surface != nil {
-		me.running = false
-		<-me.dead
-		me.surface.Free()
-		me.surface = nil
+func CloseDisplay() {
+	if screen != nil {
+		running = false
+		<-displayDead
+		screen.Free()
+		screen = nil
 		sdl.Quit()
 	}
 }

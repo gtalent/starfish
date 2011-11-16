@@ -31,14 +31,14 @@ func (me *fontKey) String() string {
 	return me.path + strconv.Itoa(me.size)
 }
 
-var fonts = newResourceCatalog(
-	func(key resourceKey) (interface{}, bool) {
+var fonts = newFlyweight(
+	func(key key) (interface{}) {
 		k := key.(*fontKey)
 		font := ttf.OpenFont(k.path, k.size)
 		fmt.Println(sdl.GetError())
-		return font, font != nil
+		return font
 	},
-	func(path resourceKey, val interface{}) {
+	func(path key, val interface{}) {
 		val.(*ttf.Font).Close()
 	})
 
