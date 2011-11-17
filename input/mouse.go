@@ -15,151 +15,66 @@
 */
 package input
 
-import (
-	"time"
-	"sdl"
-	"wombat/core/util"
-)
+import "sync"
 
-const (
-	clickTimeout int64 = 200000000
-)
+var mousePressListenersLock sync.Mutex
+var mousePressListeners []MouseButtonPressListener
 
-//clicker
-type clicker struct {
-	mice             [256]mouseButton
-	input            chan sdl.Event
-	clickListeners   []func(byte, util.Point)
-	pressListeners   []func(byte, util.Point)
-	releaseListeners []func(byte, util.Point)
-	addUpChan        chan func(byte, util.Point)
-	addDownChan      chan func(byte, util.Point)
-	addClickChan     chan func(byte, util.Point)
-	removeUpChan     chan func(byte, util.Point)
-	removeDownChan   chan func(byte, util.Point)
-	removeClickChan  chan func(byte, util.Point)
+var mouseReleaseListenersLock sync.Mutex
+var mouseReleaseListeners []MouseButtonReleaseListener
+
+func AddMousePressListenerFunc(listener func(MouseEvent)) {
+	AddMousePressListener(genericMouseListener(listener))
 }
 
-//Makes and runs a clicker
-func newClicker() clicker {
-	var c clicker
-	c.clickListeners = make([]func(byte, util.Point), 0)
-	c.pressListeners = make([]func(byte, util.Point), 0)
-	c.releaseListeners = make([]func(byte, util.Point), 0)
-	c.input = make(chan sdl.Event)
-	c.addClickChan = make(chan func(byte, util.Point))
-	c.addUpChan = make(chan func(byte, util.Point))
-	c.addDownChan = make(chan func(byte, util.Point))
-	c.removeClickChan = make(chan func(byte, util.Point))
-	c.removeUpChan = make(chan func(byte, util.Point))
-	c.removeDownChan = make(chan func(byte, util.Point))
-	go c.run()
-	return c
+func RemoveMousePressListenerFunc(listener func(MouseEvent)) {
+	RemoveMousePressListener(genericMouseListener(listener))
 }
 
-func (me *clicker) addClick(f func(byte, util.Point)) {
-	me.clickListeners = append(me.clickListeners, f)
+func AddMouseReleaseListenerFunc(listener func(MouseEvent)) {
+	AddMouseReleaseListener(genericMouseListener(listener))
 }
 
-func (me *clicker) addDown(f func(byte, util.Point)) {
-	me.pressListeners = append(me.pressListeners, f)
+func RemoveMouseReleaseListenerFunc(listener func(MouseEvent)) {
+	RemoveMouseReleaseListener(genericMouseListener(listener))
 }
 
-func (me *clicker) addUp(f func(byte, util.Point)) {
-	me.releaseListeners = append(me.releaseListeners, f)
+func AddMousePressListener(listener MouseButtonPressListener) {
+	mousePressListenersLock.Lock()
+	mousePressListeners = append(mousePressListeners, listener)
+	mousePressListenersLock.Unlock()
 }
 
-func (me *clicker) removeClick(f func(byte, util.Point)) {
-	l := me.clickListeners
-	for i, _ := range l {
-		if l[i] == f {
-			l[i] = l[len(l)-1]
-			l = l[0 : len(l)-1]
+func RemoveMousePressListener(listener MouseButtonPressListener) {
+	mousePressListenersLock.Lock()
+	pt := 0
+	for i, v := range mousePressListeners {
+		if v == listener {
+			pt = i
 			break
 		}
 	}
+	mousePressListeners[pt] = mousePressListeners[len(mousePressListeners)-1]
+	mousePressListeners = mousePressListeners[:len(mousePressListeners)-1]
+	mousePressListenersLock.Unlock()
 }
 
-func (me *clicker) removeDown(f func(byte, util.Point)) {
-	l := me.pressListeners
-	for i, _ := range l {
-		if l[i] == f {
-			l[i] = l[len(l)-1]
-			l = l[0 : len(l)-1]
+func AddMouseReleaseListener(listener MouseButtonReleaseListener) {
+	mouseReleaseListenersLock.Lock()
+	mouseReleaseListeners = append(mouseReleaseListeners, listener)
+	mouseReleaseListenersLock.Unlock()
+}
+
+func RemoveMouseReleaseListener(listener MouseButtonReleaseListener) {
+	mouseReleaseListenersLock.Lock()
+	pt := 0
+	for i, v := range mouseReleaseListeners {
+		if v == listener {
+			pt = i
 			break
 		}
 	}
-}
-
-func (me *clicker) removeUp(f func(byte, util.Point)) {
-	l := me.releaseListeners
-	for i, _ := range l {
-		if l[i] == f {
-			l[i] = l[len(l)-1]
-			l = l[0 : len(l)-1]
-			break
-		}
-	}
-}
-
-func (me *clicker) run() {
-	f := func(i byte, p util.Point) {
-		time.Sleep(clickTimeout)
-		if me.mice[i].lastRelease > me.mice[i].lastPress {
-			//call release listeners
-			for _, a := range me.clickListeners {
-				go a(i, p)
-			}
-		} else {
-			//call press listeners
-			for _, a := range me.pressListeners {
-				go a(i, p)
-			}
-		}
-	}
-	for {
-		select {
-		case et := <-me.input:
-			switch et.(*sdl.MouseButtonEvent).Type {
-			case sdl.MOUSEBUTTONUP: //release
-				i := et.(*sdl.MouseButtonEvent).Button
-				if clickTimeout < time.Nanoseconds()-me.mice[i].lastPress {
-					var p util.Point
-					p.X = int(et.(*sdl.MouseButtonEvent).X)
-					p.Y = int(et.(*sdl.MouseButtonEvent).Y)
-					for _, a := range me.releaseListeners {
-						go a(i, p)
-					}
-				}
-				me.mice[i].lastRelease = time.Nanoseconds()
-			case sdl.MOUSEBUTTONDOWN: //press
-				i := et.(*sdl.MouseButtonEvent).Button
-				me.mice[i].lastPress = time.Nanoseconds()
-				var p util.Point
-				p.X = int(et.(*sdl.MouseButtonEvent).X)
-				p.Y = int(et.(*sdl.MouseButtonEvent).Y)
-				go f(i, p)
-			}
-		//manage listeners
-		case a := <-me.addUpChan:
-			me.addUp(a)
-		case b := <-me.addDownChan:
-			me.addDown(b)
-		case c := <-me.removeUpChan:
-			me.removeUp(c)
-		case d := <-me.removeDownChan:
-			me.removeDown(d)
-		case e := <-me.addClickChan:
-			me.addClick(e)
-		case f := <-me.removeClickChan:
-			me.removeClick(f)
-		}
-	}
-}
-
-//mouseButton
-type mouseButton struct {
-	lastPress   int64 // the time of the last mousebutton press
-	lastRelease int64 // the time of the last mousebutton release
-	lastClick   int64 // the time of the last mouse click 
+	mouseReleaseListeners[pt] = mouseReleaseListeners[len(mouseReleaseListeners)-1]
+	mouseReleaseListeners = mouseReleaseListeners[:len(mouseReleaseListeners)-1]
+	mouseReleaseListenersLock.Unlock()
 }

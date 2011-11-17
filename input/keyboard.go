@@ -15,164 +15,66 @@
 */
 package input
 
-import (
-	"time"
-	"sdl"
-)
+import "sync"
 
-const (
-	typeTimeout int64 = 150000000
-)
+var keyPressListenersLock sync.Mutex
+var keyPressListeners []KeyPressListener
 
-type KeyEvent struct {
-	Key      int
-	Shift    bool
-	Ctrl     bool
-	Meta     bool
-	Alt      bool
-	CapsLock bool
+var keyReleaseListenersLock sync.Mutex
+var keyReleaseListeners []KeyReleaseListener
+
+func AddKeyPressListenerFunc(listener func(key KeyEvent)) {
+	AddKeyPressListener(genericKeyListener(listener))
 }
 
-func (me *KeyEvent) setMods(mod uint32) {
-	me.Shift = 0 != mod|sdl.KMOD_LSHIFT|sdl.KMOD_RSHIFT
-	me.Ctrl = 0 != mod|sdl.KMOD_LCTRL|sdl.KMOD_RCTRL
-	me.Meta = 0 != mod|sdl.KMOD_LMETA|sdl.KMOD_RMETA
-	me.Alt = 0 != mod|sdl.KMOD_LALT|sdl.KMOD_RALT
-	me.CapsLock = 0 != mod|sdl.KMOD_CAPS|sdl.KMOD_CAPS
+func RemoveKeyPressListenerFunc(listener func(key KeyEvent)) {
+	RemoveKeyPressListener(genericKeyListener(listener))
 }
 
-//clicker
-type keyboard struct {
-	keys             [1000]key
-	input            chan sdl.Event
-	typeListeners    []func(KeyEvent)
-	pressListeners   []func(KeyEvent)
-	releaseListeners []func(KeyEvent)
-	addUpChan        chan func(KeyEvent)
-	addDownChan      chan func(KeyEvent)
-	addTypeChan      chan func(KeyEvent)
-	removeUpChan     chan func(KeyEvent)
-	removeDownChan   chan func(KeyEvent)
-	removeTypeChan   chan func(KeyEvent)
+func AddKeyReleaseListenerFunc(listener func(key KeyEvent)) {
+	AddKeyReleaseListener(genericKeyListener(listener))
 }
 
-//Makes and runs a keyboard
-func newKeyboard() keyboard {
-	var c keyboard
-	c.typeListeners = make([]func(KeyEvent), 0)
-	c.pressListeners = make([]func(KeyEvent), 0)
-	c.releaseListeners = make([]func(KeyEvent), 0)
-	c.input = make(chan sdl.Event)
-	c.addTypeChan = make(chan func(KeyEvent))
-	c.addUpChan = make(chan func(KeyEvent))
-	c.addDownChan = make(chan func(KeyEvent))
-	c.removeTypeChan = make(chan func(KeyEvent))
-	c.removeUpChan = make(chan func(KeyEvent))
-	c.removeDownChan = make(chan func(KeyEvent))
-	go c.run()
-	return c
+func RemoveKeyReleaseListenerFunc(listener func(key KeyEvent)) {
+	RemoveKeyReleaseListener(genericKeyListener(listener))
 }
 
-func (me *keyboard) addType(f func(KeyEvent)) {
-	me.typeListeners = append(me.typeListeners, f)
+func AddKeyPressListener(listener KeyPressListener) {
+	keyPressListenersLock.Lock()
+	keyPressListeners = append(keyPressListeners, listener)
+	keyPressListenersLock.Unlock()
 }
 
-func (me *keyboard) addDown(f func(KeyEvent)) {
-	me.pressListeners = append(me.pressListeners, f)
-}
-
-func (me *keyboard) addUp(f func(KeyEvent)) {
-	me.releaseListeners = append(me.releaseListeners, f)
-}
-
-func (me *keyboard) removeType(f func(KeyEvent)) {
-	l := me.typeListeners
-	for i, _ := range l {
-		if l[i] == f {
-			l[i] = l[len(l)-1]
-			l = l[0 : len(l)-1]
+func RemoveKeyPressListener(listener KeyPressListener) {
+	keyPressListenersLock.Lock()
+	pt := 0
+	for i, v := range keyPressListeners {
+		if v == listener {
+			pt = i
 			break
 		}
 	}
+	keyPressListeners[pt] = keyPressListeners[len(keyPressListeners)-1]
+	keyPressListeners = keyPressListeners[:len(keyPressListeners)-1]
+	keyPressListenersLock.Unlock()
 }
 
-func (me *keyboard) removeDown(f func(KeyEvent)) {
-	l := me.pressListeners
-	for i, _ := range l {
-		if l[i] == f {
-			l[i] = l[len(l)-1]
-			l = l[0 : len(l)-1]
+func AddKeyReleaseListener(listener KeyReleaseListener) {
+	keyReleaseListenersLock.Lock()
+	keyReleaseListeners = append(keyReleaseListeners, listener)
+	keyReleaseListenersLock.Unlock()
+}
+
+func RemoveKeyReleaseListener(listener KeyReleaseListener) {
+	keyReleaseListenersLock.Lock()
+	pt := 0
+	for i, v := range keyReleaseListeners {
+		if v == listener {
+			pt = i
 			break
 		}
 	}
-}
-
-func (me *keyboard) removeUp(f func(KeyEvent)) {
-	l := me.releaseListeners
-	for i, _ := range l {
-		if l[i] == f {
-			l[i] = l[len(l)-1]
-			l = l[0 : len(l)-1]
-			break
-		}
-	}
-}
-
-func (me *keyboard) run() {
-	f := func(i KeyEvent) {
-		time.Sleep(clickTimeout)
-		if me.keys[i.Key].lastRelease > me.keys[i.Key].lastPress {
-			//call type listeners
-			for _, a := range me.typeListeners {
-				go a(i)
-			}
-		} else {
-			//call press listeners
-			for _, a := range me.pressListeners {
-				go a(i)
-			}
-		}
-	}
-	for {
-		select {
-		case in := <-me.input:
-			et := in.(*sdl.KeyboardEvent)
-			i := et.Keysym.Sym
-			var event KeyEvent
-			event.Key = int(i)
-			event.setMods(et.Keysym.Mod)
-			switch et.Type {
-			case sdl.KEYUP: //release
-				if clickTimeout < time.Nanoseconds()-me.keys[i].lastPress {
-					for _, a := range me.releaseListeners {
-						go a(event)
-					}
-				}
-				me.keys[i].lastRelease = time.Nanoseconds()
-			case sdl.KEYDOWN: //press
-				me.keys[i].lastPress = time.Nanoseconds()
-				go f(event)
-			}
-		//manage listeners
-		case a := <-me.addUpChan:
-			me.addUp(a)
-		case b := <-me.addDownChan:
-			me.addDown(b)
-		case c := <-me.removeUpChan:
-			me.removeUp(c)
-		case d := <-me.removeDownChan:
-			me.removeDown(d)
-		case e := <-me.addTypeChan:
-			me.addType(e)
-		case f := <-me.removeTypeChan:
-			me.removeType(f)
-		}
-	}
-}
-
-//mouseButton
-type key struct {
-	lastPress   int64 // the time of the last mousebutton press
-	lastRelease int64 // the time of the last mousebutton release
-	lastType    int64 // the time of the last mouse click 
+	keyReleaseListeners[pt] = keyReleaseListeners[len(keyReleaseListeners)-1]
+	keyReleaseListeners = keyReleaseListeners[:len(keyReleaseListeners)-1]
+	keyReleaseListenersLock.Unlock()
 }

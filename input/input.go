@@ -15,137 +15,75 @@
 */
 package input
 
-import (
-	"time"
-	"sdl"
-	"wombat/core/util"
-)
+/*
+#cgo LDFLAGS: -lSDL
+#include "SDL/SDL.h"
 
+int eventType(SDL_Event *e) {
+	return e->type;
+}
+
+int eventKey(SDL_Event *e) {
+	return e->key.keysym.sym;
+}
+
+int eventMouseButton(SDL_Event *e) {
+	return e->button.button;
+}
+
+int eventMouseX(SDL_Event *e) {
+	return e->button.x;
+}
+
+int eventMouseY(SDL_Event *e) {
+	return e->button.y;
+}
+*/
+import "C"
+
+var running = true
+
+//Initializes the input system and returns a bool indicating success.
 func Init() {
-	go input.run()
+	go run()
 }
 
-var input = func() inputManager {
-	var i inputManager
-	i.quitListeners = make([]func(), 0)
-	i.addQuitChan = make(chan func())
-	i.removeQuitChan = make(chan func())
-	i.mouse = newClicker()
-	i.keyboard = newKeyboard()
-	return i
-}()
-
-//Adds a function to listen for quit requests.
-func AddQuit(f func()) {
-	input.addQuitChan <- f
-}
-
-//Removes a function that listens for quit requests.
-func RemoveQuit(f func()) {
-	input.removeQuitChan <- f
-}
-
-//Adds a function to listen for the clicking of a mouse button.
-func AddMouseClick(f func(byte, util.Point)) {
-	input.mouse.addClickChan <- f
-}
-
-//Removes a function to listen for the pressing of a mouse button.
-func RemoveMouseClick(f func(byte, util.Point)) {
-	input.mouse.removeClickChan <- f
-}
-
-//Adds a function to listen for the pressing of a mouse button.
-func AddMousePress(f func(byte, util.Point)) {
-	input.mouse.addDownChan <- f
-}
-
-//Removes a function to listen for the pressing of a mouse button.
-func RemoveMousePress(f func(byte, util.Point)) {
-	input.mouse.removeDownChan <- f
-}
-
-//Adds a function to listen for the releasing of a mouse button.
-func AddMouseRelease(f func(byte, util.Point)) {
-	input.mouse.addUpChan <- f
-}
-
-//Removes a function to listen for the releasing of a mouse button.
-func RemoveMouseRelease(f func(byte, util.Point)) {
-	input.mouse.removeUpChan <- f
-}
-
-//keyboard listening
-
-//Adds a function to listen for the clicking of a key.
-func AddKeyType(f func(KeyEvent)) {
-	input.keyboard.addTypeChan <- f
-}
-
-//Removes a function to listen for the pressing of a key.
-func RemoveKeyType(f func(KeyEvent)) {
-	input.keyboard.removeTypeChan <- f
-}
-
-//Adds a function to listen for the pressing of a key.
-func AddKeyPress(f func(KeyEvent)) {
-	input.keyboard.addDownChan <- f
-}
-
-//Removes a function to listen for the pressing of a key.
-func RemoveKeyPress(f func(KeyEvent)) {
-	input.keyboard.removeDownChan <- f
-}
-
-//Adds a function to listen for the releasing of a key.
-func AddKeyRelease(f func(KeyEvent)) {
-	input.keyboard.addUpChan <- f
-}
-
-//Removes a function to listen for the releasing of a key.
-func RemoveKeyRelease(f func(KeyEvent)) {
-	input.keyboard.removeUpChan <- f
-}
-
-type inputManager struct {
-	quitListeners  []func()
-	addQuitChan    chan func()
-	removeQuitChan chan func()
-	mouse          clicker
-	keyboard       keyboard
-}
-
-func (me *inputManager) run() {
-	for {
-		for e := sdl.PollEvent(); e != nil; e = sdl.PollEvent() {
-			switch et := e.(type) {
-			case *sdl.QuitEvent:
-				for _, a := range me.quitListeners {
-					go a()
+func run() {
+	for running {
+		var e C.SDL_Event
+		C.SDL_WaitEvent(&e)
+		switch C.eventType(&e) {
+		case C.SDL_QUIT:
+			go func() {
+				quitListenersLock.Lock()
+				for _, v := range quitListeners {
+					go v.Quit()
 				}
-			case *sdl.MouseButtonEvent:
-				me.mouse.input <- et
-			case *sdl.KeyboardEvent:
-				me.keyboard.input <- et
-			}
-		}
-		for loop := true; loop; {
-			select {
-			case q := <-me.addQuitChan:
-				me.quitListeners = append(me.quitListeners, q)
-			case r := <-me.removeQuitChan:
-				l := me.quitListeners
-				for i, _ := range l {
-					if l[i] == r {
-						l[i] = l[len(l)-1]
-						me.quitListeners = l[0 : len(l)-1]
-						break
-					}
+				quitListenersLock.Unlock()
+			}()
+			running = false
+		case C.SDL_KEYDOWN:
+			go func() {
+				var ke KeyEvent
+				ke.Key = int(C.eventKey(&e))
+				keyPressListenersLock.Lock()
+				for _, v := range keyPressListeners {
+					go v.KeyPress(ke)
 				}
-			default:
-				loop = false
-			}
+				keyPressListenersLock.Unlock()
+			}()
+		case C.SDL_MOUSEBUTTONDOWN:
+			go func() {
+				var me MouseEvent
+				me.Button = int(C.eventMouseButton(&e))
+				me.X = int(C.eventMouseX(&e))
+				me.Y = int(C.eventMouseY(&e))
+				mousePressListenersLock.Lock()
+				for _, v := range mousePressListeners {
+					go v.MouseButtonPress(me)
+				}
+				mousePressListenersLock.Unlock()
+			}()
 		}
-		time.Sleep(6000000)
 	}
 }
