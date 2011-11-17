@@ -15,6 +15,12 @@
 */
 package graphics
 
+/*
+#cgo LDFLAGS: -lSDL -lSDL_ttf
+#include "SDL/SDL.h"
+#include "SDL/SDL_ttf.h"
+*/
+import "C"
 import (
 	"fmt"
 	"strconv"
@@ -45,7 +51,7 @@ var fonts = newFlyweight(
 //A drawable representation of a string.
 type Text struct {
 	color Color
-	text  *sdl.Surface
+	text  *C.SDL_Surface
 }
 
 //Returns a Color object representing the color of the text.
@@ -55,19 +61,19 @@ func (me *Text) Color() Color {
 
 //Returns the width of this text.
 func (me *Text) Width() int {
-	return int(me.text.W)
+	return int(me.text.w)
 }
 
 //Returns the height of this text.
 func (me *Text) Height() int {
-	return int(me.text.H)
+	return int(me.text.w)
 }
 
 //A font type that represents a TTF file loaded from storage, used to create Text objects for drawing.
 type Font struct {
 	path  string
 	size  int
-	font  *ttf.Font
+	font  *C.TTF_Font
 	color Color
 }
 
@@ -79,7 +85,7 @@ func LoadFont(path string, size int) (font *Font) {
 
 	if f := fonts.checkout(&key); f != nil {
 		font = new(Font)
-		font.font = f.(*ttf.Font)
+		font.font = f.(*C.TTF_Font)
 		font.path = path
 	}
 	return
@@ -101,7 +107,7 @@ func (me *Font) SetRGB(red, green, blue byte) {
 //Returns true if successful, false otherwise.
 func (me *Font) Write(text string, t *Text) bool {
 	t.color = me.color
-	t.text = ttf.RenderText_Blended(me.font, text, me.color.toSDL_Color())
+	t.text = C.TTF_RenderText_Blended(me.font, C.CString(text), me.color.toSDL_Color())
 	return t.text != nil
 }
 

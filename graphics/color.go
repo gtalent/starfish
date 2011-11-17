@@ -15,15 +15,19 @@
 */
 package graphics
 
-import "sdl"
+/*
+#cgo LDFLAGS: -lSDL
+#include "SDL/SDL.h"
+*/
+import "C"
 
 //An RGB color representation.
 type Color struct {
 	Red, Green, Blue byte
 }
 
-func (me *Color) toSDL_Color() sdl.Color {
-	return sdl.Color{me.Red, me.Green, me.Blue, 0}
+func (me *Color) toSDL_Color() C.SDL_Color  {
+	return C.SDL_Color{C.Uint8(me.Red), C.Uint8(me.Green), C.Uint8(me.Blue), 0}
 }
 
 func (me *Color) toUint32() uint32 {

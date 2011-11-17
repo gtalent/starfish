@@ -15,22 +15,31 @@
 */
 package graphics
 
+/*
+#cgo LDFLAGS: -lSDL
+#include "SDL/SDL.h"
+*/
+import "C"
 import (
 	"wombat/core/util"
-	"sdl"
 )
 
-func toSDL_Rect(b util.Bounds) sdl.Rect {
-	var r sdl.Rect
-	r.X = int16(b.X)
-	r.Y = int16(b.Y)
-	r.W = uint16(b.Width)
-	r.H = uint16(b.Height)
+func toSDL_Rect(b util.Bounds) C.SDL_Rect {
+	var r C.SDL_Rect
+	r.x = C.Sint16(b.X)
+	r.y = C.Sint16(b.Y)
+	r.w = C.Uint16(b.Width)
+	r.h = C.Uint16(b.Height)
 	return r
 }
 
-func sdl_Rect(x, y, width, height int) sdl.Rect {
-	return sdl.Rect{int16(x), int16(y), uint16(width), uint16(height)}
+func sdl_Rect(x, y, width, height int) C.SDL_Rect {
+	var r C.SDL_Rect
+	r.x = C.Sint16(x)
+	r.y = C.Sint16(y)
+	r.w = C.Uint16(width)
+	r.h = C.Uint16(height)
+	return r
 }
 
 //Returns the difference between the two integers given.
