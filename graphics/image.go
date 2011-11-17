@@ -16,7 +16,7 @@
 package graphics
 
 /*
-#cgo LDFLAGS: -lSDL -lSDL_image
+#cgo LDFLAGS: -lSDL -lSDL_image -lSDL_gfx
 #include "SDL/SDL.h"
 #include "SDL/SDL_rotozoom.h"
 #include "SDL/SDL_image.h"

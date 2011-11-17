@@ -15,10 +15,14 @@
 */
 package graphics
 
+/*
+#cgo LDFLAGS: -lSDL -lSDL_ttf
+#include "SDL/SDL.h"
+#include "SDL/SDL_ttf.h"
+*/
+import "C"
 import (
 	"time"
-	"sdl"
-	"sdl/ttf"
 )
 
 type Drawer interface {
@@ -37,7 +41,7 @@ type canvasHolder struct {
 	drawer Drawer
 }
 
-var screen *sdl.Surface
+var screen *C.SDL_Surface
 var displayTitle string
 var drawers []*canvasHolder
 var displayDead chan interface{}
@@ -52,7 +56,7 @@ func NewDisplay() {
 func SetDisplayTitle(title string) {
 	displayTitle = title
 	if screen != nil {
-		sdl.WM_SetCaption(displayTitle, "")
+		C.SDL_WM_SetCaption(C.CString(displayTitle), C.CString(""))
 	}
 }
 
@@ -108,7 +112,7 @@ func run() {
 			a.canvas.load()
 			a.drawer.Draw(&a.canvas)
 		}
-		screen.Flip()
+		C.SDL_Flip(screen)
 		time.Sleep(16000000)
 	}
 	displayDead <- nil
@@ -117,11 +121,11 @@ func run() {
 //Opens a window.
 func OpenDisplay(width, height int) {
 	if screen == nil {
-		sdl.Init(sdl.INIT_VIDEO)
-		ttf.Init()
-		screen = sdl.SetVideoMode(width, height, 32, sdl.RESIZABLE|sdl.DOUBLEBUF)
+		C.SDL_Init(C.SDL_INIT_VIDEO)
+		C.TTF_Init()
+		screen = C.SDL_SetVideoMode(C.int(width), C.int(height), 32, C.SDL_RESIZABLE|C.SDL_DOUBLEBUF)
 		running = true
-		sdl.WM_SetCaption(displayTitle, "")
+		C.SDL_WM_SetCaption(C.CString(displayTitle), C.CString(""))
 		go run()
 	}
 }
@@ -131,8 +135,8 @@ func CloseDisplay() {
 	if screen != nil {
 		running = false
 		<-displayDead
-		screen.Free()
+		C.SDL_FreeSurface(screen)
 		screen = nil
-		sdl.Quit()
+		C.SDL_Quit()
 	}
 }
