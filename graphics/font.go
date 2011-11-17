@@ -67,7 +67,7 @@ func (me *Text) Height() int {
 
 //A font type that represents a TTF file loaded from storage, used to create Text objects for drawing.
 type Font struct {
-	path  string
+	key   fontKey
 	size  int
 	font  *C.TTF_Font
 	color Color
@@ -82,7 +82,7 @@ func LoadFont(path string, size int) (font *Font) {
 	if f := fonts.checkout(&key); f != nil {
 		font = new(Font)
 		font.font = f.(*C.TTF_Font)
-		font.path = path
+		font.key = key
 	}
 	return
 }
@@ -114,13 +114,13 @@ func (me *Font) Size() int {
 
 //Returns the path to the font on the disk.
 func (me *Font) Path() string {
-	return me.path
+	return me.key.path
 }
 
 //Nils this font and lets the resource manager know this object is no longer using the font data.
 func (me *Font) Free() {
-	images.checkin(&fontKey{path: me.path, size: me.size})
+	fonts.checkin(&me.key)
 	me.font = nil
 	me.size = 0
-	me.path = ""
+	me.key.path = ""
 }

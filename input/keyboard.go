@@ -23,19 +23,19 @@ var keyPressListeners []KeyPressListener
 var keyReleaseListenersLock sync.Mutex
 var keyReleaseListeners []KeyReleaseListener
 
-func AddKeyPressListenerFunc(listener func(key KeyEvent)) {
+func AddKeyPressFunc(listener func(key KeyEvent)) {
 	AddKeyPressListener(genericKeyListener(listener))
 }
 
-func RemoveKeyPressListenerFunc(listener func(key KeyEvent)) {
+func RemoveKeyPressFunc(listener func(key KeyEvent)) {
 	RemoveKeyPressListener(genericKeyListener(listener))
 }
 
-func AddKeyReleaseListenerFunc(listener func(key KeyEvent)) {
+func AddKeyReleaseFunc(listener func(key KeyEvent)) {
 	AddKeyReleaseListener(genericKeyListener(listener))
 }
 
-func RemoveKeyReleaseListenerFunc(listener func(key KeyEvent)) {
+func RemoveKeyReleaseFunc(listener func(key KeyEvent)) {
 	RemoveKeyReleaseListener(genericKeyListener(listener))
 }
 

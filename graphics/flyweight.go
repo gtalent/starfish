@@ -67,11 +67,14 @@ func (me *flyweight) checkout(key key) interface{} {
 func (me *flyweight) checkin(key key) {
 	me.lock.Lock()
 	n := me.items[key.String()]
+	if n == nil {
+		me.lock.Unlock()
+		return
+	}
 	n.clients--
 	if n.clients == 0 {
-		val := me.items[key.String()]
 		me.items[key.String()] = nil, false
-		me.unloader(key, val)
+		me.unloader(key, n.val)
 	}
 	me.lock.Unlock()
 }

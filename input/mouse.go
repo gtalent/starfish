@@ -23,19 +23,19 @@ var mousePressListeners []MouseButtonPressListener
 var mouseReleaseListenersLock sync.Mutex
 var mouseReleaseListeners []MouseButtonReleaseListener
 
-func AddMousePressListenerFunc(listener func(MouseEvent)) {
+func AddMousePressFunc(listener func(MouseEvent)) {
 	AddMousePressListener(genericMouseListener(listener))
 }
 
-func RemoveMousePressListenerFunc(listener func(MouseEvent)) {
+func RemoveMousePressFunc(listener func(MouseEvent)) {
 	RemoveMousePressListener(genericMouseListener(listener))
 }
 
-func AddMouseReleaseListenerFunc(listener func(MouseEvent)) {
+func AddMouseReleaseFunc(listener func(MouseEvent)) {
 	AddMouseReleaseListener(genericMouseListener(listener))
 }
 
-func RemoveMouseReleaseListenerFunc(listener func(MouseEvent)) {
+func RemoveMouseReleaseFunc(listener func(MouseEvent)) {
 	RemoveMouseReleaseListener(genericMouseListener(listener))
 }
 
