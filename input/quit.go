@@ -31,12 +31,12 @@ func (me genericQuitListener) Quit() {
 }
 
 //Adds a function to be called when the display is asked to close.
-func AddQuitListenerFunc(listener func()) {
+func AddQuitFunc(listener func()) {
 	AddQuitListener(genericQuitListener(listener))
 }
 
 //Removes the specified quit listener function.
-func RemoveQuitListenerFunc(listener func()) {
+func RemoveQuitFunc(listener func()) {
 	RemoveQuitListener(genericQuitListener(listener))
 }
 
