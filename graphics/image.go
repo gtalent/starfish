@@ -115,6 +115,7 @@ func resize(img *C.SDL_Surface, width, height int) *C.SDL_Surface {
 	}
 	xstretch := C.double(float64(width) / float64(img.w))
 	ystretch := C.double(float64(height) / float64(img.h))
-	C.zoomSurface(img, xstretch, ystretch, 1)
-	return img
+	retval := C.zoomSurface(img, xstretch, ystretch, 1)
+	C.SDL_FreeSurface(img)
+	return retval
 }
