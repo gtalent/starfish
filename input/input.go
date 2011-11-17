@@ -72,6 +72,16 @@ func run() {
 				}
 				keyPressListenersLock.Unlock()
 			}()
+		case C.SDL_KEYUP:
+			go func() {
+				var ke KeyEvent
+				ke.Key = int(C.eventKey(&e))
+				keyReleaseListenersLock.Lock()
+				for _, v := range keyReleaseListeners {
+					go v.KeyRelease(ke)
+				}
+				keyReleaseListenersLock.Unlock()
+			}()
 		case C.SDL_MOUSEBUTTONDOWN:
 			go func() {
 				var me MouseEvent
@@ -83,6 +93,18 @@ func run() {
 					go v.MouseButtonPress(me)
 				}
 				mousePressListenersLock.Unlock()
+			}()
+		case C.SDL_MOUSEBUTTONUP:
+			go func() {
+				var me MouseEvent
+				me.Button = int(C.eventMouseButton(&e))
+				me.X = int(C.eventMouseX(&e))
+				me.Y = int(C.eventMouseY(&e))
+				mouseReleaseListenersLock.Lock()
+				for _, v := range mouseReleaseListeners {
+					go v.MouseButtonRelease(me)
+				}
+				mouseReleaseListenersLock.Unlock()
 			}()
 		}
 	}

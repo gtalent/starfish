@@ -61,5 +61,3 @@ func RemoveQuitListener(listener QuitListener) {
 	quitListeners = quitListeners[:len(quitListeners)-1]
 	quitListenersLock.Unlock()
 }
-
-
