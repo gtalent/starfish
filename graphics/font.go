@@ -22,10 +22,7 @@ package graphics
 */
 import "C"
 import (
-	"fmt"
 	"strconv"
-	"sdl"
-	"sdl/ttf"
 )
 
 type fontKey struct {
@@ -40,12 +37,11 @@ func (me *fontKey) String() string {
 var fonts = newFlyweight(
 	func(key key) (interface{}) {
 		k := key.(*fontKey)
-		font := ttf.OpenFont(k.path, k.size)
-		fmt.Println(sdl.GetError())
+		font := C.TTF_OpenFont(C.CString(k.path), C.int(k.size))
 		return font
 	},
 	func(path key, val interface{}) {
-		val.(*ttf.Font).Close()
+		C.TTF_CloseFont(val.(*C.TTF_Font))
 	})
 
 //A drawable representation of a string.
