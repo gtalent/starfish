@@ -55,12 +55,12 @@ var images = newFlyweight(
 
 type Image struct {
 	img  *C.SDL_Surface
-	path string
+	key  imageKey
 }
 
 //Returns a unique string that can be used to identify the values of this Image.
 func (me *Image) String() string {
-	return strconv.Itoa(me.Width()) + strconv.Itoa(me.Height()) + me.path
+	return me.key.String()
 }
 
 //Loads the image at the given path, or nil if the image was not found.
@@ -70,7 +70,7 @@ func LoadImage(path string) (img *Image) {
 	i := images.checkout(&key).(*C.SDL_Surface)
 	img = new(Image)
 	img.img = i
-	img.path = path
+	img.key = key
 	return
 }
 
@@ -83,7 +83,7 @@ func LoadImageSize(path string, width, height int) (img *Image) {
 	i := images.checkout(&key).(*C.SDL_Surface)
 	img = new(Image)
 	img.img = i
-	img.path = path
+	img.key = key
 	return
 }
 
@@ -99,14 +99,14 @@ func (me *Image) Height() int {
 
 //Returns the path to the image on the disk.
 func (me *Image) Path() string {
-	return me.path
+	return me.key.path
 }
 
 //Nils this image and lets the resource manager know this object is no longer using the image data.
 func (me *Image) Free() {
-	images.checkin(&imageKey{path: me.path, width: me.Width(), height: me.Height()})
+	images.checkin(&imageKey{path: me.key.path, width: me.Width(), height: me.Height()})
 	me.img = nil
-	me.path = ""
+	me.key.path = ""
 }
 
 func resize(img *C.SDL_Surface, width, height int) *C.SDL_Surface {

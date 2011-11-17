@@ -93,7 +93,7 @@ func (me *Canvas) DrawText(text *Text, x, y int) {
 	var dest C.SDL_Rect
 	dest.x = C.Sint16(x + me.origin.X)
 	dest.y = C.Sint16(y + me.origin.Y)
-	C.SDL_BlitSurface(me.pane, &dest, text.text, nil)
+	C.SDL_BlitSurface(text.text, nil, me.pane, &dest)
 }
 
 //Draws the image at the given coordinates.
@@ -106,5 +106,5 @@ func (me *Canvas) DrawImage(img *Image, x, y int) {
 	var dest C.SDL_Rect
 	dest.x = C.Sint16(x + me.origin.X)
 	dest.y = C.Sint16(y + me.origin.Y)
-	C.SDL_BlitSurface(me.pane, &dest, img.img, nil)
+	C.SDL_BlitSurface(img.img, nil, me.pane, &dest)
 }
