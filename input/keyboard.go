@@ -51,12 +51,12 @@ func RemoveKeyPressListener(listener KeyPressListener) {
 	for i, v := range keyPressListeners {
 		if v == listener {
 			pt = i
+			keyPressListeners[pt] = keyPressListeners[len(keyPressListeners)-1]
+			keyPressListeners = keyPressListeners[:len(keyPressListeners)-1]
+			keyPressListenersLock.Unlock()
 			break
 		}
 	}
-	keyPressListeners[pt] = keyPressListeners[len(keyPressListeners)-1]
-	keyPressListeners = keyPressListeners[:len(keyPressListeners)-1]
-	keyPressListenersLock.Unlock()
 }
 
 func AddKeyReleaseListener(listener KeyReleaseListener) {
@@ -71,10 +71,10 @@ func RemoveKeyReleaseListener(listener KeyReleaseListener) {
 	for i, v := range keyReleaseListeners {
 		if v == listener {
 			pt = i
+			keyReleaseListeners[pt] = keyReleaseListeners[len(keyReleaseListeners)-1]
+			keyReleaseListeners = keyReleaseListeners[:len(keyReleaseListeners)-1]
+			keyReleaseListenersLock.Unlock()
 			break
 		}
 	}
-	keyReleaseListeners[pt] = keyReleaseListeners[len(keyReleaseListeners)-1]
-	keyReleaseListeners = keyReleaseListeners[:len(keyReleaseListeners)-1]
-	keyReleaseListenersLock.Unlock()
 }

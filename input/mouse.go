@@ -51,12 +51,12 @@ func RemoveMousePressListener(listener MouseButtonPressListener) {
 	for i, v := range mousePressListeners {
 		if v == listener {
 			pt = i
+			mousePressListeners[pt] = mousePressListeners[len(mousePressListeners)-1]
+			mousePressListeners = mousePressListeners[:len(mousePressListeners)-1]
+			mousePressListenersLock.Unlock()
 			break
 		}
 	}
-	mousePressListeners[pt] = mousePressListeners[len(mousePressListeners)-1]
-	mousePressListeners = mousePressListeners[:len(mousePressListeners)-1]
-	mousePressListenersLock.Unlock()
 }
 
 func AddMouseReleaseListener(listener MouseButtonReleaseListener) {
@@ -71,10 +71,10 @@ func RemoveMouseReleaseListener(listener MouseButtonReleaseListener) {
 	for i, v := range mouseReleaseListeners {
 		if v == listener {
 			pt = i
+			mouseReleaseListeners[pt] = mouseReleaseListeners[len(mouseReleaseListeners)-1]
+			mouseReleaseListeners = mouseReleaseListeners[:len(mouseReleaseListeners)-1]
+			mouseReleaseListenersLock.Unlock()
 			break
 		}
 	}
-	mouseReleaseListeners[pt] = mouseReleaseListeners[len(mouseReleaseListeners)-1]
-	mouseReleaseListeners = mouseReleaseListeners[:len(mouseReleaseListeners)-1]
-	mouseReleaseListenersLock.Unlock()
 }
