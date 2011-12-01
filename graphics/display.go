@@ -47,10 +47,6 @@ var drawers []*canvasHolder
 var displayDead chan interface{}
 var running bool
 
-func NewDisplay() {
-	drawers = make([]*canvasHolder, 0)
-	displayDead = make(chan interface{})
-}
 
 //Sets the title of the window.
 func SetDisplayTitle(title string) {
@@ -133,6 +129,7 @@ func OpenDisplay(width, height int) {
 //Closes the window.
 func CloseDisplay() {
 	if screen != nil {
+		displayDead = make(chan interface{})
 		running = false
 		<-displayDead
 		C.SDL_FreeSurface(screen)
