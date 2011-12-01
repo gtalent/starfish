@@ -23,11 +23,11 @@ import "C"
 
 //An RGB color representation.
 type Color struct {
-	Red, Green, Blue byte
+	Red, Green, Blue, Alpha byte
 }
 
 func (me *Color) toSDL_Color() C.SDL_Color  {
-	return C.SDL_Color{C.Uint8(me.Red), C.Uint8(me.Green), C.Uint8(me.Blue), 0}
+	return C.SDL_Color{C.Uint8(me.Red), C.Uint8(me.Green), C.Uint8(me.Blue), C.Uint8(me.Alpha)}
 }
 
 func (me *Color) toUint32() uint32 {

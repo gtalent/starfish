@@ -50,6 +50,10 @@ type Text struct {
 	text  *C.SDL_Surface
 }
 
+func (me *Text) Free() {
+	C.SDL_FreeSurface(me.text)
+}
+
 //Returns a Color object representing the color of the text.
 func (me *Text) Color() Color {
 	return me.color
