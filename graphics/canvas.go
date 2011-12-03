@@ -16,8 +16,9 @@
 package graphics
 
 /*
-#cgo LDFLAGS: -lSDL -lSDL_image
+#cgo LDFLAGS: -lSDL -lSDL_gfx -lSDL_image
 #include "SDL/SDL.h"
+#include "SDL/SDL_gfxPrimitives.h"
 #include "SDL/SDL_rotozoom.h"
 #include "SDL/SDL_image.h"
 
@@ -31,7 +32,7 @@ import (
 type Canvas struct {
 	viewport    viewport
 	pane        *C.SDL_Surface
-	color       uint32
+	color       Color
 	translation util.Point
 	origin      util.Point
 }
@@ -79,13 +80,13 @@ func (me *Canvas) PopViewport() {
 
 //Sets the color that the Canvas will draw with.
 func (me *Canvas) SetColor(color Color) {
-	me.color = color.toUint32()
+	me.color = color
 }
 
 //Fills a rectangle at the given coordinates and size on this Canvas.
 func (me *Canvas) FillRect(x, y, width, height int) {
-	r := sdl_Rect(x + me.origin.X, y + me.origin.Y, width, height)
-	C.SDL_FillRect(me.pane, &r, C.Uint32(me.color))
+	r := sdl_Rect(x+me.origin.X, y+me.origin.Y, width, height)
+	C.boxRGBA(screen, C.Sint16(r.x), C.Sint16(r.y), C.Sint16(int(r.x)+int(r.w)), C.Sint16(int(r.y)+int(r.h)), C.Uint8(me.color.Red), C.Uint8(me.color.Green), C.Uint8(me.color.Blue), C.Uint8(me.color.Alpha))
 }
 
 //Draws the text at the given coordinates.
@@ -103,6 +104,7 @@ func (me *Canvas) DrawAnimation(animation *Animation, x, y int) {
 
 //Draws the image at the given coordinates.
 func (me *Canvas) DrawImage(img *Image, x, y int) {
+	C.SDL_SetAlpha(img.img, C.SDL_SRCALPHA, 255)
 	var dest C.SDL_Rect
 	dest.x = C.Sint16(x + me.origin.X)
 	dest.y = C.Sint16(y + me.origin.Y)

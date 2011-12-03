@@ -26,7 +26,7 @@ type Color struct {
 	Red, Green, Blue, Alpha byte
 }
 
-func (me *Color) toSDL_Color() C.SDL_Color  {
+func (me *Color) toSDL_Color() C.SDL_Color {
 	return C.SDL_Color{C.Uint8(me.Red), C.Uint8(me.Green), C.Uint8(me.Blue), C.Uint8(me.Alpha)}
 }
 

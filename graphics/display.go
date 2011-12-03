@@ -47,7 +47,6 @@ var drawers []*canvasHolder
 var displayDead chan interface{}
 var running bool
 
-
 //Sets the title of the window.
 func SetDisplayTitle(title string) {
 	displayTitle = title
@@ -59,6 +58,14 @@ func SetDisplayTitle(title string) {
 //Returns the title of this window.
 func GetDisplayTitle() string {
 	return displayTitle
+}
+
+func DisplayWidth() int {
+	return int(screen.w)
+}
+
+func DisplayHeight() int {
+	return int(screen.h)
 }
 
 func AddDrawer(drawer Drawer) {
@@ -115,15 +122,29 @@ func run() {
 }
 
 //Opens a window.
-func OpenDisplay(width, height int) {
-	if screen == nil {
-		C.SDL_Init(C.SDL_INIT_VIDEO)
-		C.TTF_Init()
-		screen = C.SDL_SetVideoMode(C.int(width), C.int(height), 32, C.SDL_RESIZABLE|C.SDL_DOUBLEBUF)
-		running = true
-		C.SDL_WM_SetCaption(C.CString(displayTitle), C.CString(""))
-		go run()
+//Returns an indicator of success.
+func OpenDisplay(width, height int, fullscreen bool) bool {
+	println("0")
+	if C.SDL_Init(C.SDL_INIT_VIDEO) != 0 {
+		return false
 	}
+	println("1")
+	C.TTF_Init()
+	println("2")
+	var flags C.Uint32 = C.SDL_DOUBLEBUF
+	if fullscreen {
+		flags |= C.SDL_FULLSCREEN
+	}
+	screen = C.SDL_SetVideoMode(C.int(width), C.int(height), 32, flags)
+	if screen == nil {
+		return false
+	}
+	println("3")
+	running = true
+	println("4")
+	C.SDL_WM_SetCaption(C.CString(displayTitle), C.CString(""))
+	go run()
+	return true
 }
 
 //Closes the window.

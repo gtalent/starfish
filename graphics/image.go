@@ -54,8 +54,8 @@ var images = newFlyweight(
 	})
 
 type Image struct {
-	img  *C.SDL_Surface
-	key  imageKey
+	img *C.SDL_Surface
+	key imageKey
 }
 
 //Returns a unique string that can be used to identify the values of this Image.
