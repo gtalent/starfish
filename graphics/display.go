@@ -129,6 +129,8 @@ func OpenDisplay(width, height int, fullscreen bool) bool {
 	}
 	C.TTF_Init()
 	var flags C.Uint32 = C.SDL_DOUBLEBUF
+	flags |= C.SDL_SWSURFACE
+	flags |= C.SDL_HWACCEL
 	if fullscreen {
 		flags |= C.SDL_FULLSCREEN
 	}
@@ -138,6 +140,7 @@ func OpenDisplay(width, height int, fullscreen bool) bool {
 	}
 	running = true
 	C.SDL_WM_SetCaption(C.CString(displayTitle), C.CString(""))
+	C.SDL_GL_SetAttribute(C.SDL_GL_SWAP_CONTROL, 1)
 	go run()
 	return true
 }

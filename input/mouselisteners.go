@@ -25,6 +25,11 @@ func (me genericMouseListener) MouseButtonRelease(e MouseEvent) {
 	me(e)
 }
 
+type MouseButtonListener interface {
+	MouseButtonPressListener
+	MouseButtonReleaseListener
+}
+
 type MouseButtonPressListener interface {
 	MouseButtonPress(MouseEvent)
 }

@@ -39,6 +39,16 @@ func RemoveMouseReleaseFunc(listener func(MouseEvent)) {
 	RemoveMouseReleaseListener(genericMouseListener(listener))
 }
 
+func AddMouseButtonListener(listener MouseButtonListener) {
+	AddMousePressListener(listener)
+	AddMouseReleaseListener(listener)
+}
+
+func RemoveMouseButtonListener(listener MouseButtonListener) {
+	RemoveMousePressListener(listener)
+	RemoveMouseReleaseListener(listener)
+}
+
 func AddMousePressListener(listener MouseButtonPressListener) {
 	mousePressListenersLock.Lock()
 	mousePressListeners = append(mousePressListeners, listener)
