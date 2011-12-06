@@ -135,8 +135,9 @@ func (me *Size) DivideBy(size Size) {
 	me.Width /= size.Width
 	me.Height /= size.Height
 }
+
 // Returns this Size as a Point.
-func (me *Size) ToPoint() Point {
+func (me Size) ToPoint() Point {
 	return Point{me.Width, me.Height}
 }
 
