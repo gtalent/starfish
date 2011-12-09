@@ -83,6 +83,12 @@ func (me *Canvas) SetColor(color Color) {
 	me.color = color
 }
 
+//Fills a rounded rectangle at the given coordinates and size on this Canvas.
+func (me *Canvas) FillRoundedRect(x, y, width, height, radius int) {
+	r := sdl_Rect(x+me.origin.X, y+me.origin.Y, width, height)
+	C.roundedBoxRGBA(screen, C.Sint16(r.x), C.Sint16(r.y), C.Sint16(int(r.x)+int(r.w)), C.Sint16(int(r.y)+int(r.h)), C.Sint16(radius), C.Uint8(me.color.Red), C.Uint8(me.color.Green), C.Uint8(me.color.Blue), C.Uint8(me.color.Alpha))
+}
+
 //Fills a rectangle at the given coordinates and size on this Canvas.
 func (me *Canvas) FillRect(x, y, width, height int) {
 	r := sdl_Rect(x+me.origin.X, y+me.origin.Y, width, height)
