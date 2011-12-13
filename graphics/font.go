@@ -66,7 +66,7 @@ func (me *Text) Width() int {
 
 //Returns the height of this text.
 func (me *Text) Height() int {
-	return int(me.text.w)
+	return int(me.text.h)
 }
 
 //A font type that represents a TTF file loaded from storage, used to create Text objects for drawing.
