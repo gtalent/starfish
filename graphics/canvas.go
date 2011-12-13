@@ -79,6 +79,16 @@ func (me *Canvas) PopViewport() {
 }
 
 //Sets the color that the Canvas will draw with.
+func (me *Canvas) SetRGB(r, g, b byte) {
+	me.color = Color{Red: r, Green: g, Blue: b}
+}
+
+//Sets the color that the Canvas will draw with.
+func (me *Canvas) SetRGBA(r, g, b, a byte) {
+	me.color = Color{Red: r, Green: g, Blue: b, Alpha: a}
+}
+
+//Sets the color that the Canvas will draw with.
 func (me *Canvas) SetColor(color Color) {
 	me.color = color
 }
