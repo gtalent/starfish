@@ -97,7 +97,8 @@ func AddDrawFunc(drawer func(*Canvas)) {
 
 func RemoveDrawFunc(drawer func(*Canvas)) {
 	for n, a := range drawers {
-		if a.drawer == drawFunc(drawer) {
+		var d Drawer = drawFunc(drawer)
+		if a.drawer == d {
 			end := len(drawers) - 1
 			for i := n; i < end; i++ {
 				drawers[i] = drawers[i+1]

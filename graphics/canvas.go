@@ -25,7 +25,7 @@ package graphics
 */
 import "C"
 import (
-	"wombat/core/util"
+	"../util"
 )
 
 //Used to draw and to hold data for the drawing context.

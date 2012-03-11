@@ -30,9 +30,7 @@ type Animation struct {
 
 //Returns a string that can be used to identify the values of this Animation.
 func (me *Animation) String() string {
-	retval := strconv.Itoa64(me.interval)
-	retval += "\n" + strconv.Itoa64(me.lastUpdate)
-	retval += "\n" + strconv.Itoa(me.slide)
+	retval := strconv.FormatInt(me.interval, 10)
 	for _, i := range me.images {
 		retval += "\n" + i.String()
 	}
@@ -49,11 +47,9 @@ func (me *Animation) GetImage() *Image {
 	if me.images == nil {
 		return nil
 	}
-	if time.Nanoseconds()-me.lastUpdate >= me.interval {
-		slides := len(me.images)
-		me.slide += int((time.Nanoseconds() - me.lastUpdate) / me.interval)
-		me.slide -= (me.slide / slides) * slides
-		me.lastUpdate = time.Nanoseconds()
+	if t := time.Now().UnixNano(); t-me.lastUpdate >= me.interval {
+		me.slide += int(t/me.interval) % len(me.images)
+		me.lastUpdate = t
 	}
 	return me.images[me.slide]
 }

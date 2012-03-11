@@ -21,7 +21,7 @@ package graphics
 */
 import "C"
 import (
-	"wombat/core/util"
+	"../util"
 )
 
 func toSDL_Rect(b util.Bounds) C.SDL_Rect {

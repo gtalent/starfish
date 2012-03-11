@@ -73,7 +73,7 @@ func (me *flyweight) checkin(key key) {
 	}
 	n.clients--
 	if n.clients == 0 {
-		me.items[key.String()] = nil, false
+		delete(me.items, key.String())
 		me.unloader(key, n.val)
 	}
 	me.lock.Unlock()

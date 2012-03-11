@@ -1,7 +1,0 @@
-_go_.*
-_obj
-_gotest_.*
-_test
-_testmain.*
-_testmain.go
-*.out

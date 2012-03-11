@@ -16,7 +16,7 @@
 package graphics
 
 import (
-	"wombat/core/util"
+	"../util"
 )
 
 type viewport struct {
