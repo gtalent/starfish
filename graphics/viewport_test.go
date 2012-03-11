@@ -17,7 +17,7 @@ package graphics
 
 import (
 	"testing"
-	"wombat/core/util"
+	"../util"
 )
 
 func TestViewportPushPop(t *testing.T) {
