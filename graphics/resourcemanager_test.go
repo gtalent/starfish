@@ -29,15 +29,15 @@ func TestResourceManager(t *testing.T) {
 	outKey := ""
 	inKey := ""
 	inVal := 0
-	rsrcs := newResourceCatalog(func(key resourceKey) (interface{}, bool) {
+	rsrcs := newFlyweight(func(key key) (interface{}) {
 		outKey = key.String()
-		return 42, true
-	}, func (key resourceKey, val interface{}) {
+		return 42
+	}, func (key key, val interface{}) {
 		inKey = key.String()
 		inVal = val.(int)
 	})
-	rsrcs.checkout(rsrcKey("Narf!"))
-	rsrcs.checkin(rsrcKey("Narf!"))
+	rsrcs.checkout(stringKey("Narf!"))
+	rsrcs.checkin(stringKey("Narf!"))
 	if outKey != "Narf!" {
 		t.Error("Resource manager does not recieve the right key to load.")
 	}

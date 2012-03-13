@@ -72,3 +72,7 @@ func (me *Bounds) Intersects(b Bounds) bool {
 	return me.ContainsPoint(me.Point) || me.Contains(b.X, b.Y2()) ||
 		me.Contains(b.X2(), b.Y) || me.Contains(b.X2(), b.Y2())
 }
+
+func (me *Bounds) String() string {
+	return "(" + me.Point.String() + ", " + me.Size.String() + ")"
+}

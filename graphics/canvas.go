@@ -25,7 +25,7 @@ package graphics
 */
 import "C"
 import (
-	"github.com/gtalent/WombatCore/util"
+	"../util"
 )
 
 //Used to draw and to hold data for the drawing context.
@@ -49,8 +49,7 @@ func newCanvas(surface *C.SDL_Surface) (p Canvas) {
 //Loads the settings for this Pane onto the SDL Surface.
 func (me *Canvas) load() {
 	me.viewport.calcBounds()
-	b := me.viewport.Bounds
-	r := toSDL_Rect(b)
+	r := toSDL_Rect(me.viewport.Bounds)
 	C.SDL_SetClipRect(me.pane, &r)
 }
 
@@ -62,8 +61,8 @@ func (me *Canvas) GetViewport() util.Bounds {
 //Pushs a viewport to limit the drawing space to the given bounds within the current drawing space.
 func (me *Canvas) PushViewport(x, y, width, height int) {
 	me.viewport.push(util.Bounds{util.Point{x, y}, util.Size{width, height}})
-	b := me.viewport.Bounds
-	r := toSDL_Rect(b)
+	println(me.viewport.Bounds.String())
+	r := toSDL_Rect(me.viewport.Bounds)
 	C.SDL_SetClipRect(me.pane, &r)
 	me.origin = me.translation.AddOf(me.viewport.Point)
 }
