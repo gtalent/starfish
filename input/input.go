@@ -49,6 +49,13 @@ func Init() {
 }
 
 func run() {
+	scrollFunc := func(b bool) {
+		mouseWheelListenersLock.Lock()
+		for _, v := range mouseWheelListeners {
+			go v.MouseWheelScroll(b)
+		}
+		mouseWheelListenersLock.Unlock()
+	}
 	for running {
 		var e C.SDL_Event
 		C.SDL_WaitEvent(&e)
@@ -83,29 +90,43 @@ func run() {
 				keyReleaseListenersLock.Unlock()
 			}()
 		case C.SDL_MOUSEBUTTONDOWN:
-			go func() {
-				var me MouseEvent
-				me.Button = int(C.eventMouseButton(&e))
-				me.X = int(C.eventMouseX(&e))
-				me.Y = int(C.eventMouseY(&e))
-				mousePressListenersLock.Lock()
-				for _, v := range mousePressListeners {
-					go v.MouseButtonPress(me)
-				}
-				mousePressListenersLock.Unlock()
-			}()
+			switch C.eventMouseButton(&e) {
+			case C.SDL_BUTTON_WHEELUP:
+				go scrollFunc(true)
+			case C.SDL_BUTTON_WHEELDOWN:
+				go scrollFunc(false)
+			default:
+				go func() {
+					var me MouseEvent
+					me.Button = int(C.eventMouseButton(&e))
+					me.X = int(C.eventMouseX(&e))
+					me.Y = int(C.eventMouseY(&e))
+					mousePressListenersLock.Lock()
+					for _, v := range mousePressListeners {
+						go v.MouseButtonPress(me)
+					}
+					mousePressListenersLock.Unlock()
+				}()
+			}
 		case C.SDL_MOUSEBUTTONUP:
-			go func() {
-				var me MouseEvent
-				me.Button = int(C.eventMouseButton(&e))
-				me.X = int(C.eventMouseX(&e))
-				me.Y = int(C.eventMouseY(&e))
-				mouseReleaseListenersLock.Lock()
-				for _, v := range mouseReleaseListeners {
-					go v.MouseButtonRelease(me)
-				}
-				mouseReleaseListenersLock.Unlock()
-			}()
+			switch C.eventMouseButton(&e) {
+			case C.SDL_BUTTON_WHEELUP:
+				go scrollFunc(true)
+			case C.SDL_BUTTON_WHEELDOWN:
+				go scrollFunc(false)
+			default:
+				go func() {
+					var me MouseEvent
+					me.Button = int(C.eventMouseButton(&e))
+					me.X = int(C.eventMouseX(&e))
+					me.Y = int(C.eventMouseY(&e))
+					mouseReleaseListenersLock.Lock()
+					for _, v := range mouseReleaseListeners {
+						go v.MouseButtonRelease(me)
+					}
+					mouseReleaseListenersLock.Unlock()
+				}()
+			}
 		}
 	}
 }

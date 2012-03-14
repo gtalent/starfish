@@ -15,6 +15,12 @@
 */
 package input
 
+type genericMouseWheelListener func(bool)
+
+func (me genericMouseWheelListener) MouseWheelScroll(up bool) {
+	me(up)
+}
+
 type genericMouseListener func(MouseEvent)
 
 func (me genericMouseListener) MouseButtonPress(e MouseEvent) {
@@ -23,6 +29,10 @@ func (me genericMouseListener) MouseButtonPress(e MouseEvent) {
 
 func (me genericMouseListener) MouseButtonRelease(e MouseEvent) {
 	me(e)
+}
+
+type MouseWheelListener interface {
+	MouseWheelScroll(bool)
 }
 
 type MouseButtonListener interface {

@@ -23,12 +23,23 @@ var mousePressListeners []MouseButtonPressListener
 var mouseReleaseListenersLock sync.Mutex
 var mouseReleaseListeners []MouseButtonReleaseListener
 
+var mouseWheelListenersLock sync.Mutex
+var mouseWheelListeners []MouseWheelListener
+
 func AddMousePressFunc(listener func(MouseEvent)) {
 	AddMousePressListener(genericMouseListener(listener))
 }
 
 func RemoveMousePressFunc(listener func(MouseEvent)) {
 	RemoveMousePressListener(genericMouseListener(listener))
+}
+
+func AddMouseWheelFunc(listener func(bool)) {
+	AddMouseWheelListener(genericMouseWheelListener(listener))
+}
+
+func RemoveMouseWheelFunc(listener func(bool)) {
+	RemoveMouseWheelListener(genericMouseWheelListener(listener))
 }
 
 func AddMouseReleaseFunc(listener func(MouseEvent)) {
@@ -47,6 +58,26 @@ func AddMouseButtonListener(listener MouseButtonListener) {
 func RemoveMouseButtonListener(listener MouseButtonListener) {
 	RemoveMousePressListener(listener)
 	RemoveMouseReleaseListener(listener)
+}
+
+func AddMouseWheelListener(listener MouseWheelListener) {
+	mouseWheelListenersLock.Lock()
+	mouseWheelListeners = append(mouseWheelListeners, listener)
+	mouseWheelListenersLock.Unlock()
+}
+
+func RemoveMouseWheelListener(listener MouseWheelListener) {
+	mouseWheelListenersLock.Lock()
+	pt := 0
+	for i, v := range mouseWheelListeners {
+		if v == listener {
+			pt = i
+			mouseWheelListeners[pt] = mouseWheelListeners[len(mouseWheelListeners)-1]
+			mouseWheelListeners = mouseWheelListeners[:len(mouseWheelListeners)-1]
+			mouseWheelListenersLock.Unlock()
+			break
+		}
+	}
 }
 
 func AddMousePressListener(listener MouseButtonPressListener) {

@@ -1,10 +1,4 @@
-include $(GOROOT)/src/Make.inc
-
-TARG=wombat/core/util
-GOFILES=\
-	*.go\
-
-include $(GOROOT)/src/Make.pkg
-
+build:
+	go build
 fmt:
-	gofmt -w $(GOFILES)
+	go fmt
