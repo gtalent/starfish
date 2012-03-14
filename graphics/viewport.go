@@ -16,7 +16,7 @@
 package graphics
 
 import (
-	"../util"
+	"github.com/gtalent/WombatCore/util"
 )
 
 type viewport struct {

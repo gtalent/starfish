@@ -15,7 +15,7 @@
 */
 package input
 
-import "../util"
+import "github.com/gtalent/WombatCore/util"
 
 type MouseEvent struct {
 	util.Point
