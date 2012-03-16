@@ -59,8 +59,8 @@ func (me *Canvas) GetViewport() util.Bounds {
 }
 
 //Pushs a viewport to limit the drawing space to the given bounds within the current drawing space.
-func (me *Canvas) PushViewport(x, y, width, height int) {
-	me.viewport.push(util.Bounds{util.Point{x, y}, util.Size{width, height}})
+func (me *Canvas) PushViewport(x, y, width, height uint) {
+	me.viewport.push(util.Bounds{util.Point{X: int(x), Y: int(y)}, util.Size{Width: int(width), Height: int(height)}})
 	r := toSDL_Rect(me.viewport.Bounds)
 	C.SDL_SetClipRect(me.pane, &r)
 	me.origin = me.translation.AddOf(me.viewport.Point)

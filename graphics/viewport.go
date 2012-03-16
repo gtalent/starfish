@@ -62,31 +62,22 @@ func (me *viewport) pop() {
 }
 
 func (me *viewport) calcBounds() {
-	me.X = 0
-	me.Y = 0
-	me.Width = 65000
-	me.Height = 65000
-	for i := uint(0); i < me.pt; i++ {
-		r := &me.list[i]
-		nx1 := me.X + (r.X)
-		ny1 := me.Y + (r.Y)
-		wc := (r.Width)
-		hc := (r.Height)
-		ox2 := me.X + me.Width
-		oy2 := me.Y + me.Height
-
-		if nx1+wc > ox2 {
-			me.Width = ox2 - nx1
-		} else {
-			me.Width = wc
-		}
-		me.X = nx1
-
-		if ny1+hc > oy2 {
-			me.Height = oy2 - ny1
-		} else {
-			me.Height = hc
-		}
-		me.Y = ny1
+	p := &me.list[me.pt-1]
+	n := &me.list[me.pt]
+	n.Point.AddTo(p.Point)
+	//make sure the point of origin is not beyond the edge
+	if n.X > p.X2() {
+		n.X = p.X2()
 	}
+	if n.Y > p.Y2() {
+		n.Y = p.Y2()
+	}
+	//make sure the new edge is not beyond the old edge
+	if n.X2() > p.X2() {
+		n.Width = p.X2() - n.X
+	}
+	if n.Y2() > p.Y2() {
+		n.Height = p.Y2() - n.Y
+	}
+	me.Bounds = *n
 }
