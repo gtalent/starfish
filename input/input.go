@@ -49,10 +49,14 @@ func Init() {
 }
 
 func run() {
-	scrollFunc := func(b bool) {
+	scrollFunc := func(b bool, x, y int) {
+		var e MouseWheelEvent
+		e.Up = b
+		e.X = x
+		e.Y = y
 		mouseWheelListenersLock.Lock()
 		for _, v := range mouseWheelListeners {
-			go v.MouseWheelScroll(b)
+			go v.MouseWheelScroll(e)
 		}
 		mouseWheelListenersLock.Unlock()
 	}
@@ -90,17 +94,19 @@ func run() {
 				keyReleaseListenersLock.Unlock()
 			}()
 		case C.SDL_MOUSEBUTTONDOWN:
+			x := int(C.eventMouseX(&e))
+			y := int(C.eventMouseY(&e))
 			switch C.eventMouseButton(&e) {
 			case C.SDL_BUTTON_WHEELUP:
-				go scrollFunc(true)
+				go scrollFunc(false, x, y)
 			case C.SDL_BUTTON_WHEELDOWN:
-				go scrollFunc(false)
+				go scrollFunc(true, x, y)
 			default:
 				go func() {
 					var me MouseEvent
+					me.X = x
+					me.Y = y
 					me.Button = int(C.eventMouseButton(&e))
-					me.X = int(C.eventMouseX(&e))
-					me.Y = int(C.eventMouseY(&e))
 					mousePressListenersLock.Lock()
 					for _, v := range mousePressListeners {
 						go v.MouseButtonPress(me)
@@ -109,11 +115,13 @@ func run() {
 				}()
 			}
 		case C.SDL_MOUSEBUTTONUP:
+			x := int(C.eventMouseX(&e))
+			y := int(C.eventMouseY(&e))
 			switch C.eventMouseButton(&e) {
 			case C.SDL_BUTTON_WHEELUP:
-				go scrollFunc(true)
+				go scrollFunc(false, x, y)
 			case C.SDL_BUTTON_WHEELDOWN:
-				go scrollFunc(false)
+				go scrollFunc(true, x, y)
 			default:
 				go func() {
 					var me MouseEvent

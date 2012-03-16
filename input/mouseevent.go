@@ -21,3 +21,8 @@ type MouseEvent struct {
 	util.Point
 	Button int
 }
+
+type MouseWheelEvent struct {
+	util.Point
+	Up bool
+}

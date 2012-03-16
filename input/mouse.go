@@ -34,11 +34,11 @@ func RemoveMousePressFunc(listener func(MouseEvent)) {
 	RemoveMousePressListener(genericMouseListener(listener))
 }
 
-func AddMouseWheelFunc(listener func(bool)) {
+func AddMouseWheelFunc(listener func(MouseWheelEvent)) {
 	AddMouseWheelListener(genericMouseWheelListener(listener))
 }
 
-func RemoveMouseWheelFunc(listener func(bool)) {
+func RemoveMouseWheelFunc(listener func(MouseWheelEvent)) {
 	RemoveMouseWheelListener(genericMouseWheelListener(listener))
 }
 
