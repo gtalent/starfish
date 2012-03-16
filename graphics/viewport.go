@@ -62,6 +62,10 @@ func (me *viewport) pop() {
 }
 
 func (me *viewport) calcBounds() {
+	if me.pt == 0 {
+		me.Bounds = me.list[0]
+		return
+	}
 	p := &me.list[me.pt-1]
 	n := &me.list[me.pt]
 	n.Point.AddTo(p.Point)
