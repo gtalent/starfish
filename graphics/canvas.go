@@ -68,7 +68,6 @@ func (me *Canvas) PushViewport(x, y, width, height int) {
 	correct(&width)
 	correct(&height)
 	me.viewport.push(util.Bounds{util.Point{X: int(x), Y: int(y)}, util.Size{Width: int(width), Height: int(height)}})
-	println(me.viewport.String())
 	r := toSDL_Rect(me.viewport.Bounds)
 	C.SDL_SetClipRect(me.pane, &r)
 	me.origin = me.translation.AddOf(me.viewport.Point)
