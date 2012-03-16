@@ -57,6 +57,21 @@ func (me *viewport) calcBounds() {
 	p := &me.list[me.pt-1]
 	n := &me.list[me.pt]
 	n.Point.AddTo(p.Point)
+	//make sure the point of origin is not negative
+	if n.X < 0 {
+		n.Width += n.X
+		n.X = 0
+		if n.Width < 0 {
+			n.Width = 0
+		}
+	}
+	if n.Y < 0 {
+		n.Height += n.Y
+		n.Y = 0
+		if n.Height < 0 {
+			n.Height = 0
+		}
+	}
 	//make sure the point of origin is not beyond the edge
 	if n.X > p.X2() {
 		n.X = p.X2()
