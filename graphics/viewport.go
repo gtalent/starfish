@@ -43,7 +43,6 @@ func (me *viewport) translate() util.Point {
 func (me *viewport) push(rect util.Bounds) {
 	me.pt++
 	me.list[me.pt] = rect
-	me.translations[me.pt] = util.Point{0, 0}
 	me.calcBounds()
 }
 
@@ -52,7 +51,6 @@ func (me *viewport) pop() {
 		return
 	}
 	me.pt--
-	me.calcBounds()
 }
 
 func (me *viewport) calcBounds() {
@@ -63,7 +61,7 @@ func (me *viewport) calcBounds() {
 	p := &me.list[me.pt-1]
 	n := &me.list[me.pt]
 	t := &me.translations[me.pt]
-	//*t = me.translations[me.pt-1]
+	*t = me.translations[me.pt-1]
 	n.Point.AddTo(p.Point)
 	//make sure the point of origin is not negative
 	if n.X < p.X {
