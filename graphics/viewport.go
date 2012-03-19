@@ -21,8 +21,9 @@ import (
 
 type viewport struct {
 	util.Bounds
-	list [500]util.Bounds
-	pt   uint
+	list       [500]util.Bounds
+	translations [500]util.Point
+	pt         uint
 }
 
 func newViewport() (v viewport) {
@@ -35,9 +36,14 @@ func newViewport() (v viewport) {
 	return
 }
 
+func (me *viewport) translate() util.Point {
+	return me.translations[me.pt]
+}
+
 func (me *viewport) push(rect util.Bounds) {
 	me.pt++
 	me.list[me.pt] = rect
+	me.translations[me.pt] = util.Point{0, 0}
 	me.calcBounds()
 }
 
@@ -56,9 +62,12 @@ func (me *viewport) calcBounds() {
 	}
 	p := &me.list[me.pt-1]
 	n := &me.list[me.pt]
+	t := &me.translations[me.pt]
+	//*t = me.translations[me.pt-1]
 	n.Point.AddTo(p.Point)
 	//make sure the point of origin is not negative
 	if n.X < p.X {
+		t.X = n.X - p.X
 		n.Width -= p.X - n.X
 		n.X = p.X
 		if n.Width < 0 {
@@ -66,6 +75,7 @@ func (me *viewport) calcBounds() {
 		}
 	}
 	if n.Y < p.Y {
+		t.Y = n.Y - p.Y
 		n.Height -= p.Y - n.Y
 		n.Y = p.Y
 		if n.Height < 0 {
