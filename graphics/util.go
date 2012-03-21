@@ -21,7 +21,7 @@ package graphics
 */
 import "C"
 import (
-	"github.com/gtalent/WombatCore/util"
+	"github.com/gtalent/starfish/util"
 )
 
 func toSDL_Rect(b util.Bounds) C.SDL_Rect {

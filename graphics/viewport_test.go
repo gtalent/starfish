@@ -17,7 +17,7 @@ package graphics
 
 import (
 	"testing"
-	"github.com/gtalent/WombatCore/util"
+	"github.com/gtalent/starfish/util"
 )
 
 func TestViewportPushPop(t *testing.T) {

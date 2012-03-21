@@ -25,7 +25,7 @@ package graphics
 */
 import "C"
 import (
-	"github.com/gtalent/WombatCore/util"
+	"github.com/gtalent/starfish/util"
 )
 
 //Used to draw and to hold data for the drawing context.
