@@ -20,7 +20,6 @@ import (
 )
 
 type viewport struct {
-	util.Bounds
 	list       [500]util.Bounds
 	translations [500]util.Point
 	pt         uint
@@ -32,12 +31,15 @@ func newViewport() (v viewport) {
 	v.list[0].Y = 0
 	v.list[0].Width = 65000
 	v.list[0].Height = 65000
-	v.Bounds = v.list[0]
 	return
 }
 
 func (me *viewport) translate() util.Point {
 	return me.translations[me.pt]
+}
+
+func (me *viewport) bounds() util.Bounds {
+	return me.list[me.pt]
 }
 
 func (me *viewport) push(rect util.Bounds) {
@@ -55,7 +57,6 @@ func (me *viewport) pop() {
 
 func (me *viewport) calcBounds() {
 	if me.pt == 0 {
-		me.Bounds = me.list[0]
 		return
 	}
 	p := &me.list[me.pt-1]
@@ -94,5 +95,4 @@ func (me *viewport) calcBounds() {
 	if n.Y2() > p.Y2() {
 		n.Height = p.Y2() - n.Y
 	}
-	me.Bounds = *n
 }

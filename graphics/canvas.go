@@ -46,13 +46,13 @@ func newCanvas(surface *C.SDL_Surface) (p Canvas) {
 //Loads the settings for this Pane onto the SDL Surface.
 func (me *Canvas) load() {
 	me.viewport.calcBounds()
-	r := toSDL_Rect(me.viewport.Bounds)
+	r := toSDL_Rect(me.viewport.bounds())
 	C.SDL_SetClipRect(me.pane, &r)
 }
 
 //Returns the bounds of this Canvas
 func (me *Canvas) GetViewport() util.Bounds {
-	return me.viewport.Bounds
+	return me.viewport.bounds()
 }
 
 //Pushs a viewport to limit the drawing space to the given bounds within the current drawing space.
@@ -60,9 +60,9 @@ func (me *Canvas) GetViewport() util.Bounds {
 func (me *Canvas) PushViewport(x, y, width, height int) {
 	me.origin.SubtractFrom(me.viewport.translate())
 	me.viewport.push(util.Bounds{util.Point{X: int(x), Y: int(y)}, util.Size{Width: int(width), Height: int(height)}})
-	r := toSDL_Rect(me.viewport.Bounds)
+	r := toSDL_Rect(me.viewport.bounds())
 	C.SDL_SetClipRect(me.pane, &r)
-	me.origin = me.translation.AddOf(me.viewport.Point)
+	me.origin = me.translation.AddOf(me.viewport.bounds().Point)
 	me.origin.AddTo(me.viewport.translate())
 }
 
@@ -71,9 +71,9 @@ func (me *Canvas) PopViewport() {
 	if me.viewport.pt != 0 {
 		me.origin.SubtractFrom(me.viewport.translate())
 		me.viewport.pop()
-		r := toSDL_Rect(me.viewport.Bounds)
+		r := toSDL_Rect(me.viewport.bounds())
 		C.SDL_SetClipRect(me.pane, &r)
-		me.origin = me.translation.AddOf(me.viewport.Point)
+		me.origin = me.translation.AddOf(me.viewport.bounds().Point)
 		me.origin.AddTo(me.viewport.translate())
 	}
 }
