@@ -17,52 +17,54 @@ package main
 
 import (
 	"fmt"
-	"time"
-	gfx "../graphics"
+	"../graphics"
 	"../input"
 )
 
 type Drawer struct {
-	boxman *gfx.Image
-	text   gfx.Text
+	boxman *graphics.Image
+	text   graphics.Text
 }
 
-func (me *Drawer) init() {
-	me.boxman = gfx.LoadImageSize("dirt.png", 70, 70)
-	font := gfx.LoadFont("LiberationSans-Bold.ttf", 32)
+func (me *Drawer) init() bool {
+	me.boxman = graphics.LoadImageSize("dirt.png", 70, 70)
+	font := graphics.LoadFont("LiberationSans-Bold.ttf", 32)
 	if font != nil {
 		font.SetRGB(0, 0, 255)
 		font.Write("Narf!", &me.text)
 		font.Free()
 	} else {
-		return
+		return false
 	}
 	if me.boxman == nil {
 		fmt.Println("Could not load boxman.")
-		return
+		return false
 	}
+	return true
 }
 
-func (me *Drawer) Draw(c *gfx.Canvas) {
+func (me *Drawer) Draw(c *graphics.Canvas) {
 	//clear screen
-	c.SetColor(gfx.Color{Red: 0, Green: 0, Blue: 0})
-	c.FillRect(0, 0, gfx.DisplayWidth(), gfx.DisplayHeight())
+	c.SetColor(graphics.Color{Red: 0, Green: 0, Blue: 0})
+	c.FillRect(0, 0, graphics.DisplayWidth(), graphics.DisplayHeight())
 
-	c.SetColor(gfx.Color{Red: 0, Green: 0, Blue: 255, Alpha: 255})
+	c.SetColor(graphics.Color{Red: 0, Green: 0, Blue: 255, Alpha: 255})
 	c.FillRect(42, 42, 100, 100)
 
 	//draw boxman if he's not nil
 	if me.boxman != nil {
 		c.DrawImage(me.boxman, 200, 200)
-		c.SetColor(gfx.Color{Red: 0, Green: 0, Blue: 0, Alpha: 100})
+		c.SetColor(graphics.Color{Red: 0, Green: 0, Blue: 0, Alpha: 100})
 		c.FillRect(200, 200, 100, 100)
 	}
 	c.DrawText(&me.text, 400, 400)
 
-	//draw a green rect in a viewport
+	//push a viewport at (42, 42)
+	//Note: viewports may be nested
 	c.PushViewport(42, 42, 500, 500)
 	{
-		c.SetColor(gfx.Color{Red: 0, Green: 255, Blue: 0, Alpha: 127})
+		//draw a green rect in a viewport
+		c.SetColor(graphics.Color{Red: 0, Green: 255, Blue: 0, Alpha: 127})
 		c.FillRect(42, 42, 100, 100)
 	}
 	c.PopViewport()
@@ -70,32 +72,32 @@ func (me *Drawer) Draw(c *gfx.Canvas) {
 
 func main() {
 	//For a fullscreen at your screens native resolution, simply use this line instead:
-	//if !gfx.OpenDisplay(0, 0, true) {
-	if !gfx.OpenDisplay(800, 600, false) {
+	//if !graphics.OpenDisplay(0, 0, true) {
+	if !graphics.OpenDisplay(800, 600, false) {
 		return
 	}
+	graphics.SetDisplayTitle("starfish example")
 
 	input.Init()
 
 	var pane Drawer
-	pane.init()
-	gfx.AddDrawFunc(func(c *gfx.Canvas) {
-		pane.Draw(c)
-	})
-	running := true
-	input.AddQuitFunc(func() {
-		running = false
+	if !pane.init() {
+		return
+	}
+	graphics.AddDrawer(&pane)
+	running := make(chan interface{})
+	quit := func() {
+		graphics.CloseDisplay()
 		pane.boxman.Free()
-		gfx.CloseDisplay()
-	})
-	input.AddMouseWheelFunc(func(up input.MouseWheelEvent) {
-		fmt.Println("Mouse wheel scrolling:", up)
-	})
-	input.AddKeyPressFunc(func(e input.KeyEvent) {
-		if e.Key == input.Key_Escape {
-			running = false
-			pane.boxman.Free()
-			gfx.CloseDisplay()
+		pane.text.Free()
+		running <-nil
+	}
+	input.AddQuitFunc(quit)
+	input.AddMouseWheelFunc(func(e input.MouseWheelEvent) {
+		if e.Up {
+			fmt.Println("Mouse wheel scrolling up.")
+		} else {
+			fmt.Println("Mouse wheel scrolling down.")
 		}
 	})
 	input.AddMousePressFunc(func(e input.MouseEvent) {
@@ -105,15 +107,15 @@ func main() {
 		fmt.Println("Mouse Release!")
 	})
 
-	input.AddKeyPressFunc(func(i input.KeyEvent) {
+	input.AddKeyPressFunc(func(e input.KeyEvent) {
 		fmt.Println("Key Press!")
+		if e.Key == input.Key_Escape {
+			quit()
+		}
 	})
 	input.AddKeyReleaseFunc(func(i input.KeyEvent) {
 		fmt.Println("Key Release!")
 	})
 
-	//read input
-	for running {
-		time.Sleep(6000000)
-	}
+	<-running
 }

@@ -98,9 +98,9 @@ func run() {
 			y := int(C.eventMouseY(&e))
 			switch C.eventMouseButton(&e) {
 			case C.SDL_BUTTON_WHEELUP:
-				go scrollFunc(false, x, y)
-			case C.SDL_BUTTON_WHEELDOWN:
 				go scrollFunc(true, x, y)
+			case C.SDL_BUTTON_WHEELDOWN:
+				go scrollFunc(false, x, y)
 			default:
 				go func() {
 					var me MouseEvent
@@ -119,9 +119,9 @@ func run() {
 			y := int(C.eventMouseY(&e))
 			switch C.eventMouseButton(&e) {
 			case C.SDL_BUTTON_WHEELUP:
-				go scrollFunc(false, x, y)
-			case C.SDL_BUTTON_WHEELDOWN:
 				go scrollFunc(true, x, y)
+			case C.SDL_BUTTON_WHEELDOWN:
+				go scrollFunc(false, x, y)
 			default:
 				go func() {
 					var me MouseEvent
