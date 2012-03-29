@@ -69,6 +69,7 @@ func (me *Drawer) Draw(c *gfx.Canvas) {
 }
 
 func main() {
+	//For a fullscreen at your screens native resolution, simply use this line instead:
 	//if !gfx.OpenDisplay(0, 0, true) {
 	if !gfx.OpenDisplay(800, 600, false) {
 		return
