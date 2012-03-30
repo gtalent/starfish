@@ -17,8 +17,8 @@ package main
 
 import (
 	"fmt"
-	"../graphics"
-	"../input"
+	"github.com/gtalent/starfish/tree/rpkgs/graphics"
+	"github.com/gtalent/starfish/tree/rpkgs/input"
 )
 
 type Drawer struct {

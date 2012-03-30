@@ -22,18 +22,18 @@ import (
 
 func TestViewportPushPop(t *testing.T) {
 	viewport := newViewport()
-	initial := viewport.Bounds
+	initial := viewport.bounds()
 	tests := make([]util.Bounds, 0)
 	tests = append(tests, util.Bounds{util.Point{42, 42}, util.Size{100, 100}})
 
 	for _, test := range tests {
 		viewport.push(test)
-		if !viewport.Equals(test) {
+		if viewport.bounds() != test {
 			t.Errorf("viewport.push is broken")
 		}
 		viewport.pop()
-		if !viewport.Equals(initial) {
-			t.Error("viewport.pop is broken\n\tviewport is:\t\t", viewport.Bounds, "\n\tviewport should be:\t", initial)
+		if viewport.bounds() != initial {
+			t.Error("viewport.pop is broken\n\tviewport is:\t\t", viewport.bounds(), "\n\tviewport should be:\t", initial)
 		}
 	}
 }
