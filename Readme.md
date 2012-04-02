@@ -21,6 +21,4 @@ This is done for two reasons:
 ## Installation:
 * To install starfish, the following should pull and install all three starfish packages:
 
-			go get github.com/gtalent/starfish/graphics
-			go install github.com/gtalent/starfish/graphics
-	
+			go get github.com/gtalent/starfish/graphics	
