@@ -128,13 +128,11 @@ func OpenDisplay(width, height int, fullscreen bool) bool {
 		return false
 	}
 	C.TTF_Init()
-	var flags C.Uint32 = C.SDL_DOUBLEBUF
-	flags |= C.SDL_SWSURFACE
-	flags |= C.SDL_HWACCEL
+	var flags C.int = C.SDL_DOUBLEBUF | C.SDL_HWACCEL
 	if fullscreen {
 		flags |= C.SDL_FULLSCREEN
 	}
-	screen = C.SDL_SetVideoMode(C.int(width), C.int(height), 32, flags)
+	screen = C.SDL_SetVideoMode(C.int(width), C.int(height), 32, C.Uint32(flags))
 	if screen == nil {
 		return false
 	}
