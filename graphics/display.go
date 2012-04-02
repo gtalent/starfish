@@ -18,6 +18,14 @@ package graphics
 #cgo LDFLAGS: -lSDL -lSDL_ttf
 #include "SDL/SDL.h"
 #include "SDL/SDL_ttf.h"
+
+SDL_Surface* openDisplay(int w, int h) {
+	return SDL_SetVideoMode(w, h, 32, SDL_DOUBLEBUF | SDL_HWACCEL);
+}
+
+SDL_Surface* openDisplayFullscreen(int w, int h) {
+	return SDL_SetVideoMode(w, h, 32, SDL_DOUBLEBUF | SDL_HWACCEL | SDL_FULLSCREEN);
+}
 */
 import "C"
 import (
@@ -128,11 +136,11 @@ func OpenDisplay(width, height int, fullscreen bool) bool {
 		return false
 	}
 	C.TTF_Init()
-	var flags C.int = C.SDL_DOUBLEBUF | C.SDL_HWACCEL
 	if fullscreen {
-		flags |= C.SDL_FULLSCREEN
+		screen = C.openDisplayFullscreen(C.int(width), C.int(height))
+	} else {
+		screen = C.openDisplay(C.int(width), C.int(height))
 	}
-	screen = C.SDL_SetVideoMode(C.int(width), C.int(height), 32, C.Uint32(flags))
 	if screen == nil {
 		return false
 	}
