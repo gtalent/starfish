@@ -2,7 +2,8 @@
    Copyright 2011-2012 gtalent2@gmail.com
 
    Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.  You may obtain a copy of the License at
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
 
      http://www.apache.org/licenses/LICENSE-2.0
 
@@ -130,7 +131,7 @@ func OpenDisplay(width, height int, fullscreen bool) bool {
 	C.TTF_Init()
 	var flags C.Uint32 = C.SDL_DOUBLEBUF
 	flags |= C.SDL_SWSURFACE
-	flags |= C.SDL_HWACCEL
+	//flags |= C.SDL_HWACCEL
 	if fullscreen {
 		flags |= C.SDL_FULLSCREEN
 	}
@@ -151,6 +152,8 @@ func CloseDisplay() {
 		displayDead = make(chan interface{})
 		running = false
 		<-displayDead
+		close(displayDead)
+		displayDead = nil
 		C.SDL_FreeSurface(screen)
 		screen = nil
 		C.SDL_Quit()

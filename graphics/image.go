@@ -25,6 +25,7 @@ package graphics
 import "C"
 
 import (
+	"github.com/gtalent/starfish/util"
 	"strconv"
 )
 
@@ -42,9 +43,13 @@ func (me *imageKey) String() string {
 var images = newFlyweight(
 	func(path key) interface{} {
 		key := path.(*imageKey)
-		i := C.IMG_Load(C.CString(key.path))
-		if (i != nil) && (int(i.w) != key.width || int(i.h) != key.height) {
-			i = resize(i, key.width, key.height)
+		tmp := C.IMG_Load(C.CString(key.path))
+		i := C.SDL_DisplayFormat(tmp)
+		C.SDL_FreeSurface(tmp)
+		if key.width != -1 && key.height != -1 {
+			if (i != nil) && (int(i.w) != key.width || int(i.h) != key.height) {
+				i = resize(i, key.width, key.height)
+			}
 		}
 		return i
 	},
@@ -58,15 +63,12 @@ type Image struct {
 	key imageKey
 }
 
-//Returns a unique string that can be used to identify the values of this Image.
-func (me *Image) String() string {
-	return me.key.String()
-}
-
 //Loads the image at the given path, or nil if the image was not found.
 func LoadImage(path string) (img *Image) {
 	var key imageKey
 	key.path = path
+	key.width = -1
+	key.height = -1
 	i := images.checkout(&key).(*C.SDL_Surface)
 	img = new(Image)
 	img.img = i
@@ -95,6 +97,19 @@ func (me *Image) Width() int {
 //Returns the height of the image.
 func (me *Image) Height() int {
 	return int(me.img.h)
+}
+
+//Returns a util.Size object representing the size of this Image.
+func (me *Image) Size() util.Size {
+	var s util.Size
+	s.Width = me.key.width
+	s.Height = me.key.height
+	return s
+}
+
+//Returns a unique string that can be used to identify the values of this Image.
+func (me *Image) String() string {
+	return me.key.String()
 }
 
 //Returns the path to the image on the disk.

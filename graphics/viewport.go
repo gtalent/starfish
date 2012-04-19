@@ -20,9 +20,9 @@ import (
 )
 
 type viewport struct {
-	list       [500]util.Bounds
+	list         [500]util.Bounds
 	translations [500]util.Point
-	pt         uint
+	pt           uint
 }
 
 func newViewport() (v viewport) {

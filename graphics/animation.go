@@ -48,7 +48,7 @@ func (me *Animation) GetImage() *Image {
 		return nil
 	}
 	if t := time.Now().UnixNano(); t-me.lastUpdate >= me.interval {
-		me.slide += int((t-me.lastUpdate)/me.interval)
+		me.slide += int((t - me.lastUpdate) / me.interval)
 		me.slide %= len(me.images)
 		me.lastUpdate = t
 	}

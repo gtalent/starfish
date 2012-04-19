@@ -16,8 +16,8 @@
 package graphics
 
 import (
-	"testing"
 	"github.com/gtalent/starfish/util"
+	"testing"
 )
 
 func TestViewportPushPop(t *testing.T) {
