@@ -44,7 +44,7 @@ var images = newFlyweight(
 	func(path key) interface{} {
 		key := path.(*imageKey)
 		tmp := C.IMG_Load(C.CString(key.path))
-		i := C.SDL_DisplayFormat(tmp)
+		i := C.SDL_DisplayFormatAlpha(tmp)
 		C.SDL_FreeSurface(tmp)
 		if key.width != -1 && key.height != -1 {
 			if (i != nil) && (int(i.w) != key.width || int(i.h) != key.height) {
