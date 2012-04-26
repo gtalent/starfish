@@ -17,27 +17,30 @@ package main
 
 import (
 	"fmt"
+	//normally "github.com/gtalent/starfish/graphics"
 	"../graphics"
+	//normally "github.com/gtalent/starfish/input"
 	"../input"
 )
 
 type Drawer struct {
-	boxman *graphics.Image
+	box *graphics.Image
 	text   graphics.Text
 }
 
 func (me *Drawer) init() bool {
-	me.boxman = graphics.LoadImageSize("dirt.png", 70, 70)
+	me.box = graphics.LoadImageSize("box.png", 70, 70)
 	font := graphics.LoadFont("LiberationSans-Bold.ttf", 32)
 	if font != nil {
 		font.SetRGB(0, 0, 255)
 		font.Write("Narf!", &me.text)
 		font.Free()
 	} else {
+		fmt.Println("Could not load LiberationSans-Bold.ttf.")
 		return false
 	}
-	if me.boxman == nil {
-		fmt.Println("Could not load boxman.")
+	if me.box == nil {
+		fmt.Println("Could not load box.png.")
 		return false
 	}
 	return true
@@ -51,15 +54,14 @@ func (me *Drawer) Draw(c *graphics.Canvas) {
 	c.SetColor(graphics.Color{Red: 0, Green: 0, Blue: 255, Alpha: 255})
 	c.FillRect(42, 42, 100, 100)
 
-	//draw boxman if he's not nil
-	if me.boxman != nil {
-		c.DrawImage(me.boxman, 200, 200)
+	//draw box if it's not nil
+	if me.box != nil {
+		c.DrawImage(me.box, 200, 200)
 		c.SetColor(graphics.Color{Red: 0, Green: 0, Blue: 0, Alpha: 100})
 		c.FillRect(200, 200, 100, 100)
 	}
 	c.DrawText(&me.text, 400, 400)
 
-	//push a viewport at (42, 42)
 	//Note: viewports may be nested
 	c.PushViewport(42, 42, 500, 500)
 	{
@@ -88,7 +90,7 @@ func main() {
 	running := make(chan interface{})
 	quit := func() {
 		graphics.CloseDisplay()
-		pane.boxman.Free()
+		pane.box.Free()
 		pane.text.Free()
 		running <-nil
 	}
