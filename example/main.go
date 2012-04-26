@@ -118,5 +118,4 @@ func main() {
 	})
 
 	<-running
-	close(running)
 }
