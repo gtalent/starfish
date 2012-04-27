@@ -33,6 +33,13 @@ import (
 	"time"
 )
 
+var screen *C.SDL_Surface
+var displayTitle string
+var drawers []*canvasHolder
+var displayDead chan interface{}
+var kill = make(chan interface{})
+var drawInterval = 16000000
+
 //An interface used to for telling the display what to draw.
 type Drawer interface {
 	Draw(*Canvas)
@@ -49,12 +56,6 @@ type canvasHolder struct {
 	canvas Canvas
 	drawer Drawer
 }
-
-var screen *C.SDL_Surface
-var displayTitle string
-var drawers []*canvasHolder
-var displayDead chan interface{}
-var kill = make(chan interface{})
 
 //Sets the title of the window.
 func SetDisplayTitle(title string) {
@@ -137,7 +138,7 @@ func run() {
 			}
 			C.SDL_Flip(screen)
 		}
-		time.Sleep(16000000)
+		time.Sleep(time.Duration(drawInterval))
 	}
 }
 

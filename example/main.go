@@ -26,9 +26,11 @@ import (
 type Drawer struct {
 	box  *graphics.Image
 	text graphics.Text
+	anim *graphics.Animation
 }
 
 func (me *Drawer) init() bool {
+	me.anim = graphics.NewAnimation(1000)
 	me.box = graphics.LoadImageSize("box.png", 70, 70)
 	font := graphics.LoadFont("LiberationSans-Bold.ttf", 32)
 	if font != nil {
@@ -43,6 +45,8 @@ func (me *Drawer) init() bool {
 		fmt.Println("Could not load box.png.")
 		return false
 	}
+	me.anim.LoadImageSize("box.png", 70, 70)
+	me.anim.LoadImageSize("dots.png", 70, 70)
 	return true
 }
 
@@ -66,8 +70,11 @@ func (me *Drawer) Draw(c *graphics.Canvas) {
 	c.PushViewport(42, 42, 500, 500)
 	{
 		//draw a green rect in a viewport
-		c.SetColor(graphics.Color{Red: 0, Green: 255, Blue: 0, Alpha: 127})
+		c.SetRGBA(0, 255, 0, 127)
 		c.FillRect(42, 42, 100, 100)
+		c.SetRGB(0, 0, 0)
+		c.FillRect(350, 200, 70, 70)
+		c.DrawAnimation(me.anim, 350, 200)
 	}
 	c.PopViewport()
 }

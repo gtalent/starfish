@@ -28,6 +28,12 @@ type Animation struct {
 	images     []*Image
 }
 
+func NewAnimation(interval int) *Animation {
+	a := new(Animation)
+	a.SetInterval(interval)
+	return a
+}
+
 //Returns a string that can be used to identify the values of this Animation.
 func (me *Animation) String() string {
 	retval := strconv.FormatInt(me.interval, 10)
