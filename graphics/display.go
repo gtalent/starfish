@@ -33,6 +33,7 @@ import (
 	"time"
 )
 
+//An interface used to for telling the display what to draw.
 type Drawer interface {
 	Draw(*Canvas)
 }
@@ -68,14 +69,17 @@ func GetDisplayTitle() string {
 	return displayTitle
 }
 
+//Returns the width of the display window.
 func DisplayWidth() int {
 	return int(screen.w)
 }
 
+//Returns the height of the display window.
 func DisplayHeight() int {
 	return int(screen.h)
 }
 
+//Adds a drawer object to run when the screen draws.
 func AddDrawer(drawer Drawer) {
 	ch := new(canvasHolder)
 	ch.drawer = drawer
@@ -83,6 +87,7 @@ func AddDrawer(drawer Drawer) {
 	drawers = append(drawers, ch)
 }
 
+//Removes the given drawer object.
 func RemoveDrawer(drawer Drawer) {
 	for n, a := range drawers {
 		if a.drawer == drawer {
@@ -96,6 +101,7 @@ func RemoveDrawer(drawer Drawer) {
 	}
 }
 
+//Adds a draw function to call when the screen draws.
 func AddDrawFunc(drawer func(*Canvas)) {
 	ch := new(canvasHolder)
 	ch.drawer = drawFunc(drawer)
@@ -103,6 +109,7 @@ func AddDrawFunc(drawer func(*Canvas)) {
 	drawers = append(drawers, ch)
 }
 
+//Removes the given draw function.
 func RemoveDrawFunc(drawer func(*Canvas)) {
 	for n, a := range drawers {
 		var d Drawer = drawFunc(drawer)

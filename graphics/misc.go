@@ -24,6 +24,7 @@ import (
 	"github.com/gtalent/starfish/util"
 )
 
+//Blocks until CloseDisplay is called, regardless of whether or not OpenDisplay has been called.
 func Main() {
 	<-kill
 }
