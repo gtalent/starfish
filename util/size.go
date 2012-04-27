@@ -122,7 +122,6 @@ func (me *Size) SubtractFrom(size Size) {
 	me.Height -= size.Height
 }
 
-
 // Returns the value of this Size with the dimensions divided by the dimesions of the given.
 func (me Size) DivideOf(size Size) (s Size) {
 	s.Width = me.Width / size.Width

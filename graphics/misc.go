@@ -24,6 +24,10 @@ import (
 	"github.com/gtalent/starfish/util"
 )
 
+func Main() {
+	<-kill
+}
+
 func toSDL_Rect(b util.Bounds) C.SDL_Rect {
 	var r C.SDL_Rect
 	r.x = C.Sint16(b.X)

@@ -53,7 +53,7 @@ var screen *C.SDL_Surface
 var displayTitle string
 var drawers []*canvasHolder
 var displayDead chan interface{}
-var running bool
+var kill = make(chan interface{})
 
 //Sets the title of the window.
 func SetDisplayTitle(title string) {
@@ -118,16 +118,20 @@ func RemoveDrawFunc(drawer func(*Canvas)) {
 }
 
 func run() {
-	for running {
-		for _, a := range drawers {
-			a.canvas.pane = screen
-			a.canvas.load()
-			a.drawer.Draw(&a.canvas)
+	for {
+		select {
+		case <-kill:
+			break
+		default:
+			for _, a := range drawers {
+				a.canvas.pane = screen
+				a.canvas.load()
+				a.drawer.Draw(&a.canvas)
+			}
+			C.SDL_Flip(screen)
 		}
-		C.SDL_Flip(screen)
 		time.Sleep(16000000)
 	}
-	displayDead <- nil
 }
 
 //Opens a window.
@@ -149,7 +153,6 @@ func OpenDisplay(width, height int, fullscreen bool) bool {
 	if screen == nil {
 		return false
 	}
-	running = true
 	C.SDL_WM_SetCaption(C.CString(displayTitle), C.CString(""))
 	C.SDL_GL_SetAttribute(C.SDL_GL_SWAP_CONTROL, 1)
 	go run()
@@ -159,11 +162,7 @@ func OpenDisplay(width, height int, fullscreen bool) bool {
 //Closes the window.
 func CloseDisplay() {
 	if screen != nil {
-		displayDead = make(chan interface{})
-		running = false
-		<-displayDead
-		close(displayDead)
-		displayDead = nil
+		close(kill)
 		C.SDL_FreeSurface(screen)
 		screen = nil
 		C.SDL_Quit()

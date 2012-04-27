@@ -24,8 +24,8 @@ import (
 )
 
 type Drawer struct {
-	box *graphics.Image
-	text   graphics.Text
+	box  *graphics.Image
+	text graphics.Text
 }
 
 func (me *Drawer) init() bool {
@@ -87,12 +87,10 @@ func main() {
 		return
 	}
 	graphics.AddDrawer(&pane)
-	running := make(chan interface{})
 	quit := func() {
 		graphics.CloseDisplay()
 		pane.box.Free()
 		pane.text.Free()
-		running <-nil
 	}
 	input.AddQuitFunc(quit)
 	input.AddMouseWheelFunc(func(e input.MouseWheelEvent) {
@@ -119,5 +117,5 @@ func main() {
 		fmt.Println("Key Release!")
 	})
 
-	<-running
+	graphics.Main()
 }
