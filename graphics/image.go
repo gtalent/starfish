@@ -26,7 +26,7 @@ import "C"
 
 import (
 	"github.com/gtalent/starfish/util"
-	"strconv"
+	"encoding/json"
 )
 
 type imageKey struct {
@@ -36,10 +36,10 @@ type imageKey struct {
 }
 
 func (me *imageKey) String() string {
-	return me.path + strconv.Itoa(me.width) + strconv.Itoa(me.height)
+	str, _ := json.Marshal(me)
+	return string(str)
 }
 
-//Resizes images from imageFiles and caches them.
 var images = newFlyweight(
 	func(path key) interface{} {
 		key := path.(*imageKey)

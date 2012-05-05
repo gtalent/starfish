@@ -22,7 +22,7 @@ package graphics
 */
 import "C"
 import (
-	"strconv"
+	"encoding/json"
 )
 
 type fontKey struct {
@@ -31,7 +31,8 @@ type fontKey struct {
 }
 
 func (me *fontKey) String() string {
-	return me.path + strconv.Itoa(me.size)
+	str, _ := json.Marshal(me)
+	return string(str)
 }
 
 var fonts = newFlyweight(
@@ -127,4 +128,9 @@ func (me *Font) Free() {
 	me.font = nil
 	me.size = 0
 	me.key.path = ""
+}
+
+//Returns a unique string that can be used to identify the values of this Font.
+func (me *Font) String() string {
+	return me.key.String()
 }
