@@ -34,6 +34,7 @@ import (
 )
 
 var screen *C.SDL_Surface
+var autorun = true
 var displayTitle string
 var drawers []*canvasHolder
 var displayDead chan interface{}
@@ -126,20 +127,35 @@ func RemoveDrawFunc(drawer func(*Canvas)) {
 }
 
 func run() {
-	for {
+	for autorun {
 		select {
 		case <-kill:
 			break
 		default:
-			for _, a := range drawers {
-				a.canvas.pane = screen
-				a.canvas.load()
-				a.drawer.Draw(&a.canvas)
-			}
-			C.SDL_Flip(screen)
+			Draw()
 		}
 		time.Sleep(time.Duration(drawInterval))
 	}
+}
+
+//Sets whether or not the draw functions will be called automatically. On by default.
+func SetDraw(autodraw bool) {
+	autorun = autodraw
+}
+
+//Sets the time in milliseconds between draws when autodraw is on.
+func SetDrawInterval(ms int) {
+	drawInterval = ms * 1000000
+}
+
+//Used to manually draw the screen.
+func Draw() {
+	for _, a := range drawers {
+		a.canvas.pane = screen
+		a.canvas.load()
+		a.drawer.Draw(&a.canvas)
+	}
+	C.SDL_Flip(screen)
 }
 
 //Opens a window.
