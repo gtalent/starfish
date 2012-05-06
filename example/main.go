@@ -31,7 +31,7 @@ type Drawer struct {
 
 func (me *Drawer) init() bool {
 	me.anim = graphics.NewAnimation(1000)
-	me.box = graphics.LoadImageSize("box.png", 100, 70)
+	me.box = graphics.LoadImageSize("box.png", 100, 100)
 	font := graphics.LoadFont("LiberationSans-Bold.ttf", 32)
 	if font != nil {
 		font.SetRGB(0, 0, 255)
