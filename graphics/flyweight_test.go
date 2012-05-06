@@ -36,15 +36,18 @@ func TestResourceManager(t *testing.T) {
 		inKey = key.String()
 		inVal = val.(int)
 	})
-	rsrcs.checkout(stringKey("Narf!"))
+	v := rsrcs.checkout(stringKey("Narf!"))
 	rsrcs.checkin(stringKey("Narf!"))
+	if v != 42 {
+		t.Error("flyweight.checkout does not return the right value.")
+	}
 	if outKey != "Narf!" {
-		t.Error("Resource manager does not recieve the right key to load.")
+		t.Error("flyweight does not recieve the right key to load.")
 	}
 	if inKey != "Narf!" {
-		t.Error("Resource manager does not recieve the right key to delete.")
+		t.Error("flyweight does not recieve the right key to delete.")
 	}
 	if inVal != 42 {
-		t.Error("Resource manager does not recieve the right value to delete.")
+		t.Error("flyweight does not recieve the right value to delete.")
 	}
 }
