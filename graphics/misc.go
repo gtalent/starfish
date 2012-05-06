@@ -47,16 +47,3 @@ func sdl_Rect(x, y, width, height int) C.SDL_Rect {
 	return r
 }
 
-//Returns the difference between the two integers given.
-func diff(i, ii int) int {
-	if i < 0 {
-		i = -i
-	}
-	if ii < 0 {
-		ii = -ii
-	}
-	if i > ii {
-		return i - ii
-	}
-	return ii - i
-}
