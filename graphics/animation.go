@@ -16,7 +16,7 @@
 package graphics
 
 import (
-	"encoding/json"
+	"strconv"
 	"time"
 )
 
@@ -36,8 +36,11 @@ func NewAnimation(interval int) *Animation {
 
 //Returns a string that can be used to identify the values of this Animation.
 func (me *Animation) String() string {
-	out, _ := json.Marshal(me)
-	return string(out)
+	retval := strconv.FormatInt(me.interval, 10)
+	for _, i := range me.images {
+		retval += "\n" + i.String()
+	}
+	return retval
 }
 
 //Sets the number of milliseconds per image.
