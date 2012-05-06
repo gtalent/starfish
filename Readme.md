@@ -1,8 +1,8 @@
 # What is starfish?
 ## What starfish is:
-starfish is simple 2D graphics and user input library for Go.
+starfish is simple 2D graphics and user input library for Go built on SDL.
 ## What starfish is not:
-While it is built on SDL, but unlike many SDL wrappers, it is not meant to replicate the SDL API, only leverage it. Don't expect knowledge of SDL to be beneficial when using this library.
+While it is built on SDL, but unlike many SDL wrappers, starfish is not meant to replicate the SDL API, only leverage it. Don't expect knowledge of SDL to be beneficial when using this library.
 
 This is done for two reasons:
 
