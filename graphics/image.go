@@ -25,14 +25,20 @@ package graphics
 import "C"
 
 import (
-	"github.com/gtalent/starfish/util"
 	"encoding/json"
+	"github.com/gtalent/starfish/util"
 )
 
+type imageLabel struct {
+	Str      string
+	FilePath bool
+}
+
 type imageKey struct {
-	path   string
-	width  int
-	height int
+	Label  imageLabel
+	Angle  float64
+	Width  int
+	Height int
 }
 
 func (me *imageKey) String() string {
@@ -41,19 +47,40 @@ func (me *imageKey) String() string {
 }
 
 var images = newFlyweight(
-	func(path key) interface{} {
+	func(me *flyweight, path key) interface{} {
 		key := path.(*imageKey)
-		tmp := C.IMG_Load(C.CString(key.path))
-		i := C.SDL_DisplayFormatAlpha(tmp)
-		C.SDL_FreeSurface(tmp)
-		if key.width != -1 && key.height != -1 {
-			if (i != nil) && (int(i.w) != key.width || int(i.h) != key.height) {
-				i = resize(i, key.width, key.height)
-			}
+		var i, tmp *C.SDL_Surface
+		var cleanup func()
+		if key.Label.FilePath {
+			tmp = C.IMG_Load(C.CString(key.Label.Str))
+			i = C.SDL_DisplayFormatAlpha(tmp)
+			C.SDL_FreeSurface(tmp)
+			tmp = i
+			cleanup = func() { C.SDL_FreeSurface(tmp) }
+		} else {
+			var k imageKey
+			json.Unmarshal([]byte(key.Label.Str), &k)
+			i = me.checkout(&k).(*C.SDL_Surface)
+			cleanup = func() {}
+		}
+		var w, h int
+		if key.Width == -1 {
+			w = int(i.w)
+		} else {
+			w = key.Width
+		}
+		if key.Height == -1 {
+			h = int(i.h)
+		} else {
+			h = key.Height
+		}
+		if (i != nil) && (w != int(i.w) || h != int(i.h) || key.Angle != 0) {
+			i = resizeAngleOf(i, key.Angle, w, h)
+			cleanup()
 		}
 		return i
 	},
-	func(path key, img interface{}) {
+	func(me *flyweight, path key, img interface{}) {
 		i := img.(*C.SDL_Surface)
 		C.SDL_FreeSurface(i)
 	})
@@ -66,9 +93,10 @@ type Image struct {
 //Loads the image at the given path, or nil if the image was not found.
 func LoadImage(path string) (img *Image) {
 	var key imageKey
-	key.path = path
-	key.width = -1
-	key.height = -1
+	key.Label.FilePath = true
+	key.Label.Str = path
+	key.Width = -1
+	key.Height = -1
 	i := images.checkout(&key).(*C.SDL_Surface)
 	img = new(Image)
 	img.img = i
@@ -79,9 +107,10 @@ func LoadImage(path string) (img *Image) {
 //Loads the image at the given path, or nil if the image was not found.
 func LoadImageSize(path string, width, height int) (img *Image) {
 	var key imageKey
-	key.path = path
-	key.width = width
-	key.height = height
+	key.Label.FilePath = true
+	key.Label.Str = path
+	key.Width = width
+	key.Height = height
 	i := images.checkout(&key).(*C.SDL_Surface)
 	img = new(Image)
 	img.img = i
@@ -102,8 +131,8 @@ func (me *Image) Height() int {
 //Returns a util.Size object representing the size of this Image.
 func (me *Image) Size() util.Size {
 	var s util.Size
-	s.Width = me.key.width
-	s.Height = me.key.height
+	s.Width = me.Width()
+	s.Height = me.Height()
 	return s
 }
 
@@ -114,23 +143,22 @@ func (me *Image) String() string {
 
 //Returns the path to the image on the disk.
 func (me *Image) Path() string {
-	return me.key.path
+	return me.key.Label.Str
 }
 
 //Nils this image and lets the resource manager know this object is no longer using the image data.
 func (me *Image) Free() {
-	images.checkin(&imageKey{path: me.key.path, width: me.Width(), height: me.Height()})
+	images.checkin(&me.key)
 	me.img = nil
-	me.key.path = ""
+	me.key.Label.Str = ""
 }
 
-func resize(img *C.SDL_Surface, width, height int) *C.SDL_Surface {
+func resizeAngleOf(img *C.SDL_Surface, angle float64, width, height int) *C.SDL_Surface {
 	if img.w == 0 || img.h == 0 {
 		return nil
 	}
 	xstretch := C.double(float64(width) / float64(img.w))
 	ystretch := C.double(float64(height) / float64(img.h))
-	retval := C.zoomSurface(img, xstretch, ystretch, 1)
-	C.SDL_FreeSurface(img)
+	retval := C.rotozoomSurfaceXY(img, C.double(angle), xstretch, ystretch, 1)
 	return retval
 }

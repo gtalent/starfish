@@ -40,11 +40,11 @@ func (me stringKey) String() string {
 type flyweight struct {
 	lock     *sync.Mutex
 	items    map[string]*flynode
-	loader   func(key) interface{}
-	unloader func(key, interface{})
+	loader   func(*flyweight, key) interface{}
+	unloader func(*flyweight, key, interface{})
 }
 
-func newFlyweight(loader func(key) interface{}, unloader func(key, interface{})) *flyweight {
+func newFlyweight(loader func(*flyweight, key) interface{}, unloader func(*flyweight, key, interface{})) *flyweight {
 	r := new(flyweight)
 	r.lock = new(sync.Mutex)
 	r.loader = loader
@@ -59,7 +59,7 @@ func (me *flyweight) checkout(key key) interface{} {
 		if !ok {
 			node = new(flynode)
 			node.key = key
-			node.val = me.loader(key)
+			node.val = me.loader(me, key)
 			node.clients = 1
 
 			me.lock.Lock()
@@ -103,7 +103,7 @@ func (me *flyweight) checkin(key key) {
 	n.clients--
 	if n.clients == 0 {
 		delete(me.items, key.String())
-		me.unloader(key, n.val)
+		me.unloader(me, key, n.val)
 	}
 	n.Unlock()
 }

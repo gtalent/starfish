@@ -36,12 +36,12 @@ func (me *fontKey) String() string {
 }
 
 var fonts = newFlyweight(
-	func(key key) interface{} {
+	func(me *flyweight, key key) interface{} {
 		k := key.(*fontKey)
 		font := C.TTF_OpenFont(C.CString(k.path), C.int(k.size))
 		return font
 	},
-	func(path key, val interface{}) {
+	func(me *flyweight, path key, val interface{}) {
 		C.TTF_CloseFont(val.(*C.TTF_Font))
 	})
 
