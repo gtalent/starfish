@@ -29,10 +29,10 @@ func TestResourceManager(t *testing.T) {
 	outKey := ""
 	inKey := ""
 	inVal := 0
-	rsrcs := newFlyweight(func(key key) interface{} {
+	rsrcs := newFlyweight(func(me *flyweight, key key) interface{} {
 		outKey = key.String()
 		return 42
-	}, func(key key, val interface{}) {
+	}, func(me *flyweight, key key, val interface{}) {
 		inKey = key.String()
 		inVal = val.(int)
 	})
