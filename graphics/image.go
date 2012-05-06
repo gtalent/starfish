@@ -91,26 +91,28 @@ type Image struct {
 }
 
 //Loads the image at the given path, or nil if the image was not found.
-func LoadImage(path string) (img *Image) {
-	var key imageKey
-	key.Label.FilePath = true
-	key.Label.Str = path
-	key.Width = -1
-	key.Height = -1
-	i := images.checkout(&key).(*C.SDL_Surface)
-	img = new(Image)
-	img.img = i
-	img.key = key
-	return
+func LoadImage(path string) *Image {
+	return LoadImageSize(path, -1, -1)
 }
 
-//Loads the image at the given path, or nil if the image was not found.
-func LoadImageSize(path string, width, height int) (img *Image) {
+//Loads the image at the given path at the given angle, or nil if the image was not found.
+func LoadImageAngle(path string, angle float64) *Image {
+	return LoadImageSizeAngle(path, -1, -1, angle)
+}
+
+//Loads the image at the given path at the given size, or nil if the image was not found.
+func LoadImageSize(path string, width, height int) *Image {
+	return LoadImageSizeAngle(path, width, height, 0)
+}
+
+//Loads the image at the given path at the given angle and at the given size, or nil if the image was not found.
+func LoadImageSizeAngle(path string, w, h int, angle float64) (img *Image) {
 	var key imageKey
 	key.Label.FilePath = true
 	key.Label.Str = path
-	key.Width = width
-	key.Height = height
+	key.Angle = angle
+	key.Width = w
+	key.Height = h
 	i := images.checkout(&key).(*C.SDL_Surface)
 	img = new(Image)
 	img.img = i
@@ -144,6 +146,31 @@ func (me *Image) String() string {
 //Returns the path to the image on the disk.
 func (me *Image) Path() string {
 	return me.key.Label.Str
+}
+
+//Returns a version of this Image at the given angle and given size.
+func (me *Image) ReSizeAngleOf(w, h int, angle float64) *Image {
+	var key imageKey
+	key.Label.FilePath = false
+	key.Label.Str = me.key.String()
+	key.Angle = angle
+	key.Width = w
+	key.Height = h
+	i := images.checkout(&key).(*C.SDL_Surface)
+	img := new(Image)
+	img.img = i
+	img.key = key
+	return img
+}
+
+//Returns a version of this Image at the given angle.
+func (me *Image) ReangleOf(angle float64) *Image {
+	return me.ReSizeAngleOf(me.key.Width, me.key.Height, angle)
+}
+
+//Returns a version of this Image at the given size.
+func (me *Image) ResizeOf(w, h int) *Image {
+	return me.ReSizeAngleOf(w, h, me.key.Angle)
 }
 
 //Nils this image and lets the resource manager know this object is no longer using the image data.
