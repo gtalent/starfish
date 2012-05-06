@@ -39,7 +39,7 @@ var displayTitle string
 var drawers []*canvasHolder
 var displayDead chan interface{}
 var kill = make(chan interface{})
-var drawInterval = 16000000
+var drawInterval = 0
 
 //An interface used to for telling the display what to draw.
 type Drawer interface {
@@ -179,6 +179,7 @@ func OpenDisplay(width, height int, fullscreen bool) bool {
 	}
 	C.SDL_WM_SetCaption(C.CString(displayTitle), C.CString(""))
 	C.SDL_GL_SetAttribute(C.SDL_GL_SWAP_CONTROL, 1)
+	SetDrawInterval(16)
 	go run()
 	return true
 }
