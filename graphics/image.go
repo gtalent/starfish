@@ -51,6 +51,7 @@ var images = newFlyweight(
 		key := path.(*imageKey)
 		var i, tmp *C.SDL_Surface
 		var cleanup func()
+		var k imageKey
 		if key.Label.FilePath {
 			tmp = C.IMG_Load(C.CString(key.Label.Str))
 			i = C.SDL_DisplayFormatAlpha(tmp)
@@ -58,10 +59,9 @@ var images = newFlyweight(
 			tmp = i
 			cleanup = func() { C.SDL_FreeSurface(tmp) }
 		} else {
-			var k imageKey
 			json.Unmarshal([]byte(key.Label.Str), &k)
 			i = me.checkout(&k).(*C.SDL_Surface)
-			cleanup = func() {}
+			cleanup = func() { me.checkin(&k) }
 		}
 		var w, h int
 		if key.Width == -1 {
