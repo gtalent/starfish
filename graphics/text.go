@@ -106,10 +106,22 @@ func (me *Font) SetRGB(red, green, blue byte) {
 
 //Loads text into the Text object passed in.
 //Returns true if successful, false otherwise.
-func (me *Font) Write(text string, t *Text) bool {
+func (me *Font) WriteTo(text string, t *Text) bool {
 	t.color = me.color
 	t.text = C.TTF_RenderText_Blended(me.font, C.CString(text), me.color.toSDL_Color())
 	return t.text != nil
+}
+
+//Returns a Text object representing the given string.
+func (me *Font) Write(text string) *Text {
+	s := C.TTF_RenderText_Blended(me.font, C.CString(text), me.color.toSDL_Color())
+	if s == nil {
+		return nil
+	}
+	t := new(Text)
+	t.color = me.color
+	t.text = s
+	return t
 }
 
 //Returns the size of this font.

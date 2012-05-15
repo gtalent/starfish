@@ -35,7 +35,7 @@ func (me *Drawer) init() bool {
 	font := graphics.LoadFont("LiberationSans-Bold.ttf", 32)
 	if font != nil {
 		font.SetRGB(0, 0, 255)
-		font.Write("Narf!", &me.text)
+		font.WriteTo("The mouse ate the cheese.", &me.text)
 		font.Free()
 	} else {
 		fmt.Println("Could not load LiberationSans-Bold.ttf.")

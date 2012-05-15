@@ -38,7 +38,7 @@ func (me stringKey) String() string {
 }
 
 type flyweight struct {
-	lock     *sync.Mutex
+	lock     sync.Mutex
 	items    map[string]*flynode
 	loader   func(*flyweight, key) interface{}
 	unloader func(*flyweight, key, interface{})
@@ -46,7 +46,6 @@ type flyweight struct {
 
 func newFlyweight(loader func(*flyweight, key) interface{}, unloader func(*flyweight, key, interface{})) *flyweight {
 	r := new(flyweight)
-	r.lock = new(sync.Mutex)
 	r.loader = loader
 	r.unloader = unloader
 	r.items = make(map[string]*flynode)
