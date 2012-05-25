@@ -13,37 +13,23 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package graphics
+package gfx
 
 /*
 #cgo LDFLAGS: -lSDL
 #include "SDL/SDL.h"
 */
 import "C"
-import (
-	"github.com/gtalent/starfish/util"
-)
 
-//Blocks until CloseDisplay is called, regardless of whether or not OpenDisplay has been called.
-func Main() {
-	<-kill
+//An RGB color representation.
+type Color struct {
+	Red, Green, Blue, Alpha byte
 }
 
-func toSDL_Rect(b util.Bounds) C.SDL_Rect {
-	var r C.SDL_Rect
-	r.x = C.Sint16(b.X)
-	r.y = C.Sint16(b.Y)
-	r.w = C.Uint16(b.Width)
-	r.h = C.Uint16(b.Height)
-	return r
+func (me *Color) toSDL_Color() C.SDL_Color {
+	return C.SDL_Color{C.Uint8(me.Red), C.Uint8(me.Green), C.Uint8(me.Blue), C.Uint8(me.Alpha)}
 }
 
-func sdl_Rect(x, y, width, height int) C.SDL_Rect {
-	var r C.SDL_Rect
-	r.x = C.Sint16(x)
-	r.y = C.Sint16(y)
-	r.w = C.Uint16(width)
-	r.h = C.Uint16(height)
-	return r
+func (me *Color) toUint32() uint32 {
+	return (uint32(me.Red) << 16) | (uint32(me.Green) << 8) | uint32(me.Blue)
 }
-

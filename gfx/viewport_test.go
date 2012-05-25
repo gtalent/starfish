@@ -13,23 +13,27 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package graphics
+package gfx
 
-/*
-#cgo LDFLAGS: -lSDL
-#include "SDL/SDL.h"
-*/
-import "C"
+import (
+	"github.com/gtalent/starfish/util"
+	"testing"
+)
 
-//An RGB color representation.
-type Color struct {
-	Red, Green, Blue, Alpha byte
-}
+func TestViewportPushPop(t *testing.T) {
+	viewport := newViewport()
+	initial := viewport.bounds()
+	tests := make([]util.Bounds, 0)
+	tests = append(tests, util.Bounds{util.Point{42, 42}, util.Size{100, 100}})
 
-func (me *Color) toSDL_Color() C.SDL_Color {
-	return C.SDL_Color{C.Uint8(me.Red), C.Uint8(me.Green), C.Uint8(me.Blue), C.Uint8(me.Alpha)}
-}
-
-func (me *Color) toUint32() uint32 {
-	return (uint32(me.Red) << 16) | (uint32(me.Green) << 8) | uint32(me.Blue)
+	for _, test := range tests {
+		viewport.push(test)
+		if viewport.bounds() != test {
+			t.Errorf("viewport.push is broken")
+		}
+		viewport.pop()
+		if viewport.bounds() != initial {
+			t.Error("viewport.pop is broken\n\tviewport is:\t\t", viewport.bounds(), "\n\tviewport should be:\t", initial)
+		}
+	}
 }

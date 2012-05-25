@@ -24,15 +24,15 @@ import (
 )
 
 type Drawer struct {
-	box  *gfx.Image
-	text gfx.Text
-	anim *gfx.Animation
+	box  *graphics.Image
+	text graphics.Text
+	anim *graphics.Animation
 }
 
 func (me *Drawer) init() bool {
-	me.anim = gfx.NewAnimation(1000)
-	me.box = gfx.LoadImageSize("box.png", 100, 100)
-	font := gfx.LoadFont("LiberationSans-Bold.ttf", 32)
+	me.anim = graphics.NewAnimation(1000)
+	me.box = graphics.LoadImageSize("box.png", 100, 100)
+	font := graphics.LoadFont("LiberationSans-Bold.ttf", 32)
 	if font != nil {
 		font.SetRGB(0, 0, 255)
 		font.WriteTo("The mouse ate the cheese.", &me.text)
@@ -50,18 +50,18 @@ func (me *Drawer) init() bool {
 	return true
 }
 
-func (me *Drawer) Draw(c *gfx.Canvas) {
+func (me *Drawer) Draw(c *graphics.Canvas) {
 	//clear screen
-	c.SetColor(gfx.Color{Red: 0, Green: 0, Blue: 0})
-	c.FillRect(0, 0, gfx.DisplayWidth(), gfx.DisplayHeight())
+	c.SetColor(graphics.Color{Red: 0, Green: 0, Blue: 0})
+	c.FillRect(0, 0, graphics.DisplayWidth(), graphics.DisplayHeight())
 
-	c.SetColor(gfx.Color{Red: 0, Green: 0, Blue: 255, Alpha: 255})
+	c.SetColor(graphics.Color{Red: 0, Green: 0, Blue: 255, Alpha: 255})
 	c.FillRect(42, 42, 100, 100)
 
 	//draw box if it's not nil
 	if me.box != nil {
 		c.DrawImage(me.box, 200, 200)
-		c.SetColor(gfx.Color{Red: 0, Green: 0, Blue: 0, Alpha: 100})
+		c.SetColor(graphics.Color{Red: 0, Green: 0, Blue: 0, Alpha: 100})
 		c.FillRect(200, 200, 100, 100)
 	}
 	c.DrawText(&me.text, 400, 400)
@@ -81,11 +81,11 @@ func (me *Drawer) Draw(c *gfx.Canvas) {
 
 func main() {
 	//For a fullscreen at your screens native resolution, simply use this line instead:
-	//if !gfx.OpenDisplay(0, 0, true) {
-	if !gfx.OpenDisplay(800, 600, false) {
+	//if !graphics.OpenDisplay(0, 0, true) {
+	if !graphics.OpenDisplay(800, 600, false) {
 		return
 	}
-	gfx.SetDisplayTitle("starfish example")
+	graphics.SetDisplayTitle("starfish example")
 
 	input.Init()
 
@@ -93,9 +93,9 @@ func main() {
 	if !pane.init() {
 		return
 	}
-	gfx.AddDrawer(&pane)
+	graphics.AddDrawer(&pane)
 	quit := func() {
-		gfx.CloseDisplay()
+		graphics.CloseDisplay()
 		pane.box.Free()
 		pane.text.Free()
 	}
@@ -124,5 +124,5 @@ func main() {
 		fmt.Println("Key Release!")
 	})
 
-	gfx.Main()
+	graphics.Main()
 }

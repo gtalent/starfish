@@ -13,27 +13,37 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package graphics
+package gfx
 
+/*
+#cgo LDFLAGS: -lSDL
+#include "SDL/SDL.h"
+*/
+import "C"
 import (
 	"github.com/gtalent/starfish/util"
-	"testing"
 )
 
-func TestViewportPushPop(t *testing.T) {
-	viewport := newViewport()
-	initial := viewport.bounds()
-	tests := make([]util.Bounds, 0)
-	tests = append(tests, util.Bounds{util.Point{42, 42}, util.Size{100, 100}})
-
-	for _, test := range tests {
-		viewport.push(test)
-		if viewport.bounds() != test {
-			t.Errorf("viewport.push is broken")
-		}
-		viewport.pop()
-		if viewport.bounds() != initial {
-			t.Error("viewport.pop is broken\n\tviewport is:\t\t", viewport.bounds(), "\n\tviewport should be:\t", initial)
-		}
-	}
+//Blocks until CloseDisplay is called, regardless of whether or not OpenDisplay has been called.
+func Main() {
+	<-kill
 }
+
+func toSDL_Rect(b util.Bounds) C.SDL_Rect {
+	var r C.SDL_Rect
+	r.x = C.Sint16(b.X)
+	r.y = C.Sint16(b.Y)
+	r.w = C.Uint16(b.Width)
+	r.h = C.Uint16(b.Height)
+	return r
+}
+
+func sdl_Rect(x, y, width, height int) C.SDL_Rect {
+	var r C.SDL_Rect
+	r.x = C.Sint16(x)
+	r.y = C.Sint16(y)
+	r.w = C.Uint16(width)
+	r.h = C.Uint16(height)
+	return r
+}
+
