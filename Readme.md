@@ -16,6 +16,10 @@ This is done for two reasons:
  
 			yum install gcc SDL-devel SDL_gfx-devel SDL_image-devel SDL_ttf-devel
 
+	* Arch Linux the following should work:
+ 
+			pacman -S gcc sdl sdl_gfx sdl_image sdl_ttf
+
 	* Anyone feel free to add instructions for other systems here.
 
 ## Installation:
