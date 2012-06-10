@@ -20,6 +20,22 @@ import (
 	"time"
 )
 
+func startAnimTick() {
+	go func() {
+		for {
+			select {
+			case <-kill:
+				return
+			default:
+				animTicker = time.Now().UnixNano()
+				time.Sleep(100000000)
+			}
+		}
+	}()
+}
+
+var animTicker = time.Now().UnixNano()
+
 //A type to automatically flip through a series of images.
 type Animation struct {
 	interval   int64
@@ -53,7 +69,7 @@ func (me *Animation) GetImage() *Image {
 	if me.images == nil {
 		return nil
 	}
-	if t := time.Now().UnixNano(); t-me.lastUpdate >= me.interval {
+	if t := animTicker; t-me.lastUpdate >= me.interval {
 		me.slide += int((t - me.lastUpdate) / me.interval)
 		me.slide %= len(me.images)
 		me.lastUpdate = t

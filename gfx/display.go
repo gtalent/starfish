@@ -180,6 +180,7 @@ func OpenDisplay(width, height int, fullscreen bool) bool {
 	C.SDL_WM_SetCaption(C.CString(displayTitle), C.CString(""))
 	C.SDL_GL_SetAttribute(C.SDL_GL_SWAP_CONTROL, 1)
 	SetDrawInterval(16)
+	startAnimTick()
 	go run()
 	return true
 }
