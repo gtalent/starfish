@@ -20,6 +20,14 @@ import (
 	"time"
 )
 
+var animTicker = time.Now().UnixNano()
+var tickerInterval int64 = 100000000
+
+//Sets how often the clock that Animations update based on is updated.
+func SetAnimTickInterval(ms int64) {
+	tickerInterval = ms
+}
+
 func startAnimTick() {
 	go func() {
 		for {
@@ -28,13 +36,12 @@ func startAnimTick() {
 				return
 			default:
 				animTicker = time.Now().UnixNano()
-				time.Sleep(100000000)
+				time.Sleep(time.Duration(tickerInterval))
 			}
 		}
 	}()
 }
 
-var animTicker = time.Now().UnixNano()
 
 //A type to automatically flip through a series of images.
 type Animation struct {
