@@ -16,7 +16,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
+	"os"
+	"runtime/pprof"
 	//normally "github.com/gtalent/starfish/gfx"
 	"../gfx"
 	//normally "github.com/gtalent/starfish/input"
@@ -82,6 +86,18 @@ func (me *Drawer) Draw(c *gfx.Canvas) {
 func main() {
 	//For a fullscreen at your screens native resolution, simply use this line instead:
 	//if !gfx.OpenDisplay(0, 0, true) {
+
+	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
+	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
+
 	if !gfx.OpenDisplay(800, 600, false) {
 		return
 	}
