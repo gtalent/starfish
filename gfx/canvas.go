@@ -55,8 +55,7 @@ func (me *Canvas) GetViewport() util.Bounds {
 	return me.viewport.bounds()
 }
 
-//Pushs a viewport to limit the drawing space to the given bounds within the current drawing space.
-//Will not accept any negative values.
+//Pushes a viewport to limit the drawing space to the given bounds within the current drawing space.
 func (me *Canvas) PushViewport(x, y, width, height int) {
 	me.origin.SubtractFrom(me.viewport.translate())
 	me.viewport.push(util.Bounds{util.Point{X: int(x), Y: int(y)}, util.Size{Width: int(width), Height: int(height)}})
