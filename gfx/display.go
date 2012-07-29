@@ -139,7 +139,7 @@ func run() {
 }
 
 //Sets whether or not the draw functions will be called automatically. On by default.
-func SetDraw(autodraw bool) {
+func SetAutoDraw(autodraw bool) {
 	autorun = autodraw
 }
 
