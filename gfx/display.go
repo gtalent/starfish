@@ -15,25 +15,11 @@
 */
 package gfx
 
-/*
-#cgo LDFLAGS: -lSDL -lSDL_ttf
-#include "SDL/SDL.h"
-#include "SDL/SDL_ttf.h"
-
-SDL_Surface* openDisplay(int w, int h) {
-	return SDL_SetVideoMode(w, h, 32, SDL_DOUBLEBUF | SDL_HWACCEL);
-}
-
-SDL_Surface* openDisplayFullscreen(int w, int h) {
-	return SDL_SetVideoMode(w, h, 32, SDL_DOUBLEBUF | SDL_HWACCEL | SDL_FULLSCREEN);
-}
-*/
-import "C"
 import (
+	b "github.com/gtalent/starfish/backend"
 	"time"
 )
 
-var screen *C.SDL_Surface
 var autorun = true
 var displayTitle string
 var drawers []*canvasHolder
@@ -61,9 +47,7 @@ type canvasHolder struct {
 //Sets the title of the window.
 func SetDisplayTitle(title string) {
 	displayTitle = title
-	if screen != nil {
-		C.SDL_WM_SetCaption(C.CString(displayTitle), C.CString(""))
-	}
+	b.SetDisplayTitle(title)
 }
 
 //Returns the title of this window.
@@ -73,19 +57,19 @@ func GetDisplayTitle() string {
 
 //Returns the width of the display window.
 func DisplayWidth() int {
-	return int(screen.w)
+	return b.DisplayWidth()
 }
 
 //Returns the height of the display window.
 func DisplayHeight() int {
-	return int(screen.h)
+	return b.DisplayHeight()
 }
 
 //Adds a drawer object to run when the screen draws.
 func AddDrawer(drawer Drawer) {
 	ch := new(canvasHolder)
 	ch.drawer = drawer
-	ch.canvas = newCanvas(screen)
+	ch.canvas = newCanvas()
 	drawers = append(drawers, ch)
 }
 
@@ -107,7 +91,7 @@ func RemoveDrawer(drawer Drawer) {
 func AddDrawFunc(drawer func(*Canvas)) {
 	ch := new(canvasHolder)
 	ch.drawer = drawFunc(drawer)
-	ch.canvas = newCanvas(screen)
+	ch.canvas = newCanvas()
 	drawers = append(drawers, ch)
 }
 
@@ -132,7 +116,7 @@ func run() {
 		case <-kill:
 			break
 		default:
-			Draw()
+			b.Draw()
 		}
 		time.Sleep(time.Duration(drawInterval))
 	}
@@ -151,34 +135,16 @@ func SetDrawInterval(ms int) {
 //Used to manually draw the screen.
 func Draw() {
 	for _, a := range drawers {
-		a.canvas.pane = screen
 		a.canvas.load()
 		a.drawer.Draw(&a.canvas)
 	}
-	C.SDL_Flip(screen)
 }
 
 //Opens a window.
 //Returns an indicator of success.
-func OpenDisplay(width, height int, fullscreen bool) bool {
-	if C.SDL_Init(C.SDL_INIT_VIDEO) != 0 {
-		return false
-	}
-	C.TTF_Init()
-	var flags C.Uint32 = C.SDL_DOUBLEBUF
-	flags |= C.SDL_SWSURFACE
-	flags |= C.SDL_HWACCEL
-
-	if fullscreen {
-		screen = C.openDisplayFullscreen(C.int(width), C.int(height))
-	} else {
-		screen = C.openDisplay(C.int(width), C.int(height))
-	}
-	if screen == nil {
-		return false
-	}
-	C.SDL_WM_SetCaption(C.CString(displayTitle), C.CString(""))
-	C.SDL_GL_SetAttribute(C.SDL_GL_SWAP_CONTROL, 1)
+func OpenDisplay(w, h int, fullscreen bool) bool {
+	b.SetDrawFunc(Draw)
+	b.OpenDisplay(w, h, fullscreen)
 	SetDrawInterval(16)
 	startAnimTick()
 	go run()
@@ -187,10 +153,6 @@ func OpenDisplay(width, height int, fullscreen bool) bool {
 
 //Closes the window.
 func CloseDisplay() {
-	if screen != nil {
-		close(kill)
-		C.SDL_FreeSurface(screen)
-		screen = nil
-		C.SDL_Quit()
-	}
+	close(kill)
+	b.CloseDisplay()
 }

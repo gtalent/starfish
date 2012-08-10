@@ -15,35 +15,7 @@
 */
 package gfx
 
-/*
-#cgo LDFLAGS: -lSDL
-#include "SDL/SDL.h"
-*/
-import "C"
-import (
-	"github.com/gtalent/starfish/util"
-)
-
 //Blocks until CloseDisplay is called, regardless of whether or not OpenDisplay has been called.
 func Main() {
 	<-kill
 }
-
-func toSDL_Rect(b util.Bounds) C.SDL_Rect {
-	var r C.SDL_Rect
-	r.x = C.Sint16(b.X)
-	r.y = C.Sint16(b.Y)
-	r.w = C.Uint16(b.Width)
-	r.h = C.Uint16(b.Height)
-	return r
-}
-
-func sdl_Rect(x, y, width, height int) C.SDL_Rect {
-	var r C.SDL_Rect
-	r.x = C.Sint16(x)
-	r.y = C.Sint16(y)
-	r.w = C.Uint16(width)
-	r.h = C.Uint16(height)
-	return r
-}
-

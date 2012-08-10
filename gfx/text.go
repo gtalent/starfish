@@ -15,13 +15,8 @@
 */
 package gfx
 
-/*
-#cgo LDFLAGS: -lSDL -lSDL_ttf
-#include "SDL/SDL.h"
-#include "SDL/SDL_ttf.h"
-*/
-import "C"
 import (
+	b "github.com/gtalent/starfish/backend"
 	"encoding/json"
 )
 
@@ -38,21 +33,21 @@ func (me *fontKey) String() string {
 var fonts = newFlyweight(
 	func(me *flyweight, key key) interface{} {
 		k := key.(*fontKey)
-		font := C.TTF_OpenFont(C.CString(k.path), C.int(k.size))
+		font := b.LoadFont(k.path, k.size)
 		return font
 	},
 	func(me *flyweight, path key, val interface{}) {
-		C.TTF_CloseFont(val.(*C.TTF_Font))
+		b.FreeFont(val.(*b.Font))
 	})
 
 //A drawable representation of a string.
 type Text struct {
 	color Color
-	text  *C.SDL_Surface
+	text  *b.Image
 }
 
 func (me *Text) Free() {
-	C.SDL_FreeSurface(me.text)
+	b.FreeImage(me.text)
 }
 
 //Returns a Color object representing the color of the text.
@@ -62,19 +57,19 @@ func (me *Text) Color() Color {
 
 //Returns the width of this text.
 func (me *Text) Width() int {
-	return int(me.text.w)
+	return int(me.text.W())
 }
 
 //Returns the height of this text.
 func (me *Text) Height() int {
-	return int(me.text.h)
+	return int(me.text.H())
 }
 
 //A font type that represents a TTF file loaded from storage, used to create Text objects for drawing.
 type Font struct {
 	key   fontKey
 	size  int
-	font  *C.TTF_Font
+	font  *b.Font
 	color Color
 }
 
@@ -86,7 +81,7 @@ func LoadFont(path string, size int) (font *Font) {
 
 	if f := fonts.checkout(&key); f != nil {
 		font = new(Font)
-		font.font = f.(*C.TTF_Font)
+		font.font = f.(*b.Font)
 		font.key = key
 	}
 	return
@@ -108,19 +103,14 @@ func (me *Font) SetRGB(red, green, blue byte) {
 //Returns true if successful, false otherwise.
 func (me *Font) WriteTo(text string, t *Text) bool {
 	t.color = me.color
-	t.text = C.TTF_RenderText_Blended(me.font, C.CString(text), me.color.toSDL_Color())
-	return t.text != nil
+	t.text = new(b.Image)
+	return me.font.WriteTo(text, t.text, me.color.bColor())
 }
 
 //Returns a Text object representing the given string.
 func (me *Font) Write(text string) *Text {
-	s := C.TTF_RenderText_Blended(me.font, C.CString(text), me.color.toSDL_Color())
-	if s == nil {
-		return nil
-	}
 	t := new(Text)
-	t.color = me.color
-	t.text = s
+	me.WriteTo(text, t)
 	return t
 }
 

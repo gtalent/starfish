@@ -15,30 +15,20 @@
 */
 package gfx
 
-/*
-#cgo LDFLAGS: -lSDL -lSDL_gfx -lSDL_image
-#include "SDL/SDL.h"
-#include "SDL/SDL_gfxPrimitives.h"
-#include "SDL/SDL_rotozoom.h"
-#include "SDL/SDL_image.h"
-
-*/
-import "C"
 import (
+	b "github.com/gtalent/starfish/backend"
 	"github.com/gtalent/starfish/util"
 )
 
 //Used to draw and to hold data for the drawing context.
 type Canvas struct {
 	viewport    viewport
-	pane        *C.SDL_Surface
 	color       Color
 	translation util.Point
 	origin      util.Point
 }
 
-func newCanvas(surface *C.SDL_Surface) (p Canvas) {
-	p.pane = surface
+func newCanvas() (p Canvas) {
 	p.viewport = newViewport()
 	return
 }
@@ -46,8 +36,8 @@ func newCanvas(surface *C.SDL_Surface) (p Canvas) {
 //Loads the settings for this Pane onto the SDL Surface.
 func (me *Canvas) load() {
 	me.viewport.calcBounds()
-	r := toSDL_Rect(me.viewport.bounds())
-	C.SDL_SetClipRect(me.pane, &r)
+	r := me.viewport.bounds()
+	b.SetClipRect(r.X, r.Y, r.Width, r.Height)
 }
 
 //Returns the bounds of this Canvas
@@ -59,8 +49,8 @@ func (me *Canvas) GetViewport() util.Bounds {
 func (me *Canvas) PushViewport(x, y, width, height int) {
 	me.origin.SubtractFrom(me.viewport.translate())
 	me.viewport.push(util.Bounds{util.Point{X: int(x), Y: int(y)}, util.Size{Width: int(width), Height: int(height)}})
-	r := toSDL_Rect(me.viewport.bounds())
-	C.SDL_SetClipRect(me.pane, &r)
+	r := me.viewport.bounds()
+	b.SetClipRect(r.X, r.Y, r.Width, r.Height)
 	me.origin = me.translation.AddOf(me.viewport.bounds().Point)
 	me.origin.AddTo(me.viewport.translate())
 }
@@ -70,8 +60,8 @@ func (me *Canvas) PopViewport() {
 	if me.viewport.pt != 0 {
 		me.origin.SubtractFrom(me.viewport.translate())
 		me.viewport.pop()
-		r := toSDL_Rect(me.viewport.bounds())
-		C.SDL_SetClipRect(me.pane, &r)
+		r := me.viewport.bounds()
+		b.SetClipRect(r.X, r.Y, r.Width, r.Height)
 		me.origin = me.translation.AddOf(me.viewport.bounds().Point)
 		me.origin.AddTo(me.viewport.translate())
 	}
@@ -94,22 +84,21 @@ func (me *Canvas) SetColor(color Color) {
 
 //Fills a rounded rectangle at the given coordinates and size on this Canvas.
 func (me *Canvas) FillRoundedRect(x, y, width, height, radius int) {
-	r := sdl_Rect(x+me.origin.X, y+me.origin.Y, width, height)
-	C.roundedBoxRGBA(screen, C.Sint16(r.x), C.Sint16(r.y), C.Sint16(int(r.x)+int(r.w)), C.Sint16(int(r.y)+int(r.h)), C.Sint16(radius), C.Uint8(me.color.Red), C.Uint8(me.color.Green), C.Uint8(me.color.Blue), C.Uint8(me.color.Alpha))
+	x += me.origin.X
+	y += me.origin.Y
+	b.FillRoundedRect(x, y, width, height, radius, me.color.bColor())
 }
 
 //Fills a rectangle at the given coordinates and size on this Canvas.
 func (me *Canvas) FillRect(x, y, width, height int) {
-	r := sdl_Rect(x+me.origin.X, y+me.origin.Y, width, height)
-	C.boxRGBA(screen, C.Sint16(r.x), C.Sint16(r.y), C.Sint16(int(r.x)+int(r.w)), C.Sint16(int(r.y)+int(r.h)), C.Uint8(me.color.Red), C.Uint8(me.color.Green), C.Uint8(me.color.Blue), C.Uint8(me.color.Alpha))
+	x += me.origin.X
+	y += me.origin.Y
+	b.FillRect(x, y, width, height, me.color.bColor())
 }
 
 //Draws the text at the given coordinates.
 func (me *Canvas) DrawText(text *Text, x, y int) {
-	var dest C.SDL_Rect
-	dest.x = C.Sint16(x + me.origin.X)
-	dest.y = C.Sint16(y + me.origin.Y)
-	C.SDL_BlitSurface(text.text, nil, me.pane, &dest)
+	b.DrawImage(text.text, x, y)
 }
 
 //Draws the image at the given coordinates.
@@ -119,9 +108,5 @@ func (me *Canvas) DrawAnimation(animation *Animation, x, y int) {
 
 //Draws the image at the given coordinates.
 func (me *Canvas) DrawImage(img *Image, x, y int) {
-	C.SDL_SetAlpha(img.img, C.SDL_SRCALPHA, 255)
-	var dest C.SDL_Rect
-	dest.x = C.Sint16(x + me.origin.X)
-	dest.y = C.Sint16(y + me.origin.Y)
-	C.SDL_BlitSurface(img.img, nil, me.pane, &dest)
+	b.DrawImage(img.img, x, y)
 }

@@ -42,7 +42,6 @@ func startAnimTick() {
 	}()
 }
 
-
 //A type to automatically flip through a series of images.
 type Animation struct {
 	interval   int64

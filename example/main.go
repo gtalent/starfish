@@ -56,16 +56,16 @@ func (me *Drawer) init() bool {
 
 func (me *Drawer) Draw(c *gfx.Canvas) {
 	//clear screen
-	c.SetColor(gfx.Color{Red: 0, Green: 0, Blue: 0})
+	c.SetRGB(0, 0, 0)
 	c.FillRect(0, 0, gfx.DisplayWidth(), gfx.DisplayHeight())
 
-	c.SetColor(gfx.Color{Red: 0, Green: 0, Blue: 255, Alpha: 255})
+	c.SetRGBA(0, 0, 255, 255)
 	c.FillRect(42, 42, 100, 100)
 
 	//draw box if it's not nil
 	if me.box != nil {
 		c.DrawImage(me.box, 200, 200)
-		c.SetColor(gfx.Color{Red: 0, Green: 0, Blue: 0, Alpha: 100})
+		c.SetRGBA(0, 0, 0, 100)
 		c.FillRect(200, 200, 100, 100)
 	}
 	c.DrawText(&me.text, 400, 400)
@@ -74,7 +74,7 @@ func (me *Drawer) Draw(c *gfx.Canvas) {
 	c.PushViewport(42, 42, 500, 500)
 	{
 		//draw a green rect in a viewport
-		c.SetRGBA(0, 255, 0, 127)
+		c.SetRGBA(0, 255, 100, 127)
 		c.FillRect(42, 42, 100, 100)
 		c.SetRGB(0, 0, 0)
 		c.FillRect(350, 200, 70, 70)
@@ -84,8 +84,6 @@ func (me *Drawer) Draw(c *gfx.Canvas) {
 }
 
 func main() {
-	//For a fullscreen at your screens native resolution, simply use this line instead:
-	//if !gfx.OpenDisplay(0, 0, true) {
 
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 	flag.Parse()
@@ -98,6 +96,8 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
+	//For a fullscreen at your screens native resolution, simply use this line instead:
+	//if !gfx.OpenDisplay(0, 0, true) {
 	if !gfx.OpenDisplay(800, 600, false) {
 		return
 	}

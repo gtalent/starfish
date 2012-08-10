@@ -1,5 +1,5 @@
 build:
-	go build -o main
+	go build
 test:
 	go test
 clean:

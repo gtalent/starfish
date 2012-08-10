@@ -13,19 +13,27 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package gfx
+package backend
 
-import b "github.com/gtalent/starfish/backend"
+import "github.com/gtalent/starfish/util"
 
-//An RGB color representation.
-type Color struct {
-	Red, Green, Blue, Alpha byte
+var QuitFunc = func() {}
+var KeyUp = func(e KeyEvent) {}
+var KeyDown = func(e KeyEvent) {}
+var MouseWheelFunc = func(e MouseWheelEvent) {}
+var MouseButtonUp = func(e MouseEvent) {}
+var MouseButtonDown = func(e MouseEvent) {}
+
+type KeyEvent struct {
+	Key int
 }
 
-func (me *Color) bColor() (c b.Color) {
-	c.Red = me.Red
-	c.Green = me.Green
-	c.Blue = me.Blue
-	c.Alpha = me.Alpha
-	return
+type MouseEvent struct {
+	util.Point
+	Button int
+}
+
+type MouseWheelEvent struct {
+	util.Point
+	Up bool
 }

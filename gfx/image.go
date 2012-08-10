@@ -15,16 +15,8 @@
 */
 package gfx
 
-/*
-#cgo LDFLAGS: -lSDL -lSDL_image -lSDL_gfx
-#include "SDL/SDL.h"
-#include "SDL/SDL_rotozoom.h"
-#include "SDL/SDL_image.h"
-
-*/
-import "C"
-
 import (
+	b "github.com/gtalent/starfish/backend"
 	"encoding/json"
 	"github.com/gtalent/starfish/util"
 )
@@ -49,44 +41,37 @@ func (me *imageKey) String() string {
 var images = newFlyweight(
 	func(me *flyweight, path key) interface{} {
 		key := path.(*imageKey)
-		var i, tmp *C.SDL_Surface
-		var cleanup func()
+		var i *b.Image
 		var k imageKey
 		if key.Label.FilePath {
-			tmp = C.IMG_Load(C.CString(key.Label.Str))
-			i = C.SDL_DisplayFormatAlpha(tmp)
-			C.SDL_FreeSurface(tmp)
-			tmp = i
-			cleanup = func() { C.SDL_FreeSurface(tmp) }
+			i = b.LoadImage(key.Label.Str)
 		} else {
 			json.Unmarshal([]byte(key.Label.Str), &k)
-			i = me.checkout(&k).(*C.SDL_Surface)
-			cleanup = func() { me.checkin(&k) }
+			i = me.checkout(&k).(*b.Image)
 		}
 		var w, h int
 		if key.Width == -1 {
-			w = int(i.w)
+			w = int(i.W())
 		} else {
 			w = key.Width
 		}
 		if key.Height == -1 {
-			h = int(i.h)
+			h = int(i.H())
 		} else {
 			h = key.Height
 		}
-		if (i != nil) && (w != int(i.w) || h != int(i.h) || key.Angle != 0) {
-			i = resizeAngleOf(i, key.Angle, w, h)
-			cleanup()
+		if (i != nil) && (w != int(i.W()) || h != int(i.H()) || key.Angle != 0) {
+			i = b.ResizeAngleOf(i, key.Angle, w, h)
 		}
 		return i
 	},
 	func(me *flyweight, path key, img interface{}) {
-		i := img.(*C.SDL_Surface)
-		C.SDL_FreeSurface(i)
+		i := img.(*b.Image)
+		b.FreeImage(i)
 	})
 
 type Image struct {
-	img *C.SDL_Surface
+	img *b.Image
 	key imageKey
 }
 
@@ -113,7 +98,7 @@ func LoadImageSizeAngle(path string, w, h int, angle float64) (img *Image) {
 	key.Angle = angle
 	key.Width = w
 	key.Height = h
-	i := images.checkout(&key).(*C.SDL_Surface)
+	i := images.checkout(&key).(*b.Image)
 	img = new(Image)
 	img.img = i
 	img.key = key
@@ -122,12 +107,12 @@ func LoadImageSizeAngle(path string, w, h int, angle float64) (img *Image) {
 
 //Returns the width of the image.
 func (me *Image) Width() int {
-	return int(me.img.w)
+	return int(me.img.W())
 }
 
 //Returns the height of the image.
 func (me *Image) Height() int {
-	return int(me.img.h)
+	return int(me.img.H())
 }
 
 //Returns a util.Size object representing the size of this Image.
@@ -156,7 +141,7 @@ func (me *Image) ReSizeAngleOf(w, h int, angle float64) *Image {
 	key.Angle = angle
 	key.Width = w
 	key.Height = h
-	i := images.checkout(&key).(*C.SDL_Surface)
+	i := images.checkout(&key).(*b.Image)
 	img := new(Image)
 	img.img = i
 	img.key = key
@@ -178,14 +163,4 @@ func (me *Image) Free() {
 	images.checkin(&me.key)
 	me.img = nil
 	me.key.Label.Str = ""
-}
-
-func resizeAngleOf(img *C.SDL_Surface, angle float64, width, height int) *C.SDL_Surface {
-	if img.w == 0 || img.h == 0 {
-		return nil
-	}
-	xstretch := C.double(float64(width) / float64(img.w))
-	ystretch := C.double(float64(height) / float64(img.h))
-	retval := C.rotozoomSurfaceXY(img, C.double(angle), xstretch, ystretch, 1)
-	return retval
 }

@@ -15,126 +15,67 @@
 */
 package input
 
-/*
-#cgo LDFLAGS: -lSDL
-#include "SDL/SDL.h"
-
-int eventType(SDL_Event *e) {
-	return e->type;
-}
-
-int eventKey(SDL_Event *e) {
-	return e->key.keysym.sym;
-}
-
-int eventMouseButton(SDL_Event *e) {
-	return e->button.button;
-}
-
-int eventMouseX(SDL_Event *e) {
-	return e->button.x;
-}
-
-int eventMouseY(SDL_Event *e) {
-	return e->button.y;
-}
-*/
-import "C"
-
-var running = true
+import b "github.com/gtalent/starfish/backend"
 
 //Initializes the input system and returns a bool indicating success.
 func Init() {
-	go run()
-}
-
-func run() {
-	scrollFunc := func(b bool, x, y int) {
+	b.QuitFunc = func() {
+		quitListenersLock.Lock()
+		for _, v := range quitListeners {
+			go v.Quit()
+		}
+		quitListenersLock.Unlock()
+	}
+	b.KeyDown = func(e b.KeyEvent) {
+		var ke KeyEvent
+		ke.Key = e.Key
+		keyPressListenersLock.Lock()
+		for _, v := range keyPressListeners {
+			go v.KeyPress(ke)
+		}
+		keyPressListenersLock.Unlock()
+	}
+	b.KeyUp = func(e b.KeyEvent) {
+		var ke KeyEvent
+		ke.Key = e.Key
+		keyReleaseListenersLock.Lock()
+		for _, v := range keyReleaseListeners {
+			go v.KeyRelease(ke)
+		}
+		keyReleaseListenersLock.Unlock()
+	}
+	b.MouseWheelFunc = func(i b.MouseWheelEvent) {
 		var e MouseWheelEvent
-		e.Up = b
-		e.X = x
-		e.Y = y
+		e.Up = i.Up
+		e.X = i.X
+		e.Y = i.Y
 		mouseWheelListenersLock.Lock()
 		for _, v := range mouseWheelListeners {
 			go v.MouseWheelScroll(e)
 		}
 		mouseWheelListenersLock.Unlock()
 	}
-	for running {
-		var e C.SDL_Event
-		C.SDL_WaitEvent(&e)
-		switch C.eventType(&e) {
-		case C.SDL_QUIT:
-			go func() {
-				quitListenersLock.Lock()
-				for _, v := range quitListeners {
-					go v.Quit()
-				}
-				quitListenersLock.Unlock()
-			}()
-			running = false
-		case C.SDL_KEYDOWN:
-			go func() {
-				var ke KeyEvent
-				ke.Key = int(C.eventKey(&e))
-				keyPressListenersLock.Lock()
-				for _, v := range keyPressListeners {
-					go v.KeyPress(ke)
-				}
-				keyPressListenersLock.Unlock()
-			}()
-		case C.SDL_KEYUP:
-			go func() {
-				var ke KeyEvent
-				ke.Key = int(C.eventKey(&e))
-				keyReleaseListenersLock.Lock()
-				for _, v := range keyReleaseListeners {
-					go v.KeyRelease(ke)
-				}
-				keyReleaseListenersLock.Unlock()
-			}()
-		case C.SDL_MOUSEBUTTONDOWN:
-			x := int(C.eventMouseX(&e))
-			y := int(C.eventMouseY(&e))
-			switch C.eventMouseButton(&e) {
-			case C.SDL_BUTTON_WHEELUP:
-				go scrollFunc(true, x, y)
-			case C.SDL_BUTTON_WHEELDOWN:
-				go scrollFunc(false, x, y)
-			default:
-				go func() {
-					var me MouseEvent
-					me.X = x
-					me.Y = y
-					me.Button = int(C.eventMouseButton(&e))
-					mousePressListenersLock.Lock()
-					for _, v := range mousePressListeners {
-						go v.MouseButtonPress(me)
-					}
-					mousePressListenersLock.Unlock()
-				}()
-			}
-		case C.SDL_MOUSEBUTTONUP:
-			x := int(C.eventMouseX(&e))
-			y := int(C.eventMouseY(&e))
-			switch C.eventMouseButton(&e) {
-			case C.SDL_BUTTON_WHEELUP:
-				go scrollFunc(true, x, y)
-			case C.SDL_BUTTON_WHEELDOWN:
-				go scrollFunc(false, x, y)
-			default:
-				go func() {
-					var me MouseEvent
-					me.Button = int(C.eventMouseButton(&e))
-					me.X = int(C.eventMouseX(&e))
-					me.Y = int(C.eventMouseY(&e))
-					mouseReleaseListenersLock.Lock()
-					for _, v := range mouseReleaseListeners {
-						go v.MouseButtonRelease(me)
-					}
-					mouseReleaseListenersLock.Unlock()
-				}()
-			}
+	b.MouseButtonDown = func(e b.MouseEvent) {
+		var me MouseEvent
+		me.X = e.X
+		me.Y = e.Y
+		me.Button = e.Button
+		mousePressListenersLock.Lock()
+		for _, v := range mousePressListeners {
+			go v.MouseButtonPress(me)
 		}
+		mousePressListenersLock.Unlock()
 	}
+	b.MouseButtonUp = func(e b.MouseEvent) {
+		var me MouseEvent
+		me.Button = e.Button
+		me.X = e.X
+		me.Y = e.Y
+		mouseReleaseListenersLock.Lock()
+		for _, v := range mouseReleaseListeners {
+			go v.MouseButtonRelease(me)
+		}
+		mouseReleaseListenersLock.Unlock()
+	}
+	go b.HandleInput()
 }
