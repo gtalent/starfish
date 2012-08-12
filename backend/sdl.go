@@ -159,14 +159,12 @@ func SetClipRect(x, y, w, h int) {
 	C.SDL_SetClipRect(screen, &r)
 }
 
-func FillRoundedRect(x, y, width, height, radius int, c Color) {
-	r := sdl_Rect(x, y, width, height)
-	C.roundedBoxRGBA(screen, C.Sint16(r.x), C.Sint16(r.y), C.Sint16(int(r.x)+int(r.w)), C.Sint16(int(r.y)+int(r.h)), C.Sint16(radius), C.Uint8(c.Red), C.Uint8(c.Green), C.Uint8(c.Blue), C.Uint8(c.Alpha))
+func FillRoundedRect(x, y, w, h, radius int, c Color) {
+	C.roundedBoxRGBA(screen, C.Sint16(x), C.Sint16(y), C.Sint16(x+w), C.Sint16(y+h), C.Sint16(radius), C.Uint8(c.Red), C.Uint8(c.Green), C.Uint8(c.Blue), C.Uint8(c.Alpha))
 }
 
-func FillRect(x, y, width, height int, c Color) {
-	r := sdl_Rect(x, y, width, height)
-	C.boxRGBA(screen, C.Sint16(r.x), C.Sint16(r.y), C.Sint16(int(r.x)+int(r.w)), C.Sint16(int(r.y)+int(r.h)), C.Uint8(c.Red), C.Uint8(c.Green), C.Uint8(c.Blue), C.Uint8(c.Alpha))
+func FillRect(x, y, w, h int, c Color) {
+	C.boxRGBA(screen, C.Sint16(x), C.Sint16(y), C.Sint16(x+w), C.Sint16(y+h), C.Uint8(c.Red), C.Uint8(c.Green), C.Uint8(c.Blue), C.Uint8(c.Alpha))
 }
 
 //Draws the image at the given coordinates.
