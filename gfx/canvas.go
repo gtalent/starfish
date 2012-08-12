@@ -48,7 +48,7 @@ func (me *Canvas) GetViewport() util.Bounds {
 //Pushes a viewport to limit the drawing space to the given bounds within the current drawing space.
 func (me *Canvas) PushViewport(x, y, width, height int) {
 	me.origin.SubtractFrom(me.viewport.translate())
-	me.viewport.push(util.Bounds{util.Point{X: int(x), Y: int(y)}, util.Size{Width: int(width), Height: int(height)}})
+	me.viewport.push(util.Bounds{util.Point{X: x, Y: y}, util.Size{Width: width, Height: height}})
 	r := me.viewport.bounds()
 	b.SetClipRect(r.X, r.Y, r.Width, r.Height)
 	me.origin = me.translation.AddOf(me.viewport.bounds().Point)

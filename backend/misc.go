@@ -17,6 +17,12 @@ package backend
 
 import "github.com/gtalent/starfish/util"
 
+var drawFunc = func() {}
+
+func SetDrawFunc(f func()) {
+	drawFunc = f
+}
+
 var QuitFunc = func() {}
 var KeyUp = func(e KeyEvent) {}
 var KeyDown = func(e KeyEvent) {}
