@@ -16,8 +16,8 @@
 package gfx
 
 import (
-	b "github.com/gtalent/starfish/backend"
 	"encoding/json"
+	b "github.com/gtalent/starfish/backend"
 	"github.com/gtalent/starfish/util"
 )
 
