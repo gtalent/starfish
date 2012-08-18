@@ -134,16 +134,18 @@ func SetDrawInterval(ms int) {
 
 //Used to manually draw the screen.
 func Draw() {
-	for _, a := range drawers {
-		a.canvas.load()
-		a.drawer.Draw(&a.canvas)
-	}
+	b.Draw()
 }
 
 //Opens a window.
 //Returns an indicator of success.
 func OpenDisplay(w, h int, fullscreen bool) bool {
-	b.SetDrawFunc(Draw)
+	b.SetDrawFunc(func() {
+		for _, a := range drawers {
+			a.canvas.load()
+			a.drawer.Draw(&a.canvas)
+		}
+	})
 	b.OpenDisplay(w, h, fullscreen)
 	SetDrawInterval(16)
 	startAnimTick()
