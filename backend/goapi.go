@@ -16,48 +16,86 @@
 package backend
 
 /*
-#cgo LDFLAGS: -lGL -lglut
-#include "gl_freebsd_linux_darwin.h"
+#cgo LDFLAGS: -lm -lGL -lGLU -lglfw -lIL
+
+#include "capi.h"
+#include "gl.h"
+
 */
 import "C"
+import "runtime"
+
+var draw = make(chan interface{})
+var drawRet = make(chan interface{})
+var loadImg = make(chan string)
+var loadImgRet = make(chan *Image)
+var freeImg = make(chan *Image)
+var freeImgRet = make(chan interface{})
 
 func OpenDisplay(w, h int, full bool) {
-	var c C.int = 0
-	C.glutInit(&c, nil)
-	C.glutInitDisplayMode(C.GLUT_DEPTH | C.GLUT_DOUBLE | C.GLUT_RGBA)
-	C.glutInitWindowSize(C.int(w), C.int(h))
-	C.glutCreateWindow(C.CString(""))
+	ret := make(chan interface{})
+	go func() {
+		runtime.LockOSThread()
+		f := C.int(0)
+		if full {
+			f = 1
+		}
+		C.openDisplay(C.int(w), C.int(h), f)
+		ret <- nil
+		run()
+		runtime.UnlockOSThread()
+	}()
+	<-ret
 }
 
 func CloseDisplay() {
-	C.glutExit()
+	C.closeDisplay()
 }
 
 //Sets the title of the window.
 func SetDisplayTitle(title string) {
-	C.glutSetWindowTitle(C.CString(title))
+	C.setDisplayTitle(C.CString(title))
 }
 
 //Returns the width of the display window.
 func DisplayWidth() int {
-	return int(C.glutGet(C.GLUT_WINDOW_WIDTH))
+	return int(C.displayWidth())
 }
 
 //Returns the height of the display window.
 func DisplayHeight() int {
-	return int(C.glutGet(C.GLUT_WINDOW_HEIGHT))
+	return int(C.displayHeight())
 }
 
-//Used to manually draw the screen.
+//export Draw
 func Draw() {
-	drawFunc()
+	draw <- nil
+	<-drawRet
+}
+
+func run() {
+	for {
+		select {
+		case <-draw:
+			C.clear()
+			drawFunc()
+			C.flip()
+			drawRet <- nil
+		case path := <-loadImg:
+			C.loadImage(C.CString(path))
+			i := Image(C.loadImage(C.CString(path)))
+			loadImgRet <- &i
+		case img := <-freeImg:
+			i := C.Image(*img)
+			C.freeImage(&i)
+			freeImgRet <- nil
+		}
+	}
 }
 
 //MISC
 //An RGB color representation.
-type Color struct {
-	Red, Green, Blue, Alpha byte
-}
+type Color C.Color
 
 func (me *Color) toUint32() uint32 {
 	return (uint32(me.Red) << 16) | (uint32(me.Green) << 8) | uint32(me.Blue)
@@ -67,44 +105,42 @@ func (me *Color) toUint32() uint32 {
 
 //Pushes a viewport to limit the drawing space to the given bounds within the current drawing space.
 func SetClipRect(x, y, w, h int) {
-	y += h
-	C.glViewport(C.GLint(x), C.GLint(y), C.GLsizei(w), C.GLsizei(h))
-	C.glLoadIdentity()
-	C.glOrtho(0.0, C.GLdouble(w), C.GLdouble(h), 0.0, -1.0, 1.0)
-	C.glTranslated(C.GLdouble(-x), C.GLdouble(-y), 0)
+	C.setClipRect(C.int(x), C.int(y), C.int(w), C.int(h))
 }
 
 func FillRoundedRect(x, y, w, h, radius int, c Color) {
-	C.glColor4b(C.GLbyte(c.Red), C.GLbyte(c.Green), C.GLbyte(c.Blue), C.GLbyte(c.Alpha))
 }
 
 func FillRect(x, y, w, h int, c Color) {
-	C.glColor4b(C.GLbyte(c.Red), C.GLbyte(c.Green), C.GLbyte(c.Blue), C.GLbyte(c.Alpha))
-	C.glRecti(C.GLint(x), C.GLint(y), C.GLint(x+w), C.GLint(y+h))
+	C.fillRect(C.int(x), C.int(y), C.int(w), C.int(h), C.Color(c))
 }
 
 //Draws the image at the given coordinates.
 func DrawImage(img *Image, x, y int) {
+	i := C.Image(*img)
+	C.drawImage(&i, C.int(x), C.int(y))
 }
 
 //IMAGE HANDLING
 
-type Image struct {
-}
+type Image C.Image
 
 func (me *Image) W() int {
-	return 0
+	return int(me.w)
 }
 
 func (me *Image) H() int {
-	return 0
+	return int(me.h)
 }
 
 func LoadImage(path string) *Image {
-	return nil
+	loadImg <- path
+	return <-loadImgRet
 }
 
 func FreeImage(img *Image) {
+	freeImg <- img
+	<-freeImgRet
 }
 
 func ResizeAngleOf(image *Image, angle float64, width, height int) *Image {

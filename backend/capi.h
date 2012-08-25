@@ -13,18 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <IL/il.h>
-
 typedef struct {
-	GLuint img;
-	ILuint il_img;
-	int w;
-	int h;
-	short loaded;
-} Image;
+	short Red;
+	short Green;
+	short Blue;
+	short Alpha;
+} Color;
 
-inline Image loadImage(const char*);
-inline void freeImage(Image*);
-inline void drawImage(Image*, int, int);
+inline void openDisplay(int, int, int);
+inline void closeDisplay();
+inline const char* displayTitle();
+inline void setDisplayTitle(const char*);
+inline int displayWidth();
+inline int displayHeight();
+inline void clear();
+inline void flip();
+
+inline int imageWidth(void*);
+inline int imageHeight(void*);
+
+inline void fillRect(int, int, int, int, Color);
+inline void fillRoundedRect(int, int, int, int, int, Color);
+inline void setClipRect(int, int, int, int);

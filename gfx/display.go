@@ -143,11 +143,16 @@ func Draw() {
 //Opens a window.
 //Returns an indicator of success.
 func OpenDisplay(w, h int, fullscreen bool) bool {
-	b.SetDrawFunc(Draw)
-	b.OpenDisplay(w, h, fullscreen)
-	SetDrawInterval(16)
-	startAnimTick()
-	go run()
+	ret := make(chan interface{})
+	go func() {
+		b.SetDrawFunc(Draw)
+		b.OpenDisplay(w, h, fullscreen)
+		SetDrawInterval(16)
+		startAnimTick()
+		ret <-nil
+		run()
+	}()
+	<-ret
 	return true
 }
 

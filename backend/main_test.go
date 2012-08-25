@@ -15,11 +15,28 @@
 */
 package backend
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestMain(t *testing.T) {
 	OpenDisplay(800, 600, false)
 	SetDisplayTitle("Narf!")
+	img := LoadImage("../example/box.png")
+	p := 0
+	SetDrawFunc(func() {
+		p++
+		SetClipRect(0, 0, DisplayWidth(), DisplayHeight())
+		c := Color{0, 0, 100, 255}
+		FillRect(p, p, p+100, p+100, c)
+		FillRoundedRect(100, 100, 400, 400, 2, c)
+		DrawImage(img, p, p)
+	})
+
 	for {
+		Draw()
+		time.Sleep(15000000)
 	}
+	CloseDisplay()
 }
