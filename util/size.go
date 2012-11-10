@@ -21,8 +21,8 @@ import "strconv"
   Used to track a Cartesian size.
 */
 type Size struct {
-	Width  int
-	Height int
+	Width  int "json: width"
+	Height int "json: height"
 }
 
 //Compares the value of this Size to the value of the given Size.

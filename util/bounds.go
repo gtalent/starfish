@@ -19,8 +19,8 @@ package util
   Represents location and size attributes.
 */
 type Bounds struct {
-	Point
-	Size
+	Point "json: point"
+	Size  "json: size"
 }
 
 //Compares the value of this Bounds to the value of the given Bounds.

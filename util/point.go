@@ -22,13 +22,13 @@ import "strconv"
 */
 type Point struct {
 	/*
-	 * The x coordinate.
-	 */
-	X int
+	  The x coordinate.
+	*/
+	X int "json: x"
 	/*
-	 * The y coordinate.
-	 */
-	Y int
+	  The y coordinate.
+	*/
+	Y int "json: y"
 }
 
 //Compares the value of this Point to the value of the given Point.
