@@ -70,7 +70,6 @@ const (
 	Key_BackQuote    = b.Key_BackQuote
 	Key_Backspace    = b.Key_Backspace
 	Key_Tab          = b.Key_Tab
-	Key_Clear        = b.Key_Clear
 	Key_Enter        = b.Key_Enter
 	Key_Pause        = b.Key_Pause
 	Key_Escape       = b.Key_Escape
