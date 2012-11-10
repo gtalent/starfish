@@ -302,7 +302,6 @@ const (
 	Key_BackQuote    = C.SDLK_BACKQUOTE
 	Key_Backspace    = C.SDLK_BACKSPACE
 	Key_Tab          = C.SDLK_TAB
-	Key_Clear        = C.SDLK_CLEAR
 	Key_Enter        = C.SDLK_RETURN
 	Key_Pause        = C.SDLK_PAUSE
 	Key_Escape       = C.SDLK_ESCAPE
