@@ -69,7 +69,7 @@ func (me *Bounds) Contains(x, y int) bool {
 
 //Returns true if this Bounds intersects with the given Bounds.
 func (me *Bounds) Intersects(b Bounds) bool {
-	return me.ContainsPoint(me.Point) || me.Contains(b.X, b.Y2()) ||
+	return me.ContainsPoint(b.Point) || me.Contains(b.X, b.Y2()) ||
 		me.Contains(b.X2(), b.Y) || me.Contains(b.X2(), b.Y2())
 }
 
