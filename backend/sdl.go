@@ -16,18 +16,19 @@
 package backend
 
 /*
-#cgo LDFLAGS: -lSDL -lSDL_ttf -lSDL_image -lSDL_gfx
-#include <SDL/SDL.h>
+#cgo LDFLAGS: -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_gfx
+#include <SDL2/SDL.h>
+#include <SDL2/SDL2_rotozoom.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include "sdl.h"
-#include "SDL/SDL_rotozoom.h"
-#include "SDL/SDL_gfxPrimitives.h"
-#include "SDL/SDL_image.h"
-#include "SDL/SDL_ttf.h"
 */
 import "C"
 
 var drawFunc func()
-var screen *C.SDL_Surface
+var screen *C.SDL_Window
+var renderer *C.SDL_Renderer
 
 func OpenDisplay(w, h int, full bool) {
 	var i C.int = 0
@@ -47,33 +48,37 @@ func SetDrawFunc(f func()) {
 
 //Sets the title of the window.
 func SetDisplayTitle(title string) {
-	C.SDL_WM_SetCaption(C.CString(title), C.CString(""))
+	C.SDL_SetWindowTitle(screen, C.CString(""))
 }
 
 //Returns the width of the display window.
 func DisplayWidth() int {
-	return int(screen.w)
+	var w, h C.int
+	C.SDL_GetWindowSize(screen, &w, &h)
+	return int(w)
 }
 
 //Returns the height of the display window.
 func DisplayHeight() int {
-	return int(screen.h)
+	var w, h C.int
+	C.SDL_GetWindowSize(screen, &w, &h)
+	return int(h)
 }
 
 //Used to manually draw the screen.
 func Draw() {
 	drawFunc()
-	C.SDL_Flip(screen)
+	C.SDL_RenderPresent(screen)
 }
 
 //MISC
 
 func sdl_Rect(x, y, width, height int) C.SDL_Rect {
 	var r C.SDL_Rect
-	r.x = C.Sint16(x)
-	r.y = C.Sint16(y)
-	r.w = C.Uint16(width)
-	r.h = C.Uint16(height)
+	r.x = C.int(x)
+	r.y = C.int(y)
+	r.w = C.int(width)
+	r.h = C.int(height)
 	return r
 }
 
@@ -93,40 +98,46 @@ func (me *Color) toUint32() uint32 {
 //IMAGE HANDLING
 
 type Image struct {
-	surface *C.SDL_Surface
+	surface *C.SDL_Texture
+	Width, Height int
 }
 
 func (me *Image) W() int {
-	return int(me.surface.w)
+	var out C.int
+	C.SDL_QueryTexture(me.surface, nil, nil, &out, nil)
+	return int(out)
 }
 
 func (me *Image) H() int {
-	return int(me.surface.h)
+	var out C.int
+	C.SDL_QueryTexture(me.surface, nil, nil, nil, &out)
+	return int(out)
 }
 
 func LoadImage(path string) *Image {
-	tmp := C.IMG_Load(C.CString(path))
-	i := C.SDL_DisplayFormatAlpha(tmp)
-	C.SDL_FreeSurface(tmp)
-
+	i := C.IMG_Load(C.CString(path))
 	out := new(Image)
-	out.surface = i
+	out.surface = C.SDL_CreateTextureFromSurface(renderer, i)
+	C.SDL_FreeSurface(i)
 	return out
 }
 
 func FreeImage(img *Image) {
-	C.SDL_FreeSurface(img.surface)
+	C.SDL_DestroyTexture(img.surface)
 }
 
 func ResizeAngleOf(image *Image, angle float64, width, height int) *Image {
 	img := image.surface
-	if img.w == 0 || img.h == 0 {
+	if image.W() == 0 || image.H() == 0 {
 		return nil
 	}
 	retval := new(Image)
-	xstretch := C.double(float64(width) / float64(img.w))
-	ystretch := C.double(float64(height) / float64(img.h))
-	retval.surface = C.rotozoomSurfaceXY(img, C.double(angle), xstretch, ystretch, 1)
+	//xstretch := C.double(float64(width) / float64(image.W()))
+	//ystretch := C.double(float64(height) / float64(image.H()))
+	//retval.surface = C.rotozoomSurfaceXY(img, C.double(angle), xstretch, ystretch, 1)
+	retval.Width = width
+	retval.Height = height
+	retval.surface = img
 	return retval
 }
 
@@ -147,33 +158,33 @@ func FreeFont(val *Font) {
 }
 
 func (me *Font) WriteTo(text string, t *Image, c Color) bool {
-	t.surface = C.TTF_RenderText_Blended(me.font, C.CString(text), c.toSDL_Color())
+	sur := C.TTF_RenderText_Blended(me.font, C.CString(text), c.toSDL_Color())
+	t.surface = C.SDL_CreateTextureFromSurface(renderer, sur)
 	return t.surface != nil
 }
-
 //GFX HANDLING
 
 //Pushes a viewport to limit the drawing space to the given bounds within the current drawing space.
 func SetClipRect(x, y, w, h int) {
-	r := sdl_Rect(x, y, w, h)
-	C.SDL_SetClipRect(screen, &r)
+	//r := sdl_Rect(x, y, w, h)
+	//C.SDL_SetClipRect(renderer, &r)
 }
 
 func FillRoundedRect(x, y, w, h, radius int, c Color) {
-	C.roundedBoxRGBA(screen, C.Sint16(x), C.Sint16(y), C.Sint16(x+w), C.Sint16(y+h), C.Sint16(radius), C.Uint8(c.Red), C.Uint8(c.Green), C.Uint8(c.Blue), C.Uint8(c.Alpha))
+	C.roundedBoxRGBA(renderer, C.Sint16(x), C.Sint16(y), C.Sint16(x+w), C.Sint16(y+h), C.Sint16(radius), C.Uint8(c.Red), C.Uint8(c.Green), C.Uint8(c.Blue), C.Uint8(c.Alpha))
 }
 
 func FillRect(x, y, w, h int, c Color) {
-	C.boxRGBA(screen, C.Sint16(x), C.Sint16(y), C.Sint16(x+w), C.Sint16(y+h), C.Uint8(c.Red), C.Uint8(c.Green), C.Uint8(c.Blue), C.Uint8(c.Alpha))
+	C.boxRGBA(renderer, C.Sint16(x), C.Sint16(y), C.Sint16(x+w), C.Sint16(y+h), C.Uint8(c.Red), C.Uint8(c.Green), C.Uint8(c.Blue), C.Uint8(c.Alpha))
 }
 
 //Draws the image at the given coordinates.
 func DrawImage(img *Image, x, y int) {
-	C.SDL_SetAlpha(img.surface, C.SDL_SRCALPHA, 255)
+	C.SDL_SetTextureAlphaMod(img.surface, 255)
 	var dest C.SDL_Rect
-	dest.x = C.Sint16(x)
-	dest.y = C.Sint16(y)
-	C.SDL_BlitSurface(img.surface, nil, screen, &dest)
+	dest.x = C.int(x)
+	dest.y = C.int(y)
+	C.SDL_RenderCopy(renderer, img.surface, nil, &dest)
 }
 
 //INPUT HANDLING
@@ -182,13 +193,13 @@ var running = true
 
 func HandleInput() {
 	running = true
-	scrollFunc := func(b bool, x, y int) {
-		var e MouseWheelEvent
-		e.Up = b
-		e.X = x
-		e.Y = y
-		MouseWheelFunc(e)
-	}
+	//scrollFunc := func(b bool, x, y int) {
+	//	var e MouseWheelEvent
+	//	e.Up = b
+	//	e.X = x
+	//	e.Y = y
+	//	MouseWheelFunc(e)
+	//}
 	for running {
 		var e C.SDL_Event
 		C.SDL_WaitEvent(&e)
@@ -212,10 +223,10 @@ func HandleInput() {
 			x := int(C.eventMouseX(&e))
 			y := int(C.eventMouseY(&e))
 			switch C.eventMouseButton(&e) {
-			case C.SDL_BUTTON_WHEELUP:
-				go scrollFunc(true, x, y)
-			case C.SDL_BUTTON_WHEELDOWN:
-				go scrollFunc(false, x, y)
+			//case C.SDL_BUTTON_WHEELUP:
+			//	go scrollFunc(true, x, y)
+			//case C.SDL_BUTTON_WHEELDOWN:
+			//	go scrollFunc(false, x, y)
 			default:
 				go func() {
 					var me MouseEvent
@@ -226,13 +237,13 @@ func HandleInput() {
 				}()
 			}
 		case C.SDL_MOUSEBUTTONUP:
-			x := int(C.eventMouseX(&e))
-			y := int(C.eventMouseY(&e))
+			///x := int(C.eventMouseX(&e))
+			///y := int(C.eventMouseY(&e))
 			switch C.eventMouseButton(&e) {
-			case C.SDL_BUTTON_WHEELUP:
-				go scrollFunc(true, x, y)
-			case C.SDL_BUTTON_WHEELDOWN:
-				go scrollFunc(false, x, y)
+			//case C.SDL_BUTTON_WHEELUP:
+			//	go scrollFunc(true, x, y)
+			//case C.SDL_BUTTON_WHEELDOWN:
+			//	go scrollFunc(false, x, y)
 			default:
 				go func() {
 					var me MouseEvent

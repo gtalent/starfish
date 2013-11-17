@@ -18,7 +18,7 @@ This is done for two reasons:
 
 	* Arch Linux the following should work:
  
-			pacman -S gcc sdl sdl_gfx sdl_image sdl_ttf
+			pacman -S gcc sdl2 sdl2_gfx sdl2_image sdl2_ttf
 
 	* Anyone feel free to add instructions for other systems here.
 

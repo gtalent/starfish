@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <SDL/SDL_ttf.h>
+#include <SDL2/SDL_ttf.h>
 #include "sdl.h"
 
-SDL_Surface* screen;
+SDL_Window *screen;
 
-SDL_Surface* openDisplay(int w, int h, int full) {
+SDL_Window *openDisplay(int w, int h, int full) {
 	SDL_Init(SDL_INIT_VIDEO);
 	TTF_Init();
-	unsigned flags = SDL_DOUBLEBUF;
-	flags |= SDL_SWSURFACE;
-	flags |= SDL_HWACCEL;
+	unsigned flags = 0;
 	if (full) {
-		flags |= SDL_FULLSCREEN;
+		flags |= SDL_WINDOW_FULLSCREEN;
 	}
-	screen = SDL_SetVideoMode(w, h, 32, flags);
+	screen = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, flags);
 	return screen;
 }
 
 void closeDisplay() {
-	SDL_FreeSurface(screen);
+	SDL_DestroyWindow(screen);
 	screen = NULL;
 	SDL_Quit();
 }

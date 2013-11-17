@@ -15,7 +15,7 @@
 */
 package input
 
-import b "github.com/gtalent/starfish/backend"
+import b "../backend"
 
 const (
 	Key_a int = b.Key_a

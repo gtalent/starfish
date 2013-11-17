@@ -16,8 +16,8 @@
 package gfx
 
 import (
-	b "github.com/gtalent/starfish/backend"
-	"github.com/gtalent/starfish/util"
+	b "../backend"
+	"../util"
 )
 
 //Used to draw and to hold data for the drawing context.

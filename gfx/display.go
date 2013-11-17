@@ -16,7 +16,7 @@
 package gfx
 
 import (
-	b "github.com/gtalent/starfish/backend"
+	b "../backend"
 	"time"
 )
 

@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
-SDL_Surface* openDisplay(int w, int h, int full);
+SDL_Window* openDisplay(int w, int h, int full);
 
 void closeDisplay();
 

@@ -15,7 +15,7 @@
 */
 package input
 
-import b "github.com/gtalent/starfish/backend"
+import b "../backend"
 
 //Initializes the input system and returns a bool indicating success.
 func Init() {
