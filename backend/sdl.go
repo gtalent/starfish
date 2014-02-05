@@ -25,17 +25,21 @@ package backend
 #include "sdl.h"
 */
 import "C"
+import "runtime"
 
 var drawFunc func()
 var screen *C.SDL_Window
 var renderer *C.SDL_Renderer
 
 func OpenDisplay(w, h int, full bool) {
+	runtime.LockOSThread()
 	var i C.int = 0
 	if full {
 		i = 1
 	}
 	screen = C.openDisplay(C.int(w), C.int(h), i)
+	renderer = C.SDL_CreateRenderer(screen, -1, 0)//C.SDL_RENDERER_ACCELERATED)
+	C.SDL_SetRenderDrawBlendMode(renderer, C.SDL_BLENDMODE_BLEND)
 }
 
 func CloseDisplay() {
@@ -68,7 +72,7 @@ func DisplayHeight() int {
 //Used to manually draw the screen.
 func Draw() {
 	drawFunc()
-	C.SDL_RenderPresent(screen)
+	C.SDL_RenderPresent(renderer)
 }
 
 //MISC
@@ -115,9 +119,24 @@ func (me *Image) H() int {
 }
 
 func LoadImage(path string) *Image {
+	if renderer == nil {
+		errlog.Println("Cannot load image because renderer is nil")
+		return nil
+	}
+
 	i := C.IMG_Load(C.CString(path))
+	if i == nil {
+		errlog.Println("Surface for", path, "loaded nil")
+		return nil
+	}
+
+	texture := C.SDL_CreateTextureFromSurface(renderer, i)
+	if texture == nil {
+		errlog.Println("Texture for", path, "loaded nil")
+		return nil
+	}
 	out := new(Image)
-	out.surface = C.SDL_CreateTextureFromSurface(renderer, i)
+	out.surface = texture
 	C.SDL_FreeSurface(i)
 	return out
 }
@@ -175,15 +194,26 @@ func FillRoundedRect(x, y, w, h, radius int, c Color) {
 }
 
 func FillRect(x, y, w, h int, c Color) {
-	C.boxRGBA(renderer, C.Sint16(x), C.Sint16(y), C.Sint16(x+w), C.Sint16(y+h), C.Uint8(c.Red), C.Uint8(c.Green), C.Uint8(c.Blue), C.Uint8(c.Alpha))
+	if renderer == nil {
+		errlog.Println("FillRect: renderer nil")
+	}
+	var rect C.SDL_Rect
+	rect.x = C.int(x)
+	rect.y = C.int(y)
+	rect.w = C.int(w)
+	rect.h = C.int(h)
+	C.SDL_SetRenderDrawColor(renderer, C.Uint8(c.Red), C.Uint8(c.Green), C.Uint8(c.Blue), C.Uint8(c.Alpha))
+	C.SDL_RenderFillRect(renderer, &rect)
 }
 
 //Draws the image at the given coordinates.
 func DrawImage(img *Image, x, y int) {
-	C.SDL_SetTextureAlphaMod(img.surface, 255)
 	var dest C.SDL_Rect
 	dest.x = C.int(x)
 	dest.y = C.int(y)
+	dest.w = C.int(img.W())
+	dest.h = C.int(img.H())
+	C.SDL_SetTextureAlphaMod(img.surface, 255)
 	C.SDL_RenderCopy(renderer, img.surface, nil, &dest)
 }
 

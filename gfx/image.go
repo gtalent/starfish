@@ -16,9 +16,9 @@
 package gfx
 
 import (
-	"encoding/json"
 	b "../backend"
 	"../util"
+	"encoding/json"
 )
 
 type imageLabel struct {

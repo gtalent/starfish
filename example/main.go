@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"runtime/pprof"
 	//normally "github.com/gtalent/starfish/gfx"
 	"../gfx"
@@ -84,6 +85,8 @@ func (me *Drawer) Draw(c *gfx.Canvas) {
 }
 
 func main() {
+	runtime.GOMAXPROCS(1)
+	runtime.LockOSThread()
 
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 	flag.Parse()

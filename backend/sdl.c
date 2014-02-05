@@ -20,11 +20,13 @@ SDL_Window *screen;
 
 SDL_Window *openDisplay(int w, int h, int full) {
 	SDL_Init(SDL_INIT_VIDEO);
+	IMG_Init(IMG_INIT_PNG);
 	TTF_Init();
 	unsigned flags = 0;
 	if (full) {
 		flags |= SDL_WINDOW_FULLSCREEN;
 	}
+	flags |= SDL_WINDOW_OPENGL;
 	screen = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, flags);
 	return screen;
 }

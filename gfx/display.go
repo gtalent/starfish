@@ -20,12 +20,11 @@ import (
 	"time"
 )
 
-var autorun = true
 var displayTitle string
 var drawers []*canvasHolder
 var displayDead chan interface{}
-var kill = make(chan interface{})
 var drawInterval = 0
+var running = false
 
 //An interface used to for telling the display what to draw.
 type Drawer interface {
@@ -110,23 +109,6 @@ func RemoveDrawFunc(drawer func(*Canvas)) {
 	}
 }
 
-func run() {
-	for autorun {
-		select {
-		case <-kill:
-			break
-		default:
-			b.Draw()
-		}
-		time.Sleep(time.Duration(drawInterval))
-	}
-}
-
-//Sets whether or not the draw functions will be called automatically. On by default.
-func SetAutoDraw(autodraw bool) {
-	autorun = autodraw
-}
-
 //Sets the time in milliseconds between draws when autodraw is on.
 func SetDrawInterval(ms int) {
 	drawInterval = ms * 1000000
@@ -140,21 +122,31 @@ func Draw() {
 //Opens a window.
 //Returns an indicator of success.
 func OpenDisplay(w, h int, fullscreen bool) bool {
-	b.SetDrawFunc(func() {
-		for _, a := range drawers {
-			a.canvas.load()
-			a.drawer.Draw(&a.canvas)
-		}
-	})
-	b.OpenDisplay(w, h, fullscreen)
-	SetDrawInterval(16)
-	startAnimTick()
-	go run()
+	if !running {
+		b.SetDrawFunc(func() {
+			for _, a := range drawers {
+				a.canvas.load()
+				a.drawer.Draw(&a.canvas)
+			}
+		})
+		b.OpenDisplay(w, h, fullscreen)
+		running = true
+		SetDrawInterval(16)
+		startAnimTick()
+	}
 	return true
 }
 
 //Closes the window.
 func CloseDisplay() {
-	close(kill)
+	running = false
 	b.CloseDisplay()
+}
+
+//Blocks until CloseDisplay is called, regardless of whether or not OpenDisplay has been called.
+func Main() {
+	for running {
+		b.Draw()
+		time.Sleep(time.Duration(drawInterval))
+	}
 }

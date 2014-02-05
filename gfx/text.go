@@ -16,8 +16,8 @@
 package gfx
 
 import (
-	"encoding/json"
 	b "../backend"
+	"encoding/json"
 )
 
 type fontKey struct {

@@ -30,14 +30,9 @@ func SetAnimTickInterval(ms int64) {
 
 func startAnimTick() {
 	go func() {
-		for {
-			select {
-			case <-kill:
-				return
-			default:
-				animTicker = time.Now().UnixNano()
-				time.Sleep(time.Duration(tickerInterval))
-			}
+		for running {
+			animTicker = time.Now().UnixNano()
+			time.Sleep(time.Duration(tickerInterval))
 		}
 	}()
 }
@@ -102,6 +97,9 @@ func (me *Animation) LoadImage(path string) {
 func (me *Animation) LoadImageSize(path string, width, height int) {
 	if i := LoadImageSize(path, width, height); i != nil {
 		me.images = append(me.images, i)
+		log.Printf("Animatin: Loaded image {path: %s, width: %d, height: %d}", path, width, height)
+	} else {
+		errlog.Printf("Animatin: Could not load image {path: %s, width: %d, height: %d}", path, width, height)
 	}
 }
 
