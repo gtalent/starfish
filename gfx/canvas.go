@@ -61,6 +61,14 @@ func (me *Canvas) PopViewport() {
 		me.origin.SubtractFrom(me.viewport.translate())
 		me.viewport.pop()
 		r := me.viewport.bounds()
+
+		if r.Width == -1 {
+			r.Width = b.DisplayWidth()
+		}
+		if r.Height == -1 {
+			r.Height = b.DisplayHeight()
+		}
+
 		b.SetClipRect(r.X, r.Y, r.Width, r.Height)
 		me.origin = me.translation.AddOf(me.viewport.bounds().Point)
 		me.origin.AddTo(me.viewport.translate())

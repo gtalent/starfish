@@ -29,8 +29,8 @@ func newViewport() (v viewport) {
 	v.pt = 0
 	v.list[0].X = 0
 	v.list[0].Y = 0
-	v.list[0].Width = 65000
-	v.list[0].Height = 65000
+	v.list[0].Width = -1
+	v.list[0].Height = -1
 	return
 }
 
@@ -59,11 +59,17 @@ func (me *viewport) calcBounds() {
 	if me.pt == 0 {
 		return
 	}
-	p := &me.list[me.pt-1]
+	p := me.list[me.pt-1]
 	n := &me.list[me.pt]
 	t := &me.translations[me.pt]
 	*t = me.translations[me.pt-1]
 	n.Point.AddTo(p.Point)
+
+	if me.pt == 1 { // base viewport
+		p.Width = DisplayWidth()
+		p.Height = DisplayHeight()
+	}
+
 	//make sure the point of origin is not negative
 	if n.X < p.X {
 		t.X = n.X - p.X

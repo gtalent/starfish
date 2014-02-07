@@ -38,7 +38,7 @@ func OpenDisplay(w, h int, full bool) {
 		i = 1
 	}
 	screen = C.openDisplay(C.int(w), C.int(h), i)
-	renderer = C.SDL_CreateRenderer(screen, -1, 0)//C.SDL_RENDERER_ACCELERATED)
+	renderer = C.SDL_CreateRenderer(screen, -1, C.SDL_RENDERER_ACCELERATED)
 	C.SDL_SetRenderDrawBlendMode(renderer, C.SDL_BLENDMODE_BLEND)
 }
 
@@ -52,7 +52,7 @@ func SetDrawFunc(f func()) {
 
 //Sets the title of the window.
 func SetDisplayTitle(title string) {
-	C.SDL_SetWindowTitle(screen, C.CString(""))
+	C.SDL_SetWindowTitle(screen, C.CString(title))
 }
 
 //Returns the width of the display window.
@@ -73,6 +73,10 @@ func DisplayHeight() int {
 func Draw() {
 	drawFunc()
 	C.SDL_RenderPresent(renderer)
+}
+
+func Clear() {
+	C.SDL_RenderClear(renderer)
 }
 
 //MISC
@@ -102,7 +106,7 @@ func (me *Color) toUint32() uint32 {
 //IMAGE HANDLING
 
 type Image struct {
-	surface *C.SDL_Texture
+	surface       *C.SDL_Texture
 	Width, Height int
 }
 
@@ -151,9 +155,6 @@ func ResizeAngleOf(image *Image, angle float64, width, height int) *Image {
 		return nil
 	}
 	retval := new(Image)
-	//xstretch := C.double(float64(width) / float64(image.W()))
-	//ystretch := C.double(float64(height) / float64(image.H()))
-	//retval.surface = C.rotozoomSurfaceXY(img, C.double(angle), xstretch, ystretch, 1)
 	retval.Width = width
 	retval.Height = height
 	retval.surface = img
@@ -181,12 +182,14 @@ func (me *Font) WriteTo(text string, t *Image, c Color) bool {
 	t.surface = C.SDL_CreateTextureFromSurface(renderer, sur)
 	return t.surface != nil
 }
+
 //GFX HANDLING
 
 //Pushes a viewport to limit the drawing space to the given bounds within the current drawing space.
 func SetClipRect(x, y, w, h int) {
-	//r := sdl_Rect(x, y, w, h)
-	//C.SDL_SetClipRect(renderer, &r)
+	y *= -1
+	r := sdl_Rect(x, y, w, h)
+	C.SDL_RenderSetClipRect(renderer, &r)
 }
 
 func FillRoundedRect(x, y, w, h, radius int, c Color) {
@@ -211,8 +214,8 @@ func DrawImage(img *Image, x, y int) {
 	var dest C.SDL_Rect
 	dest.x = C.int(x)
 	dest.y = C.int(y)
-	dest.w = C.int(img.W())
-	dest.h = C.int(img.H())
+	dest.w = C.int(img.Width)
+	dest.h = C.int(img.Height)
 	C.SDL_SetTextureAlphaMod(img.surface, 255)
 	C.SDL_RenderCopy(renderer, img.surface, nil, &dest)
 }
