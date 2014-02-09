@@ -97,6 +97,7 @@ func (me *Font) SetRGB(red, green, blue byte) {
 	me.color.Red = red
 	me.color.Green = green
 	me.color.Blue = blue
+	me.color.Alpha = 255
 }
 
 //Loads text into the Text object passed in.

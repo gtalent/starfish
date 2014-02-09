@@ -17,7 +17,7 @@ package gfx
 
 import (
 	b "../backend"
-	"../util"
+	starfish "../"
 	"encoding/json"
 )
 
@@ -115,9 +115,9 @@ func (me *Image) Height() int {
 	return int(me.img.H())
 }
 
-//Returns a util.Size object representing the size of this Image.
-func (me *Image) Size() util.Size {
-	var s util.Size
+//Returns a starfish.Size object representing the size of this Image.
+func (me *Image) Size() starfish.Size {
+	var s starfish.Size
 	s.Width = me.Width()
 	s.Height = me.Height()
 	return s

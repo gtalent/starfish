@@ -15,14 +15,14 @@
 */
 package input
 
-import "../util"
+import starfish "../"
 
 type MouseEvent struct {
-	util.Point
+	starfish.Point
 	Button int
 }
 
 type MouseWheelEvent struct {
-	util.Point
+	starfish.Point
 	Up bool
 }

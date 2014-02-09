@@ -17,15 +17,15 @@ package gfx
 
 import (
 	b "../backend"
-	"../util"
+	starfish "../"
 )
 
 //Used to draw and to hold data for the drawing context.
 type Canvas struct {
 	viewport    viewport
 	color       Color
-	translation util.Point
-	origin      util.Point
+	translation starfish.Point
+	origin      starfish.Point
 }
 
 func newCanvas() (p Canvas) {
@@ -41,14 +41,14 @@ func (me *Canvas) load() {
 }
 
 //Returns the bounds of this Canvas
-func (me *Canvas) GetViewport() util.Bounds {
+func (me *Canvas) GetViewport() starfish.Bounds {
 	return me.viewport.bounds()
 }
 
 //Pushes a viewport to limit the drawing space to the given bounds within the current drawing space.
 func (me *Canvas) PushViewport(x, y, width, height int) {
 	me.origin.SubtractFrom(me.viewport.translate())
-	me.viewport.push(util.Bounds{util.Point{X: int(x), Y: int(y)}, util.Size{Width: int(width), Height: int(height)}})
+	me.viewport.push(starfish.Bounds{starfish.Point{X: int(x), Y: int(y)}, starfish.Size{Width: int(width), Height: int(height)}})
 	r := me.viewport.bounds()
 	b.SetClipRect(r.X, r.Y, r.Width, r.Height)
 	me.origin = me.translation.AddOf(me.viewport.bounds().Point)

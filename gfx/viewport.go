@@ -16,12 +16,12 @@
 package gfx
 
 import (
-	"../util"
+	starfish "../"
 )
 
 type viewport struct {
-	list         [500]util.Bounds
-	translations [500]util.Point
+	list         [500]starfish.Bounds
+	translations [500]starfish.Point
 	pt           uint
 }
 
@@ -34,15 +34,15 @@ func newViewport() (v viewport) {
 	return
 }
 
-func (me *viewport) translate() util.Point {
+func (me *viewport) translate() starfish.Point {
 	return me.translations[me.pt]
 }
 
-func (me *viewport) bounds() util.Bounds {
+func (me *viewport) bounds() starfish.Bounds {
 	return me.list[me.pt]
 }
 
-func (me *viewport) push(rect util.Bounds) {
+func (me *viewport) push(rect starfish.Bounds) {
 	me.pt++
 	me.list[me.pt] = rect
 	me.calcBounds()

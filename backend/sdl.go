@@ -180,6 +180,7 @@ func FreeFont(val *Font) {
 func (me *Font) WriteTo(text string, t *Image, c Color) bool {
 	sur := C.TTF_RenderText_Blended(me.font, C.CString(text), c.toSDL_Color())
 	t.surface = C.SDL_CreateTextureFromSurface(renderer, sur)
+	log.Println("WriteTo:", c.Blue, c.Alpha)
 	return t.surface != nil
 }
 

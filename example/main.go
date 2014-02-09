@@ -30,7 +30,7 @@ import (
 
 type Drawer struct {
 	box  *gfx.Image
-	text gfx.Text
+	text *gfx.Text
 	anim *gfx.Animation
 }
 
@@ -40,7 +40,7 @@ func (me *Drawer) init() bool {
 	font := gfx.LoadFont("LiberationSans-Bold.ttf", 32)
 	if font != nil {
 		font.SetRGB(0, 0, 255)
-		font.WriteTo("The mouse ate the cheese.", &me.text)
+		me.text = font.Write("The mouse ate the cheese.")
 		font.Free()
 	} else {
 		fmt.Println("Could not load LiberationSans-Bold.ttf.")
@@ -69,7 +69,7 @@ func (me *Drawer) Draw(c *gfx.Canvas) {
 		c.SetRGBA(0, 0, 0, 100)
 		c.FillRect(200, 200, 100, 100)
 	}
-	c.DrawText(&me.text, 400, 400)
+	c.DrawText(me.text, 400, 400)
 
 	//Note: viewports may be nested
 	c.PushViewport(42, 42, 500, 500)
