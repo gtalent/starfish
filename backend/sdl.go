@@ -25,21 +25,43 @@ package backend
 #include "sdl.h"
 */
 import "C"
-import "runtime"
+import (
+	"runtime"
+	"sync"
+)
 
-var drawFunc func()
+var drawFunc = func() {}
 var screen *C.SDL_Window
 var renderer *C.SDL_Renderer
+var inputChan = make(chan C.SDL_Event, 10)
+var drawComplete = make(chan interface{})
+
+var Event_DrawEvent, Event_LoadImgEvent, Event_LoadTxtEvent C.Uint32
+var loadImgMutex sync.Mutex
+var loadImgChan = make(chan interface{})
+var loadTxtMutex sync.Mutex
+var loadTxtChan = make(chan interface{})
 
 func OpenDisplay(w, h int, full bool) {
-	runtime.LockOSThread()
-	var i C.int = 0
-	if full {
-		i = 1
-	}
-	screen = C.openDisplay(C.int(w), C.int(h), i)
-	renderer = C.SDL_CreateRenderer(screen, -1, C.SDL_RENDERER_ACCELERATED)
-	C.SDL_SetRenderDrawBlendMode(renderer, C.SDL_BLENDMODE_BLEND)
+	var done = make(chan interface{})
+	go func() {
+		runtime.LockOSThread()
+		var i C.int = 0
+		if full {
+			i = 1
+		}
+		screen = C.openDisplay(C.int(w), C.int(h), i)
+		renderer = C.SDL_CreateRenderer(screen, -1, C.SDL_RENDERER_ACCELERATED)
+		C.SDL_SetRenderDrawBlendMode(renderer, C.SDL_BLENDMODE_BLEND)
+
+		Event_DrawEvent = C.SDL_RegisterEvents(1)
+		Event_LoadImgEvent = C.SDL_RegisterEvents(1)
+		Event_LoadTxtEvent = C.SDL_RegisterEvents(1)
+
+		done <- nil
+		handleEvents()
+	}()
+	<-done
 }
 
 func CloseDisplay() {
@@ -71,8 +93,10 @@ func DisplayHeight() int {
 
 //Used to manually draw the screen.
 func Draw() {
-	drawFunc()
-	C.SDL_RenderPresent(renderer)
+	var e C.SDL_Event
+	C.setEventType(&e, Event_DrawEvent)
+	C.SDL_PushEvent(&e)
+	<-drawComplete
 }
 
 func Clear() {
@@ -123,26 +147,13 @@ func (me *Image) H() int {
 }
 
 func LoadImage(path string) *Image {
-	if renderer == nil {
-		errlog.Println("Cannot load image because renderer is nil")
-		return nil
-	}
-
-	i := C.IMG_Load(C.CString(path))
-	if i == nil {
-		errlog.Println("Surface for", path, "loaded nil")
-		return nil
-	}
-
-	texture := C.SDL_CreateTextureFromSurface(renderer, i)
-	if texture == nil {
-		errlog.Println("Texture for", path, "loaded nil")
-		return nil
-	}
-	out := new(Image)
-	out.surface = texture
-	C.SDL_FreeSurface(i)
-	return out
+	loadImgMutex.Lock()
+	defer loadImgMutex.Unlock()
+	var e C.SDL_Event
+	C.setEventType(&e, Event_LoadImgEvent)
+	C.SDL_PushEvent(&e)
+	loadImgChan <- path
+	return (<-loadImgChan).(*Image)
 }
 
 func FreeImage(img *Image) {
@@ -179,7 +190,16 @@ func FreeFont(val *Font) {
 
 func (me *Font) WriteTo(text string, t *Image, c Color) bool {
 	sur := C.TTF_RenderText_Blended(me.font, C.CString(text), c.toSDL_Color())
-	t.surface = C.SDL_CreateTextureFromSurface(renderer, sur)
+
+	// access renderer via loadTxtChan
+	loadTxtMutex.Lock()
+	var e C.SDL_Event
+	C.setEventType(&e, Event_LoadTxtEvent)
+	C.SDL_PushEvent(&e)
+	loadTxtChan <- sur
+	t.surface = (<-loadTxtChan).(*C.SDL_Texture)
+	loadTxtMutex.Unlock()
+
 	var w, h C.int
 	C.SDL_QueryTexture(t.surface, nil, nil, &w, &h)
 	t.Width = int(w)
@@ -201,9 +221,6 @@ func FillRoundedRect(x, y, w, h, radius int, c Color) {
 }
 
 func FillRect(x, y, w, h int, c Color) {
-	if renderer == nil {
-		errlog.Println("FillRect: renderer nil")
-	}
 	var rect C.SDL_Rect
 	rect.x = C.int(x)
 	rect.y = C.int(y)
@@ -224,12 +241,61 @@ func DrawImage(img *Image, x, y int) {
 	C.SDL_RenderCopy(renderer, img.surface, nil, &dest)
 }
 
-//INPUT HANDLING
+//EVENT HANDLING
 
 var running = true
 
+func handleEvents() {
+	for running := true; running; {
+		var e C.SDL_Event
+		C.SDL_WaitEvent(&e)
+		switch C.eventType(&e) {
+		case C.SDL_QUIT:
+			inputChan <- e
+			running = false
+		case C.SDL_KEYDOWN, C.SDL_KEYUP, C.SDL_MOUSEBUTTONDOWN, C.SDL_MOUSEBUTTONUP:
+			inputChan <- e
+		case Event_DrawEvent:
+			drawFunc()
+			C.SDL_RenderPresent(renderer)
+			drawComplete <- nil
+		case Event_LoadImgEvent:
+		{
+			if renderer == nil {
+				errlog.Println("Cannot load image because renderer is nil")
+				loadImgChan <- nil
+				continue
+			}
+
+			path := (<-loadImgChan).(string)
+			i := C.IMG_Load(C.CString(path))
+			if i == nil {
+				errlog.Println("Surface for", path, "loaded nil")
+				loadImgChan <- nil
+				continue
+			}
+
+			texture := C.SDL_CreateTextureFromSurface(renderer, i)
+			if texture == nil {
+				errlog.Println("Texture for", path, "loaded nil")
+				loadImgChan <- nil
+				continue
+			}
+			out := new(Image)
+			out.surface = texture
+			C.SDL_FreeSurface(i)
+			loadImgChan <- out
+		}
+		case Event_LoadTxtEvent:
+		{
+			sur := (<-loadTxtChan).(*C.SDL_Surface)
+			loadTxtChan <- C.SDL_CreateTextureFromSurface(renderer, sur)
+		}
+		}
+	}
+}
+
 func HandleInput() {
-	running = true
 	//scrollFunc := func(b bool, x, y int) {
 	//	var e MouseWheelEvent
 	//	e.Up = b
@@ -237,9 +303,8 @@ func HandleInput() {
 	//	e.Y = y
 	//	MouseWheelFunc(e)
 	//}
-	for running {
-		var e C.SDL_Event
-		C.SDL_WaitEvent(&e)
+	for running := true; running; {
+		e := <-inputChan
 		switch C.eventType(&e) {
 		case C.SDL_QUIT:
 			go QuitFunc()

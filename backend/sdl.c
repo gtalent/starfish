@@ -37,7 +37,11 @@ void closeDisplay() {
 	SDL_Quit();
 }
 
-int eventType(SDL_Event *e) {
+void setEventType(SDL_Event *e, Uint32 type) {
+	e->type = type;
+}
+
+Uint32 eventType(SDL_Event *e) {
 	return e->type;
 }
 

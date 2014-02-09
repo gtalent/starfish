@@ -20,7 +20,9 @@ SDL_Window* openDisplay(int w, int h, int full);
 
 void closeDisplay();
 
-int eventType(SDL_Event *e);
+void setEventType(SDL_Event *e, Uint32 type);
+
+Uint32 eventType(SDL_Event *e);
 
 int eventKey(SDL_Event *e);
 

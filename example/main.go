@@ -54,6 +54,8 @@ type Drawer struct {
 }
 
 func (me *Drawer) init() bool {
+	i := 0
+	log.Println("init", i)
 	me.anim = gfx.NewAnimation(1000)
 	me.box = gfx.LoadImageSize("box.png", 100, 100)
 	font := gfx.LoadFont("LiberationSans-Bold.ttf", 32)
@@ -104,7 +106,7 @@ func (me *Drawer) Draw(c *gfx.Canvas) {
 }
 
 func main() {
-	runtime.GOMAXPROCS(1)
+	//runtime.GOMAXPROCS(2)
 	runtime.LockOSThread()
 
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
