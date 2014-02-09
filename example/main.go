@@ -18,7 +18,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	l "log"
 	"os"
 	"runtime"
 	"runtime/pprof"
@@ -28,6 +28,25 @@ import (
 	"../input"
 )
 
+
+var log = l.New(os.Stdout, "  LOG: starfish example: ", l.Ldate|l.Ltime)
+var errlog = l.New(os.Stderr, "ERROR: starfish example: ", l.Ldate|l.Ltime)
+
+func LogOn(on bool) {
+	if on {
+		log = l.New(os.Stdout, "  LOG: starfish example: ", l.Ldate|l.Ltime)
+	} else {
+		log = l.New(nil, "  LOG: starfish example: ", l.Ldate|l.Ltime)
+	}
+}
+
+func ErrLogOn(on bool) {
+	if on {
+		errlog = l.New(os.Stdout, "ERROR: starfish backend: ", l.Ldate|l.Ltime)
+	} else {
+		errlog = l.New(nil, "ERROR: starfish backend: ", l.Ldate|l.Ltime)
+	}
+}
 type Drawer struct {
 	box  *gfx.Image
 	text *gfx.Text
@@ -40,7 +59,7 @@ func (me *Drawer) init() bool {
 	font := gfx.LoadFont("LiberationSans-Bold.ttf", 32)
 	if font != nil {
 		font.SetRGB(0, 0, 255)
-		me.text = font.Write("The mouse ate the cheese.")
+		me.text = font.Write("Narf!")
 		font.Free()
 	} else {
 		fmt.Println("Could not load LiberationSans-Bold.ttf.")
