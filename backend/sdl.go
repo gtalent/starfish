@@ -30,42 +30,60 @@ import (
 	"sync"
 )
 
+func init() {
+	runtime.LockOSThread()
+}
+
 var drawFunc = func() {}
 var screen *C.SDL_Window
 var renderer *C.SDL_Renderer
 var inputChan = make(chan C.SDL_Event, 10)
 var drawComplete = make(chan interface{})
 
-var Event_DrawEvent, Event_LoadImgEvent, Event_LoadTxtEvent C.Uint32
-var loadImgMutex sync.Mutex
-var loadImgChan = make(chan interface{})
-var loadTxtMutex sync.Mutex
-var loadTxtChan = make(chan interface{})
+var Event_DrawEvent, Event_MainOpEvent C.Uint32
+var mainOpMutex sync.Mutex
+var mainOpChan = make(chan func())
+
+func isMainThread() bool {
+	return C.isMainThread() != 0
+}
 
 func OpenDisplay(w, h int, full bool) {
-	var done = make(chan interface{})
-	go func() {
-		runtime.LockOSThread()
-		var i C.int = 0
-		if full {
-			i = 1
-		}
-		screen = C.openDisplay(C.int(w), C.int(h), i)
-		renderer = C.SDL_CreateRenderer(screen, -1, C.SDL_RENDERER_ACCELERATED)
-		C.SDL_SetRenderDrawBlendMode(renderer, C.SDL_BLENDMODE_BLEND)
+	runtime.LockOSThread()
+	var i C.int = 0
+	if full {
+		i = 1
+	}
+	screen = C.openDisplay(C.int(w), C.int(h), i)
+	renderer = C.SDL_CreateRenderer(screen, -1, C.SDL_RENDERER_ACCELERATED)
+	C.SDL_SetRenderDrawBlendMode(renderer, C.SDL_BLENDMODE_BLEND)
 
-		Event_DrawEvent = C.SDL_RegisterEvents(1)
-		Event_LoadImgEvent = C.SDL_RegisterEvents(1)
-		Event_LoadTxtEvent = C.SDL_RegisterEvents(1)
-
-		done <- nil
-		handleEvents()
-	}()
-	<-done
+	Event_DrawEvent = C.SDL_RegisterEvents(1)
+	Event_MainOpEvent = C.SDL_RegisterEvents(1)
 }
 
 func CloseDisplay() {
 	C.closeDisplay()
+}
+
+func runMainOp(f func()) {
+	if isMainThread() {
+		f()
+	} else {
+		var e C.SDL_Event
+		C.setEventType(&e, Event_MainOpEvent)
+
+		mainOpMutex.Lock()
+		defer mainOpMutex.Unlock()
+		C.SDL_PushEvent(&e)
+		done := make(chan interface{})
+		op := func() {
+			f()
+			done <- nil
+		}
+		mainOpChan <- op
+		<-done
+	}
 }
 
 func SetDrawFunc(f func()) {
@@ -147,13 +165,32 @@ func (me *Image) H() int {
 }
 
 func LoadImage(path string) *Image {
-	loadImgMutex.Lock()
-	defer loadImgMutex.Unlock()
-	var e C.SDL_Event
-	C.setEventType(&e, Event_LoadImgEvent)
-	C.SDL_PushEvent(&e)
-	loadImgChan <- path
-	return (<-loadImgChan).(*Image)
+	var retval *Image
+	var texture *C.SDL_Texture
+
+	i := C.IMG_Load(C.CString(path))
+	if i == nil {
+		errlog.Println("Surface for", path, "loaded nil")
+		return nil
+	}
+
+	if renderer == nil {
+		errlog.Println("Cannot load image because renderer is nil")
+		return nil
+	}
+
+	runMainOp(func() {
+		texture = C.SDL_CreateTextureFromSurface(renderer, i)
+	})
+
+	if texture == nil {
+		errlog.Println("Texture for", path, "loaded nil")
+		return nil
+	}
+	retval = new(Image)
+	retval.surface = texture
+	C.SDL_FreeSurface(i)
+	return retval
 }
 
 func FreeImage(img *Image) {
@@ -191,14 +228,9 @@ func FreeFont(val *Font) {
 func (me *Font) WriteTo(text string, t *Image, c Color) bool {
 	sur := C.TTF_RenderText_Blended(me.font, C.CString(text), c.toSDL_Color())
 
-	// access renderer via loadTxtChan
-	loadTxtMutex.Lock()
-	var e C.SDL_Event
-	C.setEventType(&e, Event_LoadTxtEvent)
-	C.SDL_PushEvent(&e)
-	loadTxtChan <- sur
-	t.surface = (<-loadTxtChan).(*C.SDL_Texture)
-	loadTxtMutex.Unlock()
+	runMainOp(func() {
+		t.surface = C.SDL_CreateTextureFromSurface(renderer, sur)
+	})
 
 	var w, h C.int
 	C.SDL_QueryTexture(t.surface, nil, nil, &w, &h)
@@ -243,54 +275,22 @@ func DrawImage(img *Image, x, y int) {
 
 //EVENT HANDLING
 
-var running = true
-
-func handleEvents() {
+func HandleEvents() {
 	for running := true; running; {
 		var e C.SDL_Event
-		C.SDL_WaitEvent(&e)
+		C.SDL_PollEvent(&e)
 		switch C.eventType(&e) {
 		case C.SDL_QUIT:
 			inputChan <- e
 			running = false
 		case C.SDL_KEYDOWN, C.SDL_KEYUP, C.SDL_MOUSEBUTTONDOWN, C.SDL_MOUSEBUTTONUP:
 			inputChan <- e
+		case Event_MainOpEvent:
+			(<-mainOpChan)()
 		case Event_DrawEvent:
 			drawFunc()
 			C.SDL_RenderPresent(renderer)
 			drawComplete <- nil
-		case Event_LoadImgEvent:
-		{
-			if renderer == nil {
-				errlog.Println("Cannot load image because renderer is nil")
-				loadImgChan <- nil
-				continue
-			}
-
-			path := (<-loadImgChan).(string)
-			i := C.IMG_Load(C.CString(path))
-			if i == nil {
-				errlog.Println("Surface for", path, "loaded nil")
-				loadImgChan <- nil
-				continue
-			}
-
-			texture := C.SDL_CreateTextureFromSurface(renderer, i)
-			if texture == nil {
-				errlog.Println("Texture for", path, "loaded nil")
-				loadImgChan <- nil
-				continue
-			}
-			out := new(Image)
-			out.surface = texture
-			C.SDL_FreeSurface(i)
-			loadImgChan <- out
-		}
-		case Event_LoadTxtEvent:
-		{
-			sur := (<-loadTxtChan).(*C.SDL_Surface)
-			loadTxtChan <- C.SDL_CreateTextureFromSurface(renderer, sur)
-		}
 		}
 	}
 }
@@ -310,17 +310,17 @@ func HandleInput() {
 			go QuitFunc()
 			running = false
 		case C.SDL_KEYDOWN:
-			go func() {
+			{
 				var ke KeyEvent
 				ke.Key = int(C.eventKey(&e))
 				go KeyDown(ke)
-			}()
+			}
 		case C.SDL_KEYUP:
-			go func() {
+			{
 				var ke KeyEvent
 				ke.Key = int(C.eventKey(&e))
 				go KeyUp(ke)
-			}()
+			}
 		case C.SDL_MOUSEBUTTONDOWN:
 			x := int(C.eventMouseX(&e))
 			y := int(C.eventMouseY(&e))

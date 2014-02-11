@@ -145,8 +145,11 @@ func CloseDisplay() {
 
 //Blocks until CloseDisplay is called, regardless of whether or not OpenDisplay has been called.
 func Main() {
-	for running {
-		b.Draw()
-		time.Sleep(time.Duration(drawInterval))
-	}
+	go func() {
+		for running {
+			b.Draw()
+			time.Sleep(time.Duration(drawInterval))
+		}
+	}()
+	b.HandleEvents()
 }

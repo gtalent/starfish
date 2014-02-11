@@ -17,9 +17,10 @@
 #include "sdl.h"
 
 SDL_Window *screen;
+SDL_mutex *mainMut;
 
 SDL_Window *openDisplay(int w, int h, int full) {
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER);
 	IMG_Init(IMG_INIT_PNG);
 	TTF_Init();
 	unsigned flags = 0;
@@ -27,14 +28,21 @@ SDL_Window *openDisplay(int w, int h, int full) {
 		flags |= SDL_WINDOW_FULLSCREEN;
 	}
 	flags |= SDL_WINDOW_OPENGL;
-	screen = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, flags);
+	screen = SDL_CreateWindow("starfish", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, flags);
+	mainMut = SDL_CreateMutex();
+	SDL_LockMutex(mainMut);
 	return screen;
 }
 
 void closeDisplay() {
 	SDL_DestroyWindow(screen);
+	SDL_DestroyMutex(mainMut);
 	screen = NULL;
 	SDL_Quit();
+}
+
+int isMainThread() {
+	return SDL_TryLockMutex(mainMut) == 0;
 }
 
 void setEventType(SDL_Event *e, Uint32 type) {
