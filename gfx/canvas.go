@@ -17,7 +17,7 @@ package gfx
 
 import (
 	starfish "../"
-	b "../backend"
+	b "../plumbing"
 )
 
 //Used to draw and to hold data for the drawing context.

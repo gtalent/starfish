@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package backend
+package plumbing
 
 /*
 #cgo LDFLAGS: -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_gfx

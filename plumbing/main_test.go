@@ -13,27 +13,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package backend
+package plumbing
 
-import "github.com/gtalent/starfish/util"
+import "testing"
 
-var QuitFunc = func() {}
-var KeyUp = func(e KeyEvent) {}
-var KeyDown = func(e KeyEvent) {}
-var MouseWheelFunc = func(e MouseWheelEvent) {}
-var MouseButtonUp = func(e MouseEvent) {}
-var MouseButtonDown = func(e MouseEvent) {}
-
-type KeyEvent struct {
-	Key int
-}
-
-type MouseEvent struct {
-	util.Point
-	Button int
-}
-
-type MouseWheelEvent struct {
-	util.Point
-	Up bool
+func TestMain(t *testing.T) {
+	OpenDisplay(800, 600, false)
+	SetDisplayTitle("Narf!")
 }

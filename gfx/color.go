@@ -15,7 +15,7 @@
 */
 package gfx
 
-import b "../backend"
+import b "../plumbing"
 
 //An RGB color representation.
 type Color struct {

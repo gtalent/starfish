@@ -15,7 +15,7 @@
 */
 package input
 
-import b "../backend"
+import b "../plumbing"
 
 //Initializes the input system and returns a bool indicating success.
 func Init() {
