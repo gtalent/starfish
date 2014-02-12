@@ -283,7 +283,7 @@ func HandleEvents() {
 		case C.SDL_QUIT:
 			inputChan <- e
 			running = false
-		case C.SDL_KEYDOWN, C.SDL_KEYUP, C.SDL_MOUSEBUTTONDOWN, C.SDL_MOUSEBUTTONUP:
+		case C.SDL_KEYDOWN, C.SDL_KEYUP, C.SDL_MOUSEBUTTONDOWN, C.SDL_MOUSEBUTTONUP, C.SDL_MOUSEWHEEL:
 			inputChan <- e
 		case Event_MainOpEvent:
 			(<-mainOpChan)()
@@ -296,13 +296,6 @@ func HandleEvents() {
 }
 
 func HandleInput() {
-	//scrollFunc := func(b bool, x, y int) {
-	//	var e MouseWheelEvent
-	//	e.Up = b
-	//	e.X = x
-	//	e.Y = y
-	//	MouseWheelFunc(e)
-	//}
 	for running := true; running; {
 		e := <-inputChan
 		switch C.eventType(&e) {
@@ -321,41 +314,30 @@ func HandleInput() {
 				ke.Key = int(C.eventKey(&e))
 				go KeyUp(ke)
 			}
+		case C.SDL_MOUSEWHEEL:
+			println("SDL_MOUSEWHEEL");
+			var mwe MouseWheelEvent
+			var x,y C.int
+			C.SDL_GetMouseState(&x, &y)
+			mwe.X = int(x)
+			mwe.Y = int(y)
+			mwe.Up = C.eventMouseWheelY(&e) > 0
+			go MouseWheelFunc(mwe)
 		case C.SDL_MOUSEBUTTONDOWN:
 			x := int(C.eventMouseX(&e))
 			y := int(C.eventMouseY(&e))
-			switch C.eventMouseButton(&e) {
-			//case C.SDL_BUTTON_WHEELUP:
-			//	go scrollFunc(true, x, y)
-			//case C.SDL_BUTTON_WHEELDOWN:
-			//	go scrollFunc(false, x, y)
-			default:
-				go func() {
-					var me MouseEvent
-					me.X = x
-					me.Y = y
-					me.Button = int(C.eventMouseButton(&e))
-					go MouseButtonDown(me)
-				}()
-			}
+			var me MouseEvent
+			me.X = x
+			me.Y = y
+			me.Button = int(C.eventMouseButton(&e))
+			go MouseButtonDown(me)
 		case C.SDL_MOUSEBUTTONUP:
-			///x := int(C.eventMouseX(&e))
-			///y := int(C.eventMouseY(&e))
-			switch C.eventMouseButton(&e) {
-			//case C.SDL_BUTTON_WHEELUP:
-			//	go scrollFunc(true, x, y)
-			//case C.SDL_BUTTON_WHEELDOWN:
-			//	go scrollFunc(false, x, y)
-			default:
-				go func() {
-					var me MouseEvent
-					me.Button = int(C.eventMouseButton(&e))
-					me.X = int(C.eventMouseX(&e))
-					me.Y = int(C.eventMouseY(&e))
-					me.Button = int(C.eventMouseButton(&e))
-					go MouseButtonUp(me)
-				}()
-			}
+			var me MouseEvent
+			me.Button = int(C.eventMouseButton(&e))
+			me.X = int(C.eventMouseX(&e))
+			me.Y = int(C.eventMouseY(&e))
+			me.Button = int(C.eventMouseButton(&e))
+			go MouseButtonUp(me)
 		}
 	}
 }

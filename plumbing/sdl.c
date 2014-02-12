@@ -68,3 +68,7 @@ int eventMouseX(SDL_Event *e) {
 int eventMouseY(SDL_Event *e) {
 	return e->button.y;
 }
+
+int eventMouseWheelY(SDL_Event *e) {
+	return e->wheel.y;
+}

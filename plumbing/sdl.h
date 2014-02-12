@@ -33,3 +33,5 @@ int eventMouseButton(SDL_Event *e);
 int eventMouseX(SDL_Event *e);
 
 int eventMouseY(SDL_Event *e);
+
+int eventMouseWheelY(SDL_Event *e);
