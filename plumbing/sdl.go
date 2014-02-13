@@ -278,7 +278,7 @@ func DrawImage(img *Image, x, y int) {
 func HandleEvents() {
 	for running := true; running; {
 		var e C.SDL_Event
-		C.SDL_PollEvent(&e)
+		C.SDL_WaitEvent(&e)
 		switch C.eventType(&e) {
 		case C.SDL_QUIT:
 			inputChan <- e
@@ -315,7 +315,6 @@ func HandleInput() {
 				go KeyUp(ke)
 			}
 		case C.SDL_MOUSEWHEEL:
-			println("SDL_MOUSEWHEEL");
 			var mwe MouseWheelEvent
 			var x,y C.int
 			C.SDL_GetMouseState(&x, &y)
