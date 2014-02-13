@@ -16,8 +16,8 @@
 package gfx
 
 import (
-	starfish "../"
-	b "../plumbing"
+	starfish "github.com/gtalent/starfish"
+	b "github.com/gtalent/starfish/plumbing"
 )
 
 //Used to draw and to hold data for the drawing context.

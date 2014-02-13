@@ -15,7 +15,7 @@
 */
 package plumbing
 
-import starfish ".."
+import starfish "github.com/gtalent/starfish"
 
 var QuitFunc = func() {}
 var KeyUp = func(e KeyEvent) {}

@@ -16,7 +16,7 @@
 package gfx
 
 import (
-	starfish "../"
+	starfish "github.com/gtalent/starfish"
 )
 
 type viewport struct {

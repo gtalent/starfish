@@ -15,7 +15,7 @@
 */
 package input
 
-import starfish "../"
+import starfish "github.com/gtalent/starfish"
 
 type MouseEvent struct {
 	starfish.Point

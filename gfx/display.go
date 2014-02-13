@@ -16,7 +16,7 @@
 package gfx
 
 import (
-	b "../plumbing"
+	b "github.com/gtalent/starfish/plumbing"
 	"time"
 )
 

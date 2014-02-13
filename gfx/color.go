@@ -15,7 +15,7 @@
 */
 package gfx
 
-import b "../plumbing"
+import b "github.com/gtalent/starfish/plumbing"
 
 //An RGB color representation.
 type Color struct {
