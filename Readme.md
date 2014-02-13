@@ -11,20 +11,32 @@ This is done for two reasons:
 
 # Getting starfish:
 ## Prerequisites:
-* Install GCC, SDL, SDL_gfx, SDL_image, and SDL_ttf:
-	* RHEL-like systems the following should work:
+Install GCC, SDL, SDL_gfx, SDL_image, and SDL_ttf:
+
+* RHEL-like systems the following should work:
  
 			yum install gcc SDL-devel SDL_gfx-devel SDL_image-devel SDL_ttf-devel
 
-	* Arch Linux the following should work:
+* Arch Linux the following should work:
  
 			pacman -S gcc sdl2 sdl2_gfx sdl2_image sdl2_ttf
 
-	* Anyone feel free to add instructions for other systems here.
+* Anyone feel free to add instructions for other systems here.
 
 ## Installation:
-* To install starfish, the following should pull and install all three starfish packages:
+### Install the lastest and greatest stable release
+To install starfish, the following should pull and install all four starfish packages:
 
 			go get github.com/gtalent/starfish/gfx
 			go get github.com/gtalent/starfish/input
-	
+
+### Install release any release/branch you want (0.11.1 and later)
+
+			cd $GOPATH/src
+			mkdir -p gtalent
+			cd gtalent
+			rm -rf starfish
+			git clone https://github.com/gtalent/starfish.git
+			cd starfish
+			git checkout origin/<release or tag you want here>
+			make install
