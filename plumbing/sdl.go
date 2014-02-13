@@ -316,7 +316,7 @@ func HandleInput() {
 			}
 		case C.SDL_MOUSEWHEEL:
 			var mwe MouseWheelEvent
-			var x,y C.int
+			var x, y C.int
 			C.SDL_GetMouseState(&x, &y)
 			mwe.X = int(x)
 			mwe.Y = int(y)
