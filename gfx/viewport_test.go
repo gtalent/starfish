@@ -16,15 +16,15 @@
 package gfx
 
 import (
-	"../util"
+	starfish "../"
 	"testing"
 )
 
 func TestViewportPushPop(t *testing.T) {
 	viewport := newViewport()
 	initial := viewport.bounds()
-	tests := make([]util.Bounds, 0)
-	tests = append(tests, util.Bounds{util.Point{42, 42}, util.Size{100, 100}})
+	tests := make([]starfish.Bounds, 0)
+	tests = append(tests, starfish.Bounds{starfish.Point{42, 42}, starfish.Size{100, 100}})
 
 	for _, test := range tests {
 		viewport.push(test)
