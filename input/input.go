@@ -15,7 +15,7 @@
 */
 package input
 
-import b "../plumbing"
+import b "github.com/gtalent/starfish/plumbing"
 
 //Initializes the input system and returns a bool indicating success.
 func Init() {

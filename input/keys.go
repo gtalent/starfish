@@ -15,7 +15,7 @@
 */
 package input
 
-import b "../plumbing"
+import b "github.com/gtalent/starfish/plumbing"
 
 const (
 	Key_a int = b.Key_a
