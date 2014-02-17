@@ -59,7 +59,7 @@ func (me *Drawer) init() bool {
 	font := gfx.LoadFont("LiberationSans-Bold.ttf", 32)
 	if font != nil {
 		font.SetRGB(0, 0, 255)
-		me.text = font.Write("Narf!")
+		me.text = font.Write("starfish 0.12!")
 		font.Free()
 	} else {
 		fmt.Println("Could not load LiberationSans-Bold.ttf.")

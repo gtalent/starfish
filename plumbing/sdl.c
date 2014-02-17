@@ -28,7 +28,7 @@ SDL_Window *openDisplay(int w, int h, int full) {
 		flags |= SDL_WINDOW_FULLSCREEN;
 	}
 	flags |= SDL_WINDOW_OPENGL;
-	screen = SDL_CreateWindow("starfish", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, flags);
+	screen = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, flags);
 	mainMut = SDL_CreateMutex();
 	SDL_LockMutex(mainMut);
 	return screen;
