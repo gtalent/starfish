@@ -106,7 +106,7 @@ func (me *Canvas) FillRect(x, y, width, height int) {
 
 //Draws the text at the given coordinates.
 func (me *Canvas) DrawText(text *Text, x, y int) {
-	b.DrawImage(text.text, x, y)
+	b.DrawImage(text.text, x, y, 0, 0, text.Width(), text.Height())
 }
 
 //Draws the image at the given coordinates.
@@ -116,5 +116,10 @@ func (me *Canvas) DrawAnimation(animation *Animation, x, y int) {
 
 //Draws the image at the given coordinates.
 func (me *Canvas) DrawImage(img *Image, x, y int) {
-	b.DrawImage(img.img, x, y)
+	b.DrawImage(img.img, x, y, 0, 0, img.Width(), img.Height())
+}
+
+//Draws the image at the given coordinates.
+func (me *Canvas) DrawImageCrop(img *Image, x, y int, srcBnds starfish.Bounds) {
+	b.DrawImage(img.img, x, y, srcBnds.X, srcBnds.Y, srcBnds.Width, srcBnds.Height)
 }

@@ -263,14 +263,19 @@ func FillRect(x, y, w, h int, c Color) {
 }
 
 //Draws the image at the given coordinates.
-func DrawImage(img *Image, x, y int) {
-	var dest C.SDL_Rect
-	dest.x = C.int(x)
-	dest.y = C.int(y)
+func DrawImage(img *Image, destX, destY, srcX, srcY, srcW, srcH int) {
+	var src, dest C.SDL_Rect
+	dest.x = C.int(destX)
+	dest.y = C.int(destY)
 	dest.w = C.int(img.Width)
 	dest.h = C.int(img.Height)
+
+	src.x = C.int(srcX)
+	src.y = C.int(srcY)
+	src.w = C.int(srcW)
+	src.h = C.int(srcH)
 	C.SDL_SetTextureAlphaMod(img.surface, 255)
-	C.SDL_RenderCopy(renderer, img.surface, nil, &dest)
+	C.SDL_RenderCopy(renderer, img.surface, &src, &dest)
 }
 
 //EVENT HANDLING
