@@ -22,10 +22,10 @@ import (
 	"os"
 	"runtime"
 	"runtime/pprof"
-	//normally "github.com/gtalent/starfish/gfx"
-	"../gfx"
-	//normally "github.com/gtalent/starfish/input"
-	"../input"
+	"github.com/gtalent/starfish/gfx"
+	"github.com/gtalent/starfish/input"
+	//"../gfx"
+	//"../input"
 )
 
 
@@ -125,7 +125,7 @@ func main() {
 	}
 	gfx.SetDisplayTitle("starfish example")
 
-	input.Init()
+	//input.Init()
 
 	var pane Drawer
 	if !pane.init() {

@@ -116,7 +116,7 @@ func (me *Canvas) DrawAnimation(animation *Animation, x, y int) {
 
 //Draws the image at the given coordinates.
 func (me *Canvas) DrawImage(img *Image, x, y int) {
-	b.DrawImage(img.img, x, y, 0, 0, img.Width(), img.Height())
+	b.DrawImage(img.img, x, y, img.clipX(), img.clipY(), img.clipW(), img.clipH())
 }
 
 //Draws the image at the given coordinates.

@@ -16,8 +16,8 @@
 package gfx
 
 import (
-	b "github.com/gtalent/starfish/plumbing"
 	"encoding/json"
+	b "github.com/gtalent/starfish/plumbing"
 )
 
 type fontKey struct {

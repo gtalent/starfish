@@ -15,8 +15,6 @@
 */
 package plumbing
 
-import starfish "github.com/gtalent/starfish"
-
 var QuitFunc = func() {}
 var KeyUp = func(e KeyEvent) {}
 var KeyDown = func(e KeyEvent) {}
@@ -29,11 +27,11 @@ type KeyEvent struct {
 }
 
 type MouseEvent struct {
-	starfish.Point
+	X, Y   int
 	Button int
 }
 
 type MouseWheelEvent struct {
-	starfish.Point
-	Up bool
+	X, Y int
+	Up   bool
 }

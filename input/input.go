@@ -18,7 +18,7 @@ package input
 import b "github.com/gtalent/starfish/plumbing"
 
 //Initializes the input system and returns a bool indicating success.
-func Init() {
+func init() {
 	b.QuitFunc = func() {
 		quitListenersLock.Lock()
 		for _, v := range quitListeners {

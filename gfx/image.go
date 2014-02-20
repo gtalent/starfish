@@ -16,9 +16,9 @@
 package gfx
 
 import (
+	"encoding/json"
 	starfish "github.com/gtalent/starfish"
 	b "github.com/gtalent/starfish/plumbing"
-	"encoding/json"
 )
 
 type imageLabel struct {
@@ -71,8 +71,10 @@ var images = newFlyweight(
 	})
 
 type Image struct {
-	img *b.Image
-	key imageKey
+	img     *b.Image
+	key     imageKey
+	size    starfish.Size
+	srcBnds starfish.Bounds
 }
 
 //Loads the image at the given path, or nil if the image was not found.
@@ -102,24 +104,74 @@ func LoadImageSizeAngle(path string, w, h int, angle float64) (img *Image) {
 	img = new(Image)
 	img.img = i
 	img.key = key
+	img.ResetClipRect()
 	return
+}
+
+func (me *Image) SetSize(w, h int) {
+	me.size = starfish.Size{w, h}
+}
+
+func (me *Image) ResetSize() {
+	me.size = starfish.Size{me.DefaultWidth(), me.DefaultHeight()}
+}
+
+//Resets a default image source clip rect to the full image.
+func (me *Image) ResetClipRect() {
+	me.srcBnds = starfish.Bounds{starfish.Point{0, 0}, me.DefaultSize()}
+}
+
+//Sets a default image source clip rect.
+func (me *Image) SetClipRect(x, y, w, h int) {
+	me.srcBnds = starfish.Bounds{starfish.Point{x, y}, starfish.Size{w, h}}
+}
+
+func (me *Image) clipX() int {
+	return me.srcBnds.X
+}
+
+func (me *Image) clipY() int {
+	return me.srcBnds.Y
+}
+
+func (me *Image) clipW() int {
+	return me.srcBnds.Width
+}
+
+func (me *Image) clipH() int {
+	return me.srcBnds.Height
 }
 
 //Returns the width of the image.
 func (me *Image) Width() int {
-	return int(me.img.W())
+	return me.size.Width
 }
 
 //Returns the height of the image.
 func (me *Image) Height() int {
-	return int(me.img.H())
+	return me.size.Height
 }
 
 //Returns a starfish.Size object representing the size of this Image.
 func (me *Image) Size() starfish.Size {
+	return me.size
+}
+
+//Returns the width of the image.
+func (me *Image) DefaultWidth() int {
+	return int(me.img.W())
+}
+
+//Returns the height of the image.
+func (me *Image) DefaultHeight() int {
+	return int(me.img.H())
+}
+
+//Returns a starfish.Size object representing the size of this Image.
+func (me *Image) DefaultSize() starfish.Size {
 	var s starfish.Size
-	s.Width = me.Width()
-	s.Height = me.Height()
+	s.Width = me.DefaultWidth()
+	s.Height = me.DefaultHeight()
 	return s
 }
 
