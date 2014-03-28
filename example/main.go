@@ -47,6 +47,7 @@ func ErrLogOn(on bool) {
 		errlog = l.New(nil, "ERROR: starfish backend: ", l.Ldate|l.Ltime)
 	}
 }
+
 type Drawer struct {
 	box  *gfx.Image
 	text *gfx.Text

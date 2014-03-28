@@ -36,6 +36,7 @@ SDL_Window *openDisplay(int w, int h, int full) {
 
 void closeDisplay() {
 	SDL_DestroyWindow(screen);
+	SDL_UnlockMutex(mainMut);
 	SDL_DestroyMutex(mainMut);
 	screen = NULL;
 	SDL_Quit();

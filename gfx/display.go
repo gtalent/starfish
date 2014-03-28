@@ -16,7 +16,7 @@
 package gfx
 
 import (
-	b "github.com/gtalent/starfish/plumbing"
+	p "github.com/gtalent/starfish/plumbing"
 	"time"
 )
 
@@ -46,7 +46,7 @@ type canvasHolder struct {
 //Sets the title of the window.
 func SetDisplayTitle(title string) {
 	displayTitle = title
-	b.SetDisplayTitle(title)
+	p.SetDisplayTitle(title)
 }
 
 //Returns the title of this window.
@@ -56,12 +56,12 @@ func GetDisplayTitle() string {
 
 //Returns the width of the display window.
 func DisplayWidth() int {
-	return b.DisplayWidth()
+	return p.DisplayWidth()
 }
 
 //Returns the height of the display window.
 func DisplayHeight() int {
-	return b.DisplayHeight()
+	return p.DisplayHeight()
 }
 
 //Adds a drawer object to run when the screen draws.
@@ -116,20 +116,20 @@ func SetDrawInterval(ms int) {
 
 //Used to manually draw the screen.
 func Draw() {
-	b.Draw()
+	p.Draw()
 }
 
 //Opens a window.
 //Returns an indicator of success.
 func OpenDisplay(w, h int, fullscreen bool) bool {
 	if !running {
-		b.SetDrawFunc(func() {
+		p.SetDrawFunc(func() {
 			for _, a := range drawers {
 				a.canvas.load()
 				a.drawer.Draw(&a.canvas)
 			}
 		})
-		b.OpenDisplay(w, h, fullscreen)
+		p.OpenDisplay(w, h, fullscreen)
 		running = true
 		SetDrawInterval(16)
 		startAnimTick()
@@ -140,16 +140,16 @@ func OpenDisplay(w, h int, fullscreen bool) bool {
 //Closes the window.
 func CloseDisplay() {
 	running = false
-	b.CloseDisplay()
+	p.CloseDisplay()
 }
 
 //Blocks until CloseDisplay is called, regardless of whether or not OpenDisplay has been called.
 func Main() {
 	go func() {
 		for running {
-			b.Draw()
+			p.Draw()
 			time.Sleep(time.Duration(drawInterval))
 		}
 	}()
-	b.HandleEvents()
+	p.HandleEvents()
 }

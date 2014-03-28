@@ -1,7 +1,7 @@
 package starfish
 
 import (
-	b "github.com/gtalent/starfish/plumbing"
+	p "github.com/gtalent/starfish/plumbing"
 )
 
 var running = false
@@ -10,9 +10,9 @@ var running = false
 func Main() {
 	go func() {
 		for running {
-			b.Draw()
+			p.Draw()
 			//time.Sleep(time.Duration(drawInterval))
 		}
 	}()
-	b.HandleEvents()
+	p.HandleEvents()
 }

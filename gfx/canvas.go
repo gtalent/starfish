@@ -17,7 +17,7 @@ package gfx
 
 import (
 	starfish "github.com/gtalent/starfish"
-	b "github.com/gtalent/starfish/plumbing"
+	p "github.com/gtalent/starfish/plumbing"
 )
 
 //Used to draw and to hold data for the drawing context.
@@ -37,7 +37,7 @@ func newCanvas() (p Canvas) {
 func (me *Canvas) load() {
 	me.viewport.calcBounds()
 	r := me.viewport.bounds()
-	b.SetClipRect(r.X, r.Y, r.Width, r.Height)
+	p.SetClipRect(r.X, r.Y, r.Width, r.Height)
 }
 
 //Returns the bounds of this Canvas
@@ -50,7 +50,7 @@ func (me *Canvas) PushViewport(x, y, width, height int) {
 	me.origin.SubtractFrom(me.viewport.translate())
 	me.viewport.push(starfish.Bounds{starfish.Point{X: int(x), Y: int(y)}, starfish.Size{Width: int(width), Height: int(height)}})
 	r := me.viewport.bounds()
-	b.SetClipRect(r.X, r.Y, r.Width, r.Height)
+	p.SetClipRect(r.X, r.Y, r.Width, r.Height)
 	me.origin = me.translation.AddOf(me.viewport.bounds().Point)
 	me.origin.AddTo(me.viewport.translate())
 }
@@ -63,13 +63,13 @@ func (me *Canvas) PopViewport() {
 		r := me.viewport.bounds()
 
 		if r.Width == -1 {
-			r.Width = b.DisplayWidth()
+			r.Width = p.DisplayWidth()
 		}
 		if r.Height == -1 {
-			r.Height = b.DisplayHeight()
+			r.Height = p.DisplayHeight()
 		}
 
-		b.SetClipRect(r.X, r.Y, r.Width, r.Height)
+		p.SetClipRect(r.X, r.Y, r.Width, r.Height)
 		me.origin = me.translation.AddOf(me.viewport.bounds().Point)
 		me.origin.AddTo(me.viewport.translate())
 	}
@@ -94,19 +94,19 @@ func (me *Canvas) SetColor(color Color) {
 func (me *Canvas) FillRoundedRect(x, y, width, height, radius int) {
 	x += me.origin.X
 	y += me.origin.Y
-	b.FillRoundedRect(x, y, width, height, radius, me.color.bColor())
+	p.FillRoundedRect(x, y, width, height, radius, me.color.bColor())
 }
 
 //Fills a rectangle at the given coordinates and size on this Canvas.
 func (me *Canvas) FillRect(x, y, width, height int) {
 	x += me.origin.X
 	y += me.origin.Y
-	b.FillRect(x, y, width, height, me.color.bColor())
+	p.FillRect(x, y, width, height, me.color.bColor())
 }
 
 //Draws the text at the given coordinates.
 func (me *Canvas) DrawText(text *Text, x, y int) {
-	b.DrawImage(text.text, x, y, 0, 0, text.Width(), text.Height())
+	p.DrawImage(text.text, x, y, 0, 0, text.Width(), text.Height())
 }
 
 //Draws the image at the given coordinates.
@@ -116,10 +116,10 @@ func (me *Canvas) DrawAnimation(animation *Animation, x, y int) {
 
 //Draws the image at the given coordinates.
 func (me *Canvas) DrawImage(img *Image, x, y int) {
-	b.DrawImage(img.img, x, y, img.clipX(), img.clipY(), img.clipW(), img.clipH())
+	p.DrawImage(img.img, x, y, img.clipX(), img.clipY(), img.clipW(), img.clipH())
 }
 
 //Draws the image at the given coordinates.
 func (me *Canvas) DrawImageCrop(img *Image, x, y int, srcBnds starfish.Bounds) {
-	b.DrawImage(img.img, x, y, srcBnds.X, srcBnds.Y, srcBnds.Width, srcBnds.Height)
+	p.DrawImage(img.img, x, y, srcBnds.X, srcBnds.Y, srcBnds.Width, srcBnds.Height)
 }

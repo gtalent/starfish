@@ -63,7 +63,9 @@ func OpenDisplay(w, h int, full bool) {
 }
 
 func CloseDisplay() {
-	C.closeDisplay()
+	runMainOp(func() {
+		C.closeDisplay()
+	})
 }
 
 func runMainOp(f func()) {

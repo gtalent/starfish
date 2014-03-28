@@ -18,7 +18,7 @@ package gfx
 import (
 	"encoding/json"
 	starfish "github.com/gtalent/starfish"
-	b "github.com/gtalent/starfish/plumbing"
+	p "github.com/gtalent/starfish/plumbing"
 )
 
 type imageLabel struct {
@@ -41,13 +41,13 @@ func (me *imageKey) String() string {
 var images = newFlyweight(
 	func(me *flyweight, path key) interface{} {
 		key := path.(*imageKey)
-		var i *b.Image
+		var i *p.Image
 		var k imageKey
 		if key.Label.FilePath {
-			i = b.LoadImage(key.Label.Str)
+			i = p.LoadImage(key.Label.Str)
 		} else {
 			json.Unmarshal([]byte(key.Label.Str), &k)
-			i = me.checkout(&k).(*b.Image)
+			i = me.checkout(&k).(*p.Image)
 		}
 		var w, h int
 		if key.Width == -1 {
@@ -61,17 +61,17 @@ var images = newFlyweight(
 			h = key.Height
 		}
 		if (i != nil) && (w != int(i.W()) || h != int(i.H()) || key.Angle != 0) {
-			i = b.ResizeAngleOf(i, key.Angle, w, h)
+			i = p.ResizeAngleOf(i, key.Angle, w, h)
 		}
 		return i
 	},
 	func(me *flyweight, path key, img interface{}) {
-		i := img.(*b.Image)
-		b.FreeImage(i)
+		i := img.(*p.Image)
+		p.FreeImage(i)
 	})
 
 type Image struct {
-	img     *b.Image
+	img     *p.Image
 	key     imageKey
 	size    starfish.Size
 	srcBnds starfish.Bounds
@@ -100,11 +100,12 @@ func LoadImageSizeAngle(path string, w, h int, angle float64) (img *Image) {
 	key.Angle = angle
 	key.Width = w
 	key.Height = h
-	i := images.checkout(&key).(*b.Image)
+	i := images.checkout(&key).(*p.Image)
 	img = new(Image)
 	img.img = i
 	img.key = key
 	img.ResetClipRect()
+	img.ResetSize()
 	return
 }
 
@@ -193,7 +194,7 @@ func (me *Image) ReSizeAngleOf(w, h int, angle float64) *Image {
 	key.Angle = angle
 	key.Width = w
 	key.Height = h
-	i := images.checkout(&key).(*b.Image)
+	i := images.checkout(&key).(*p.Image)
 	img := new(Image)
 	img.img = i
 	img.key = key
