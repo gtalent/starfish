@@ -1,5 +1,5 @@
 /*
-   Copyright 2011-2012 starfish authors
+   Copyright 2011-2014 starfish authors
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import (
 	"runtime/pprof"
 	"github.com/gtalent/starfish/gfx"
 	"github.com/gtalent/starfish/input"
-	//"../gfx"
-	//"../input"
 )
 
 
@@ -125,8 +123,6 @@ func main() {
 		return
 	}
 	gfx.SetDisplayTitle("starfish example")
-
-	//input.Init()
 
 	var pane Drawer
 	if !pane.init() {
